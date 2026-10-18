@@ -158,7 +158,8 @@
         </div>
     </div>
 
-    <script src="storage.js"></script>
+    <!-- Integrated Images Storage Architecture Script to support ImageStorageDB exclusivity -->
+    <script src="images-storage.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
         let currentPage = 1;
@@ -167,7 +168,8 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
+            // Initialize ImageStorageDB for isolated image model directory access
+            await ImageStorageDB.initDB();
             buildFilterBar();
             renderModels();
 
@@ -183,7 +185,9 @@
                 img.src = thumb;
                 img.onload = () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    StorageDB.addModel({ name, thumbnail: thumb, shape });
+                    const models = ImageStorageDB.getModels();
+                    models.push({ name, thumbnail: thumb, shape });
+                    ImageStorageDB.saveModels(models);
                     nameInput.value = '';
                     thumbInput.value = '';
                     closeAddModelModal();
@@ -191,7 +195,9 @@
                     renderModels();
                 };
                 img.onerror = () => {
-                    StorageDB.addModel({ name, thumbnail: thumb, shape: 'square' });
+                    const models = ImageStorageDB.getModels();
+                    models.push({ name, thumbnail: thumb, shape: 'square' });
+                    ImageStorageDB.saveModels(models);
                     nameInput.value = '';
                     thumbInput.value = '';
                     closeAddModelModal();
@@ -204,7 +210,7 @@
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const models = StorageDB.getModels();
+                    const models = ImageStorageDB.getModels();
                     if (models[modelIndexToUpdateThumb]) {
                         const img = new Image();
                         img.src = newUrl;
@@ -212,12 +218,12 @@
                             const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
                             models[modelIndexToUpdateThumb].thumbnail = newUrl;
                             models[modelIndexToUpdateThumb].shape = shape;
-                            StorageDB.saveModels(models);
+                            ImageStorageDB.saveModels(models);
                             renderModels();
                         };
                         img.onerror = () => {
                             models[modelIndexToUpdateThumb].thumbnail = newUrl;
-                            StorageDB.saveModels(models);
+                            ImageStorageDB.saveModels(models);
                             renderModels();
                         };
                     }
@@ -246,7 +252,8 @@
         }
 
         function renderModels() {
-            const models = StorageDB.getModels();
+            // Retrieve models exclusively from ImageStorageDB for photostream tagging access
+            const models = ImageStorageDB.getModels();
             const grid = document.getElementById('modelsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
@@ -328,7 +335,7 @@
         }
 
         function openVault(name, thumb) {
-            window.location.href = `vault.html?name=${name}`;
+            window.location.href = `albums.html?name=${name}`;
         }
 
         function openUpdateThumbModal(index) {
@@ -354,9 +361,9 @@
 
         function confirmDeleteModel() {
             if (modelIndexToDelete !== null) {
-                const models = StorageDB.getModels();
+                const models = ImageStorageDB.getModels();
                 models.splice(modelIndexToDelete, 1);
-                StorageDB.saveModels(models);
+                ImageStorageDB.saveModels(models);
                 renderModels();
             }
             closeDeleteModal();
