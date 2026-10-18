@@ -151,11 +151,18 @@
             </div>
         </div>
 
+        <!-- Embedded Databases for Cross-Gallery Sync & Self-Hydration -->
         <script type="application/json" id="embedded-images-database">
         {
             "models": [],
             "photostreams": [],
             "folders": []
+        }
+        </script>
+        <script type="application/json" id="embedded-video-database">
+        {
+            "models": [],
+            "streams": []
         }
         </script>
     </div>
@@ -173,14 +180,29 @@
             await StorageDB.initDB();
             await ImageStorageDB.initDB();
 
+            // Sync from image-gallery.html embedded database if available
             try {
-                const embeddedScript = document.getElementById('embedded-images-database');
-                if (embeddedScript) {
-                    const dbData = JSON.parse(embeddedScript.textContent);
-                    if (dbData && dbData.models && dbData.models.length > 0) {
-                        const currentModels = ImageStorageDB.getModels() || [];
-                        if (currentModels.length === 0) {
-                            ImageStorageDB.saveModels(dbData.models);
+                const imgEmb = document.getElementById('embedded-images-database');
+                if (imgEmb) {
+                    const imgData = JSON.parse(imgEmb.textContent);
+                    if (imgData && imgData.models && imgData.models.length > 0) {
+                        const curImgModels = ImageStorageDB.getModels() || [];
+                        if (curImgModels.length === 0) {
+                            ImageStorageDB.saveModels(imgData.models);
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // Sync from video-gallery.html embedded database if available
+            try {
+                const vidEmb = document.getElementById('embedded-video-database');
+                if (vidEmb) {
+                    const vidData = JSON.parse(vidEmb.textContent);
+                    if (vidData && vidData.models && vidData.models.length > 0) {
+                        const curVidModels = StorageDB.getModels() || [];
+                        if (curVidModels.length === 0) {
+                            StorageDB.saveModels(vidData.models);
                         }
                     }
                 }
