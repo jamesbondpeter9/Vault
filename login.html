@@ -87,10 +87,15 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" required placeholder="Enter password">
             </div>
-            <button type="submit" class="btn-submit">Login</button>
+            <div class="form-group">
+                <label for="patToken">GitHub PAT Token</label>
+                <input type="password" id="patToken" required placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <button type="submit" class="btn-submit">Login & Connect</button>
         </form>
     </div>
 
+    <script src="config.js"></script>
     <script>
         // Set your login credentials here for verification
         const VALID_USERNAME = "admin";
@@ -100,10 +105,16 @@
             e.preventDefault();
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
+            const token = document.getElementById('patToken').value.trim();
 
-            if (user === Janice && pass === James@123) {
-                // Set login session flag
+            if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+                // Set login session flag and save token securely
                 sessionStorage.setItem('portal_authenticated', 'true');
+                if (typeof PortalConfig !== 'undefined' && PortalConfig.setToken) {
+                    PortalConfig.setToken(token);
+                } else {
+                    sessionStorage.setItem('github_pat_token', token);
+                }
                 
                 // Redirect to main index directory
                 window.location.href = 'index.html';
