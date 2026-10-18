@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Albums - Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Compact Navigation Header Sizing matching index.html */
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .tag-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
+        }
+
+        /* Mosaic Grid configured for 180px base row height matching index.html */
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 180px;
+            grid-auto-flow: dense;
+            gap: 2px;
+            align-items: stretch;
+        }
+        @media(max-width: 1400px) { .album-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .album-grid { grid-template-columns: 1fr; } }
+
+        /* Exact matching view.html sizing and proportions */
+        .mondrian-card.landscape { 
+            grid-column: span 2; 
+            grid-row: span 3; 
+        }
+
+        .mondrian-card.portrait { 
+            grid-column: span 1; 
+            grid-row: span 3; 
+        }
+
+        .mondrian-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* Portrait-specific mini-cropping styling matching view.html */
+        .mondrian-card.portrait .mondrian-thumb img {
+            object-fit: cover !important;
+            object-position: center center !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+        }
+
+        /* Landscape-specific styling for folder thumbnails */
+        .mondrian-card.landscape .mondrian-thumb img {
+            object-fit: cover !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <!-- Top Nav Bar (Home, Models matching index.html & New Folder Action) -->
+        <div class="nav-bar-compact">
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New Folder</div></a>
+        </div>
+
+        <div class="tag-header">
+            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Albums</h1>
+            <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Albums featuring this model</p>
+        </div>
+
+        <div class="album-grid" id="albumGrid"></div>
+    </div>
+
+    <!-- Custom Popup Modal for Folder Creation -->
+    <div id="folderModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Create New Folder</h3>
+            <input type="text" id="folderNameInput" placeholder="Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button onclick="closeFolderModal()" style="padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                <button onclick="submitFolderCreation()" style="padding: 8px 16px; background: #fff; border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Popup Modal for Folder Renaming (+ Symbol Feature) -->
+    <div id="renameModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Rename Folder</h3>
+            <input type="text" id="renameInput" placeholder="New Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button onclick="closeRenameModal()" style="padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                <button onclick="submitFolderRename()" style="padding: 8px 16px; background: #fff; border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="photoviewer.js"></script>
+    <script>
+        let currentModelName = '';
+        let folderToRename = '';
+
+        function extractImageUrl(input) {
+            if (!input) return '';
+            input = input.trim();
+
+            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
+
+            const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
+
+            const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
+            if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
+
+            return input;
+        }
+
+        function getImageOrientation(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve(img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape');
+                };
+                img.onerror = () => resolve('landscape');
+                img.src = url;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            const params = new URLSearchParams(window.location.search);
+            currentModelName = decodeURIComponent(params.get('name') ?? '');
+
+            if (currentModelName) {
+                document.getElementById('tagTitle').textContent = `${currentModelName} - Albums`;
+                document.title = `${currentModelName} Albums - Portal`;
+            }
+
+            const allPhotoStreams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            const matchedItems = allPhotoStreams.filter(item => item.models && item.models.includes(currentModelName));
+
+            let allFolders = [];
+            if (typeof StorageDB.getFolders === 'function') {
+                allFolders = (StorageDB.getFolders(currentModelName) || []).filter(f => !f.model || f.model === currentModelName);
+            } else {
+                const globalFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+                allFolders = globalFolders.filter(f => f.model === currentModelName);
+            }
+
+            const grid = document.getElementById('albumGrid');
+            grid.innerHTML = '';
+
+            for (const folder of allFolders) {
+                const folderImages = matchedItems.filter(item => {
+                    return item.folder === folder.name || (Array.isArray(item.folders) && item.folders.includes(folder.name));
+                });
+
+                // Exact ascending sort matching view.html
+                folderImages.sort((a, b) => {
+                    const titleA = (a.title || '').toLowerCase();
+                    const titleB = (b.title || '').toLowerCase();
+                    if (titleA !== titleB) {
+                        return titleA.localeCompare(titleB);
+                    }
+                    return (a.createdAt || 0) - (b.createdAt || 0);
+                });
+
+                let firstImage = null;
+                let orientation = 'landscape';
+
+                if (folderImages.length > 0) {
+                    firstImage = extractImageUrl(folderImages[0].thumbnail || folderImages[0].url || '');
+                    orientation = await getImageOrientation(firstImage);
+                }
+
+                const folderCard = document.createElement('div');
+                folderCard.className = `mondrian-card ${orientation}`;
+                folderCard.innerHTML = `
+                    <div class="mondrian-thumb" onclick="openFolderPage('${encodeURIComponent(folder.name)}')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                        <!-- Top-left Rename (+) Button -->
+                        <button onclick="openRenameModal('${folder.name.replace(/'/g, "\\'")}', event)" title="Rename Folder" style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1;">+</button>
+                        <!-- Top-right Delete Button -->
+                        <button onclick="deleteFolder('${folder.name.replace(/'/g, "\\'")}', event)" title="Delete Folder" style="position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1;">&times;</button>
+                        ${firstImage ? `<img src="${firstImage}" alt="${folder.name}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="font-size: 1.5rem; margin-bottom: 4px;">📁</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; font-weight: 700; font-size: 0.75rem; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${folder.name}</div>
+                    </div>`;
+                grid.appendChild(folderCard);
+            }
+        });
+
+        function openFolderModal() {
+            document.getElementById('folderModal').style.display = 'flex';
+            document.getElementById('folderNameInput').value = '';
+            document.getElementById('folderNameInput').focus();
+        }
+
+        function closeFolderModal() {
+            document.getElementById('folderModal').style.display = 'none';
+        }
+
+        function submitFolderCreation() {
+            const folderName = document.getElementById('folderNameInput').value;
+            if (!folderName || !folderName.trim()) return;
+
+            const nameClean = folderName.trim();
+            
+            if (typeof StorageDB.saveFolder === 'function') {
+                StorageDB.saveFolder({ name: nameClean, model: currentModelName });
+            } else {
+                let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+                if (!allFolders.some(f => f.name === nameClean && f.model === currentModelName)) {
+                    allFolders.push({ name: nameClean, model: currentModelName });
+                    localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
+                }
+            }
+            
+            closeFolderModal();
+            location.reload();
+        }
+
+        function openRenameModal(folderName, event) {
+            event.stopPropagation();
+            folderToRename = folderName;
+            document.getElementById('renameModal').style.display = 'flex';
+            document.getElementById('renameInput').value = folderName;
+            document.getElementById('renameInput').focus();
+        }
+
+        function closeRenameModal() {
+            document.getElementById('renameModal').style.display = 'none';
+            folderToRename = '';
+        }
+
+        function submitFolderRename() {
+            const newName = document.getElementById('renameInput').value;
+            if (!newName || !newName.trim() || !folderToRename) return;
+            const newNameClean = newName.trim();
+
+            let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+            allFolders.forEach(f => {
+                if (f.name === folderToRename && f.model === currentModelName) {
+                    f.name = newNameClean;
+                }
+            });
+            localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
+            localStorage.removeItem(`folders_${currentModelName}`);
+
+            let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            streams.forEach(s => {
+                const matchesModel = s.models && s.models.includes(currentModelName);
+                if (matchesModel) {
+                    if (s.folder === folderToRename) {
+                        s.folder = newNameClean;
+                    }
+                    if (Array.isArray(s.folders)) {
+                        s.folders = s.folders.map(f => f === folderToRename ? newNameClean : f);
+                    }
+                }
+            });
+
+            if (typeof StorageDB.savePhotoStreams === 'function') {
+                StorageDB.savePhotoStreams(streams);
+            } else if (typeof StorageDB.saveStreams === 'function') {
+                StorageDB.saveStreams(streams);
+            }
+
+            closeRenameModal();
+            location.reload();
+        }
+
+        function openFolderPage(folderName) {
+            window.location.href = `view.html?folder=${folderName}&model=${encodeURIComponent(currentModelName)}`;
+        }
+
+        function deleteFolder(folderName, event) {
+            event.stopPropagation();
+            if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
+
+            let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+            allFolders = allFolders.filter(f => !(f.name === folderName && f.model === currentModelName));
+            localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
+            localStorage.removeItem(`folders_${currentModelName}`);
+
+            let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            streams = streams.filter(s => {
+                const matchesFolder = s.folder === folderName || (Array.isArray(s.folders) && s.folders.includes(folderName));
+                const matchesModel = s.models && s.models.includes(currentModelName);
+                return !(matchesFolder && matchesModel);
+            });
+            
+            if (typeof StorageDB.savePhotoStreams === 'function') {
+                StorageDB.savePhotoStreams(streams);
+            } else if (typeof StorageDB.saveStreams === 'function') {
+                StorageDB.saveStreams(streams);
+            }
+
+            location.reload();
+        }
+    </script>
+</body>
+</html>
