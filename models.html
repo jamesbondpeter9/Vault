@@ -158,7 +158,8 @@
         </div>
     </div>
 
-    <!-- Integrated Images Storage Architecture Script -->
+    <!-- Integrated Storage Scripts -->
+    <script src="storage.js"></script>
     <script src="images-storage.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
@@ -168,8 +169,10 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Explicitly initialize ImageStorageDB with full method stack
+            // Explicitly initialize BOTH StorageDB and ImageStorageDB maintaining strict storage exclusivity
+            await StorageDB.initDB();
             await ImageStorageDB.initDB();
+
             buildFilterBar();
             renderModels();
 
@@ -185,44 +188,10 @@
                 img.src = thumb;
                 img.onload = () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    
-                    // Construct model object with full column attributes (`name`, `thumbnail`, `shape`, `createdAt`)
-                    const modelData = {
-                        name: name,
-                        thumbnail: thumb,
-                        shape: shape,
-                        createdAt: Date.now()
-                    };
-
-                    ImageStorageDB.initDB();
-                    const models = ImageStorageDB.getModels() || [];
-                    models.push(modelData);
-                    ImageStorageDB.saveModels(models);
-
-                    nameInput.value = '';
-                    thumbInput.value = '';
-                    closeAddModelModal();
-                    currentPage = 1;
-                    renderModels();
+                    saveModelToBoth(name, thumb, shape);
                 };
                 img.onerror = () => {
-                    const modelData = {
-                        name: name,
-                        thumbnail: thumb,
-                        shape: 'square',
-                        createdAt: Date.now()
-                    };
-
-                    ImageStorageDB.initDB();
-                    const models = ImageStorageDB.getModels() || [];
-                    models.push(modelData);
-                    ImageStorageDB.saveModels(models);
-
-                    nameInput.value = '';
-                    thumbInput.value = '';
-                    closeAddModelModal();
-                    currentPage = 1;
-                    renderModels();
+                    saveModelToBoth(name, thumb, 'square');
                 };
             });
 
@@ -230,28 +199,63 @@
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    ImageStorageDB.initDB();
-                    const models = ImageStorageDB.getModels() || [];
-                    if (models[modelIndexToUpdateThumb]) {
-                        const img = new Image();
-                        img.src = newUrl;
-                        img.onload = () => {
-                            const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
-                            models[modelIndexToUpdateThumb].shape = shape;
-                            ImageStorageDB.saveModels(models);
-                            renderModels();
-                        };
-                        img.onerror = () => {
-                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
-                            ImageStorageDB.saveModels(models);
-                            renderModels();
-                        };
-                    }
+                    const img = new Image();
+                    img.src = newUrl;
+                    img.onload = () => {
+                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, shape);
+                    };
+                    img.onerror = () => {
+                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, 'square');
+                    };
                 }
                 closeUpdateThumbModal();
             });
         });
+
+        function saveModelToBoth(name, thumbnail, shape) {
+            const modelData = { name, thumbnail, shape, createdAt: Date.now() };
+
+            // 1. Save to StorageDB (for stream.html / video subsystem)
+            StorageDB.initDB();
+            const videoModels = StorageDB.getModels() || [];
+            videoModels.push(modelData);
+            StorageDB.saveModels(videoModels);
+
+            // 2. Save to ImageStorageDB (for photostream.html / albums.html / image subsystem)
+            ImageStorageDB.initDB();
+            const imageModels = ImageStorageDB.getModels() || [];
+            imageModels.push(modelData);
+            ImageStorageDB.saveModels(imageModels);
+
+            document.getElementById('modelName').value = '';
+            document.getElementById('modelThumb').value = '';
+            closeAddModelModal();
+            currentPage = 1;
+            renderModels();
+        }
+
+        function updateModelThumbInBoth(index, newUrl, shape) {
+            // Update in StorageDB
+            StorageDB.initDB();
+            const videoModels = StorageDB.getModels() || [];
+            if (videoModels[index]) {
+                videoModels[index].thumbnail = newUrl;
+                videoModels[index].shape = shape;
+                StorageDB.saveModels(videoModels);
+            }
+
+            // Update in ImageStorageDB
+            ImageStorageDB.initDB();
+            const imageModels = ImageStorageDB.getModels() || [];
+            if (imageModels[index]) {
+                imageModels[index].thumbnail = newUrl;
+                imageModels[index].shape = shape;
+                ImageStorageDB.saveModels(imageModels);
+            }
+
+            renderModels();
+        }
 
         function buildFilterBar() {
             const filterBar = document.getElementById('filterBar');
@@ -273,6 +277,7 @@
         }
 
         function renderModels() {
+            // Read from ImageStorageDB (or StorageDB) to display models in the single architecture view
             ImageStorageDB.initDB();
             const models = ImageStorageDB.getModels() || [];
             const grid = document.getElementById('modelsGrid');
@@ -380,10 +385,18 @@
 
         function confirmDeleteModel() {
             if (modelIndexToDelete !== null) {
+                // Delete from StorageDB
+                StorageDB.initDB();
+                const videoModels = StorageDB.getModels() || [];
+                videoModels.splice(modelIndexToDelete, 1);
+                StorageDB.saveModels(videoModels);
+
+                // Delete from ImageStorageDB
                 ImageStorageDB.initDB();
-                const models = ImageStorageDB.getModels() || [];
-                models.splice(modelIndexToDelete, 1);
-                ImageStorageDB.saveModels(models);
+                const imageModels = ImageStorageDB.getModels() || [];
+                imageModels.splice(modelIndexToDelete, 1);
+                ImageStorageDB.saveModels(imageModels);
+
                 renderModels();
             }
             closeDeleteModal();
