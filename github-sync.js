@@ -7,7 +7,7 @@ class GitHubSync {
 
         const token = PortalConfig.getToken();
         if (!token) {
-            console.warn('GitHub PAT token not found in session. Skipping auto-sync.');
+            console.warn('GitHub PAT token not found. Skipping auto-sync.');
             return;
         }
 
@@ -24,17 +24,22 @@ class GitHubSync {
         
         let extractedDbData = null;
 
+        // Detect correct storage engine (ImageStorageDB for images, StorageDB for videos)
+        const activeStorage = (path.includes('image') || path.includes('photo')) 
+            ? (typeof ImageStorageDB !== 'undefined' ? ImageStorageDB : null)
+            : (typeof StorageDB !== 'undefined' ? StorageDB : null);
+
         if (scriptTag) {
             try {
                 const dbData = JSON.parse(scriptTag.textContent);
-                if (typeof StorageDB !== 'undefined') {
+                if (activeStorage) {
                     if (path.includes('image') || path.includes('photo')) {
-                        dbData.models = StorageDB.getModels ? StorageDB.getModels() : (dbData.models || []);
-                        dbData.photostreams = StorageDB.getPhotoStreams ? StorageDB.getPhotoStreams() : (dbData.photostreams || []);
-                        dbData.folders = StorageDB.getFolders ? StorageDB.getFolders() : (dbData.folders || []);
+                        dbData.models = activeStorage.getModels ? activeStorage.getModels() : (dbData.models || []);
+                        dbData.photostreams = activeStorage.getPhotoStreams ? activeStorage.getPhotoStreams() : (dbData.photostreams || []);
+                        dbData.folders = activeStorage.getFolders ? activeStorage.getFolders() : (dbData.folders || []);
                     } else {
-                        dbData.models = StorageDB.getModels ? StorageDB.getModels() : (dbData.models || []);
-                        dbData.streams = StorageDB.getStreams ? StorageDB.getStreams() : (dbData.streams || []);
+                        dbData.models = activeStorage.getModels ? activeStorage.getModels() : (dbData.models || []);
+                        dbData.streams = activeStorage.getStreams ? activeStorage.getStreams() : (dbData.streams || []);
                     }
                 }
                 scriptTag.textContent = JSON.stringify(dbData, null, 2);
@@ -43,6 +48,68 @@ class GitHubSync {
                 console.error('Failed to update embedded database before sync:', e);
             }
         }
+
+        // 2. Sync Current HTML File
+        const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
+
+        // 3. Dual-Sync Corresponding JSON File
+        if (extractedDbData) {
+            let jsonFilename = '';
+            if (path.includes('image') || path.includes('photo')) {
+                jsonFilename = 'images.json';
+            } else if (path.includes('video') || path.includes('watch') || path.includes('vault')) {
+                jsonFilename = 'videos.json';
+            }
+
+            if (jsonFilename) {
+                const jsonContent = JSON.stringify(extractedDbData, null, 4);
+                await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+            }
+        }
+    }
+
+    static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+
+        try {
+            let sha = null;
+            const getRes = await fetch(apiUrl, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            
+            if (getRes.ok) {
+                const getData = await getRes.json();
+                sha = getData.sha;
+            }
+
+            const base64Content = btoa(unescape(encodeURIComponent(fileContent)));
+
+            const putRes = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: commitMessage,
+                    content: base64Content,
+                    sha: sha,
+                    branch: branch
+                })
+            });
+
+            if (putRes.ok) {
+                console.log(`Successfully synced ${filePath} to GitHub repository!`);
+            } else {
+                const errData = await putRes.json();
+                console.error(`GitHub API commit error for ${filePath}:`, errData.message);
+            }
+        } catch (err) {
+            console.error(`GitHub Sync Exception for ${filePath}:`, err);
+        }
+    }
+}
 
         // 2. Sync Current HTML File
         const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
