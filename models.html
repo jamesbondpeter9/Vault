@@ -32,10 +32,11 @@
             font-weight: 700;
             transition: all 0.2s ease;
         }
+        /* Hover effect updated to prevent solid white background flash */
         .mondrian-nav-box:hover {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: var(--card-border);
         }
 
         .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
