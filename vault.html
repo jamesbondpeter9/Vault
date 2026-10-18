@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Vault - Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Compact Navigation Header Sizing matching index.html */
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* Large Featured Square Thumbnails Section */
+        .featured-squares-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 24px;
+        }
+        @media(max-width: 900px) { .featured-squares-grid { grid-template-columns: 1fr; } }
+
+        .featured-square-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: auto !important;
+            height: calc(180px * 3.3 + 4px); /* Slightly increased vertical height */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), var(--neon-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mosaic Grid configured for 180px base row height matching index.html */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 180px;
+            grid-auto-flow: dense;
+            gap: 2px;
+            align-items: stretch;
+        }
+        @media(max-width: 1400px) { .vault-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .vault-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .vault-grid { grid-template-columns: 1fr; } }
+
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 3; }
+        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
+
+        .mondrian-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <!-- Top Nav Bar (Home & Models matching index.html background) -->
+        <div class="nav-bar-compact">
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+        </div>
+
+        <!-- Two Large Curved Square Thumbnails -->
+        <div class="featured-squares-grid" id="featuredSquares">
+            <!-- Left Square (Albums - connected to albums.html) -->
+            <div class="featured-square-card">
+                <div id="featThumb1" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;">
+                    <a id="albumsTagLink" href="#" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); z-index: 5; text-decoration: none;">Albums</a>
+                </div>
+            </div>
+            <!-- Right Square (Videos - connected to videotag.html) -->
+            <div class="featured-square-card">
+                <div id="featThumb2" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;">
+                    <a id="videoTagLink" href="#" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); z-index: 5; text-decoration: none;">Videos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            const params = new URLSearchParams(window.location.search);
+            const modelName = decodeURIComponent(params.get('name') ?? '');
+
+            if (modelName) {
+                document.title = `${modelName} - Vault`;
+                document.getElementById('albumsTagLink').href = `albums.html?name=${encodeURIComponent(modelName)}`;
+                document.getElementById('videoTagLink').href = `videotag.html?name=${encodeURIComponent(modelName)}`;
+            }
+
+            const allStreams = StorageDB.getStreams();
+            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.includes(modelName));
+
+            // Note: Albums thumbnail image is intentionally omitted per instructions.
+
+            const feat2VideoLink = document.getElementById('videoTagLink');
+            if (matchedStreams.length > 1) {
+                const s2 = matchedStreams[1];
+                if (s2.thumbnail) {
+                    const bgImg2 = document.createElement('img');
+                    bgImg2.src = s2.thumbnail;
+                    bgImg2.alt = s2.title;
+                    bgImg2.style.cssText = "object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1;";
+                    feat2VideoLink.prepend(bgImg2);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
