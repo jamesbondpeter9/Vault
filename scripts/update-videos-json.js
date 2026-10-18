@@ -1,6 +1,3 @@
-/**
- * update-videos-json.js - Database Schema Validation and Verification Script
- */
 const fs = require('fs');
 const path = require('path');
 
@@ -15,10 +12,14 @@ if (fs.existsSync(filePath)) {
     }
 }
 
-// Ensure all required schema arrays exist
 if (!dbData.models) dbData.models = [];
 if (!dbData.streams) dbData.streams = [];
 if (!dbData.homepage_thumbnails) dbData.homepage_thumbnails = [];
 
+dbData.streams = dbData.streams.filter(item => {
+    const type = (item.type || 'stream').toLowerCase();
+    return type === 'stream' || type === 'video';
+});
+
 fs.writeFileSync(filePath, JSON.stringify(dbData, null, 4), 'utf8');
-console.log('Successfully updated and verified videos.json schema!');
+console.log('Successfully updated, filtered, and verified videos.json schema!');
