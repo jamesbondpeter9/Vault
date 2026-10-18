@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Folder View - Portal</title>
@@ -111,9 +118,11 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
-    <!-- Images Storage Concept & Photoviewer -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="images-storage.js"></script>
     <script src="photoviewer.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let currentFolderName = '';
         let currentModelName = '';
@@ -217,7 +226,7 @@
             }
         }
 
-        function deletePhoto(index, event) {
+        async function deletePhoto(index, event) {
             event.stopPropagation();
             if (!confirm('Are you sure you want to delete this photo?')) return;
 
@@ -232,6 +241,12 @@
             });
 
             ImageStorageDB.savePhotoStreams(allPhotoStreams);
+            
+            // Trigger GitHub auto-sync before reloading
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                await GitHubSync.triggerAutoSync();
+            }
+
             location.reload();
         }
     </script>
