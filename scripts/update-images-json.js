@@ -1,14 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, '../imagess.json');
+const filePath = path.join(__dirname, '../images.json');
 let dbData = { models: [], photostreams: [], folders: [] };
 
 if (fs.existsSync(filePath)) {
     try {
         dbData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     } catch (e) {
-        console.log('Could not parse existing imagess.json, starting fresh.');
+        console.log('Could not parse existing images.json, starting fresh.');
     }
 }
 
@@ -22,4 +22,4 @@ dbData.photostreams = dbData.photostreams.filter(item => {
 });
 
 fs.writeFileSync(filePath, JSON.stringify(dbData, null, 4), 'utf8');
-console.log('Successfully updated, filtered, and verified imagess.json schema!');
+console.log('Successfully updated, filtered, and verified images.json schema!');
