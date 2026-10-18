@@ -1,4 +1,4 @@
-name: Auto-update imagess.json from image-gallery.html
+name: Auto-update images.json from image-gallery.html
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Extract JSON and update imagess.json
+      - name: Extract JSON and update images.json
         run: |
           node -e '
           const fs = require("fs");
@@ -46,8 +46,8 @@ jobs:
                       return t === "photo" || t === "photostream";
                   });
               }
-              fs.writeFileSync("imagess.json", JSON.stringify(jsonData, null, 4), "utf8");
-              console.log("Successfully updated and filtered imagess.json from image-gallery.html!");
+              fs.writeFileSync("images.json", JSON.stringify(jsonData, null, 4), "utf8");
+              console.log("Successfully updated and filtered images.json from image-gallery.html!");
           } catch(err) {
               console.error("Invalid JSON inside embedded-images-database script tag:", err);
               process.exit(1);
@@ -57,5 +57,5 @@ jobs:
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-update imagess.json from Image Gallery Hub [skip ci]"
-          file_pattern: "imagess.json"
+          commit_message: "Auto-update images.json from Image Gallery Hub [skip ci]"
+          file_pattern: "images.json"
