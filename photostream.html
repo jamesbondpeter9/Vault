@@ -210,7 +210,7 @@
                             <input type="text" id="streamUrl" required placeholder="Paste direct link, HTML img, BBCode, or combined embed codes">
                         </div>
 
-                        <!-- Models Tagging Section (Linked directly to models.html directory via StorageDB) -->
+                        <!-- Models Tagging Section -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -410,7 +410,6 @@
         });
 
         function renderModelTags() {
-            // Pulls models directly from StorageDB, which is managed via models.html
             let models = StorageDB.getModels() || [];
             const container = document.getElementById('modelTagsList');
 
@@ -457,6 +456,7 @@
             });
         }
 
+        // Tag Folder Directory linked to Albums (+ New Folder) according to selected Model
         function renderFolderTags() {
             const container = document.getElementById('folderTagsList');
             const azBar = document.getElementById('folderAZBar');
@@ -476,7 +476,7 @@
                 if (typeof StorageDB.getFolders === 'function') {
                     dbFolders = StorageDB.getFolders(modelName) || [];
                 } else {
-                    dbFolders = globalFoldersDB.filter(f => f.model === modelName);
+                    dbFolders = globalFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
                 }
                 dbFolders.forEach(f => {
                     const fName = typeof f === 'string' ? f : (f.name || f.title);
