@@ -17,10 +17,14 @@ class StorageDB {
             const scriptTag = document.getElementById('embedded-database');
             if (scriptTag) {
                 const embeddedData = JSON.parse(scriptTag.textContent);
-                if (embeddedData.models) {
+                
+                const currentModels = StorageDB.getModels();
+                if (currentModels.length === 0 && embeddedData.models && embeddedData.models.length > 0) {
                     localStorage.setItem('video_portal_models_db', JSON.stringify(embeddedData.models));
                 }
-                if (embeddedData.streams) {
+
+                const currentStreams = StorageDB.getStreams();
+                if (currentStreams.length === 0 && embeddedData.streams && embeddedData.streams.length > 0) {
                     const videoStreams = embeddedData.streams.filter(s => {
                         const t = (s.type || 'stream').toLowerCase();
                         return t === 'stream' || t === 'video';
@@ -47,12 +51,19 @@ class StorageDB {
 
     static addModel(modelData) {
         const models = StorageDB.getModels();
-        models.push({
-            name: modelData.name,
-            thumbnail: modelData.thumbnail || '',
-            shape: modelData.shape || 'portrait',
-            createdAt: Date.now()
-        });
+        const existingIndex = models.findIndex(m => m.name.toLowerCase() === modelData.name.toLowerCase());
+        
+        if (existingIndex >= 0) {
+            models[existingIndex].thumbnail = modelData.thumbnail || models[existingIndex].thumbnail;
+            models[existingIndex].shape = modelData.shape || models[existingIndex].shape;
+        } else {
+            models.push({
+                name: modelData.name,
+                thumbnail: modelData.thumbnail || '',
+                shape: modelData.shape || 'portrait',
+                createdAt: Date.now()
+            });
+        }
         StorageDB.saveModels(models);
     }
 
