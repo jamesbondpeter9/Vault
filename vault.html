@@ -57,36 +57,11 @@
             overflow: hidden;
             position: relative;
             aspect-ratio: auto !important;
-            height: calc(180px * 3.3 + 4px); /* Slightly increased vertical height */
+            height: calc(180px * 3.3 + 4px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.6), var(--neon-glow);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Mosaic Grid configured for 180px base row height matching index.html */
-        .vault-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 180px;
-            grid-auto-flow: dense;
-            gap: 2px;
-            align-items: stretch;
-        }
-        @media(max-width: 1400px) { .vault-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 900px) { .vault-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .vault-grid { grid-template-columns: 1fr; } }
-
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 3; }
-        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
-
-        .mondrian-thumb {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
         }
     </style>
 </head>
@@ -131,11 +106,8 @@
             const allStreams = StorageDB.getStreams();
             const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
 
-            // Note: Albums thumbnail image is intentionally omitted per instructions.
-
             const feat2VideoLink = document.getElementById('videoTagLink');
             if (matchedStreams.length > 0) {
-                // Use case-insensitive matching or fallback to first available stream thumbnail if index 1 isn't present
                 const targetStream = matchedStreams.length > 1 ? matchedStreams[1] : matchedStreams[0];
                 if (targetStream && targetStream.thumbnail) {
                     const bgImg2 = document.createElement('img');
