@@ -150,6 +150,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Embedded Database Container for Self-Hydration Persistence -->
+        <script type="application/json" id="embedded-images-database">
+        {
+            "models": [],
+            "photostreams": [],
+            "folders": []
+        }
+        </script>
     </div>
 
     <script src="storage.js"></script>
@@ -164,6 +173,21 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
             await ImageStorageDB.initDB();
+
+            // Self-hydration check from embedded database
+            try {
+                const embeddedScript = document.getElementById('embedded-images-database');
+                if (embeddedScript) {
+                    const dbData = JSON.parse(embeddedScript.textContent);
+                    if (dbData && dbData.models && dbData.models.length > 0) {
+                        const currentModels = ImageStorageDB.getModels() || [];
+                        if (currentModels.length === 0) {
+                            ImageStorageDB.saveModels(dbData.models);
+                        }
+                    }
+                }
+            } catch (e) {}
+
             buildFilterBar();
             renderModels();
 
@@ -378,22 +402,18 @@
                 if (targetModel) {
                     const modelName = targetModel.name;
 
-                    // Cascade delete model from ImageStorageDB models
                     models.splice(modelIndexToDelete, 1);
                     ImageStorageDB.saveModels(models);
 
-                    // Cascade delete associated folders
                     let allFolders = ImageStorageDB.getFolders() || [];
                     allFolders = allFolders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
                     ImageStorageDB.saveFolders(allFolders);
 
-                    // Cascade delete associated photo streams
                     let allStreams = ImageStorageDB.getPhotoStreams() || [];
                     allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
                     ImageStorageDB.savePhotoStreams(allStreams);
                 }
 
-                // Also sync deletion from StorageDB
                 StorageDB.initDB();
                 const videoModels = StorageDB.getModels() || [];
                 if (videoModels[modelIndexToDelete]) {
