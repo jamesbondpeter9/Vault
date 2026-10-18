@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Models Directory - Portal</title>
+    <title>Models - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
         .mondrian-nav-box {
             height: 52px !important;
             font-size: 0.85rem !important;
@@ -37,15 +36,10 @@
             color: #000;
             border-color: #fff;
         }
-
-        .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
-        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
-        .filter-btn:hover, .filter-btn.active { background: #fff; color: #000; border-color: #fff; }
-        
         .models-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 320px;
+            grid-auto-rows: 180px;
             grid-auto-flow: dense;
             gap: 4px;
             align-items: stretch;
@@ -54,316 +48,113 @@
         @media(max-width: 900px) { .models-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media(max-width: 500px) { .models-grid { grid-template-columns: 1fr; } }
 
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 1; }
+        .mondrian-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            text-decoration: none;
+            background: #000;
+            display: block;
+            box-sizing: border-box;
+        }
         .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 2; }
         .mondrian-card.square { grid-column: span 1; grid-row: span 1; }
 
         .mondrian-thumb {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            background: #000;
+        }
+        .mondrian-thumb img {
             width: 100%;
             height: 100%;
-            border-radius: 20px;
-            cursor: pointer;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px;
         }
-
-        .update-thumb-btn { 
-            position: absolute; top: 10px; left: 10px; 
-            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
-            color: #fff; width: 26px; height: 26px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
-            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
-        }
-        .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
-
-        .delete-btn { 
-            position: absolute; top: 10px; right: 10px; 
-            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
-            color: #ff4d4d; width: 26px; height: 26px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
-            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
-        }
-        .mondrian-thumb:hover .delete-btn { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar matching index.html specifications -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Gallery Hub</div></a>
         </div>
 
-        <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
+        <div style="margin-bottom: 24px; display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="modelNameInput" placeholder="Model Name" style="flex: 1; padding: 12px; background: var(--card-bg); border: 1px solid var(--card-border); color: #fff; border-radius: 12px;">
+            <input type="text" id="modelThumbInput" placeholder="Thumbnail URL" style="flex: 2; padding: 12px; background: var(--card-bg); border: 1px solid var(--card-border); color: #fff; border-radius: 12px;">
+            <button onclick="addNewModel()" class="btn-primary" style="padding: 12px 24px;">Add Model</button>
+        </div>
 
-        <div class="filter-bar" id="filterBar"></div>
         <div class="models-grid" id="modelsGrid"></div>
-
-        <!-- Pagination Controls Bar -->
-        <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
-
-        <!-- Add Model Modal -->
-        <div id="modelModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Add New Model</h3>
-                <form id="modelForm">
-                    <div style="margin-bottom: 14px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Model Name</label>
-                        <input type="text" id="modelName" required placeholder="Enter model name">
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Photo / Thumbnail URL</label>
-                        <input type="text" id="modelThumb" required placeholder="https://...">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary" style="flex:1;">Save Model</button>
-                        <button type="button" onclick="closeAddModelModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Update Thumbnail Popbox Modal -->
-        <div id="updateThumbModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Update Thumbnail Image</h3>
-                <form id="updateThumbForm">
-                    <div style="margin-bottom: 20px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">New Thumbnail URL</label>
-                        <input type="text" id="newThumbUrl" required placeholder="https://...">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary" style="flex:1;">Update</button>
-                        <button type="button" onclick="closeUpdateThumbModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Delete Confirmation Popbox Modal -->
-        <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Model</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this model from the directory?</p>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="confirmDeleteModel()" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
-                    <button onclick="closeDeleteModal()" class="btn-primary" style="flex:1; background:#333; color:#fff;">Cancel</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="storage.js"></script>
     <script>
-        let currentLetterFilter = 'ALL';
-        let currentPage = 1;
-        const pageSize = 20;
-        let modelIndexToDelete = null;
-        let modelIndexToUpdateThumb = null;
-
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            buildFilterBar();
             renderModels();
-
-            document.getElementById('modelForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const nameInput = document.getElementById('modelName');
-                const thumbInput = document.getElementById('modelThumb');
-                const name = nameInput.value.trim();
-                const thumb = thumbInput.value.trim();
-                if (!name || !thumb) return;
-
-                const img = new Image();
-                img.src = thumb;
-                img.onload = () => {
-                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    StorageDB.addModel(name, thumb, shape);
-                    nameInput.value = '';
-                    thumbInput.value = '';
-                    closeAddModelModal();
-                    currentPage = 1;
-                    renderModels();
-                };
-                img.onerror = () => {
-                    StorageDB.addModel(name, thumb, 'square');
-                    nameInput.value = '';
-                    thumbInput.value = '';
-                    closeAddModelModal();
-                    currentPage = 1;
-                    renderModels();
-                };
-            });
-
-            document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newUrl = document.getElementById('newThumbUrl').value.trim();
-                if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const models = StorageDB.getModels();
-                    if (models[modelIndexToUpdateThumb]) {
-                        const img = new Image();
-                        img.src = newUrl;
-                        img.onload = () => {
-                            const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
-                            models[modelIndexToUpdateThumb].shape = shape;
-                            StorageDB.saveModels(models);
-                            renderModels();
-                        };
-                        img.onerror = () => {
-                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
-                            StorageDB.saveModels(models);
-                            renderModels();
-                        };
-                    }
-                }
-                closeUpdateThumbModal();
-            });
         });
-
-        function buildFilterBar() {
-            const filterBar = document.getElementById('filterBar');
-            const letters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
-            filterBar.innerHTML = '';
-            letters.forEach(letter => {
-                const btn = document.createElement('button');
-                btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
-                btn.textContent = letter;
-                btn.onclick = () => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentLetterFilter = letter;
-                    currentPage = 1; // reset to first page on filter change
-                    renderModels();
-                };
-                filterBar.appendChild(btn);
-            });
-        }
 
         function renderModels() {
             const models = StorageDB.getModels();
             const grid = document.getElementById('modelsGrid');
-            const paginationBar = document.getElementById('paginationBar');
             
-            const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: idx }));
-            const filtered = modelsWithIndex.filter(m => {
-                if (currentLetterFilter === 'ALL') return true;
-                return m.name.toUpperCase().startsWith(currentLetterFilter);
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div>`;
-                paginationBar.innerHTML = '';
+            if (models.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models added yet.</div>`;
                 return;
             }
 
-            // Pagination Calculations
-            const totalPages = Math.ceil(filtered.length / pageSize);
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
-
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const paginatedItems = filtered.slice(startIndex, endIndex);
-
             grid.innerHTML = '';
-            paginatedItems.forEach((model) => {
+            models.forEach((model) => {
                 const card = document.createElement('div');
-                const shape = model.shape || (model.originalIndex % 2 === 0 ? 'portrait' : 'landscape');
-                card.className = `mondrian-card ${shape}`;
-
+                card.className = `mondrian-card ${model.shape || 'portrait'} ${model.shape === 'landscape' ? 'landscape' : 'portrait'}`;
+                
                 card.innerHTML = `
-                    <div class="mondrian-thumb" onclick="openVault('${encodeURIComponent(model.name)}', '${encodeURIComponent(model.thumbnail)}')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
-                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
+                    <div class="mondrian-thumb">
+                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}">` : '<div style="color:#888;">No Image</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 22px 10px 8px 10px; background: transparent; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; display: flex; justify-content: space-between; align-items: center;">
+                            <a href="videotag.html?name=${encodeURIComponent(model.name)}" style="color: #fff; text-decoration: none; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${model.name}</a>
+                            <button onclick="deleteModel('${model.name.replace(/'/g, "\\'")}')" style="background: rgba(255,0,0,0.7); border: none; color: #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 8px;" title="Delete Model">&times;</button>
+                        </div>
                     </div>`;
                 grid.appendChild(card);
             });
+        }
 
-            // Render Pagination Controls Bar
-            paginationBar.innerHTML = '';
-            if (totalPages > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'filter-btn';
-                prevBtn.textContent = '← Prev';
-                prevBtn.disabled = currentPage === 1;
-                prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
-                prevBtn.onclick = () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderModels();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(prevBtn);
+        function addNewModel() {
+            const nameInput = document.getElementById('modelNameInput');
+            const thumbInput = document.getElementById('modelThumbInput');
+            const name = nameInput.value.trim();
+            const thumbnail = thumbInput.value.trim();
 
-                const pageInfo = document.createElement('span');
-                pageInfo.style.color = 'var(--text-muted)';
-                pageInfo.style.fontSize = '0.85rem';
-                pageInfo.style.fontWeight = '700';
-                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-                paginationBar.appendChild(pageInfo);
-
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'filter-btn';
-                nextBtn.textContent = 'Next →';
-                nextBtn.disabled = currentPage === totalPages;
-                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
-                nextBtn.onclick = () => {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderModels();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(nextBtn);
+            if (!name) {
+                alert('Please enter a model name.');
+                return;
             }
+
+            StorageDB.addModel({ name, thumbnail, shape: 'portrait' });
+            nameInput.value = '';
+            thumbInput.value = '';
+            renderModels();
         }
 
-        function openVault(name, thumb) {
-            window.location.href = `vault.html?name=${name}&thumb=${thumb}`;
+        function deleteModel(modelName) {
+            if (!confirm(`Are you sure you want to delete model "${modelName}"?`)) return;
+            let models = StorageDB.getModels();
+            models = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
+            StorageDB.saveModels(models);
+            renderModels();
         }
-
-        function openUpdateThumbModal(index) {
-            modelIndexToUpdateThumb = index;
-            document.getElementById('newThumbUrl').value = '';
-            document.getElementById('updateThumbModal').style.display = 'flex';
-        }
-
-        function closeUpdateThumbModal() {
-            modelIndexToUpdateThumb = null;
-            document.getElementById('updateThumbModal').style.display = 'none';
-        }
-
-        function openDeleteModal(index) {
-            modelIndexToDelete = index;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        function closeDeleteModal() {
-            modelIndexToDelete = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-
-        function confirmDeleteModel() {
-            if (modelIndexToDelete !== null) {
-                const models = StorageDB.getModels();
-                models.splice(modelIndexToDelete, 1);
-                StorageDB.saveModels(models);
-                renderModels();
-            }
-            closeDeleteModal();
-        }
-
-        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
-        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
 </body>
 </html>
