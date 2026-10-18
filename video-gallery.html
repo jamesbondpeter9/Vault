@@ -3,42 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery Hub - Portal</title>
+    <title>Video Gallery Hub - Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.4rem; font-weight: 900;">+</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
         
         <div style="max-width: 600px; margin: 60px auto; text-align: center;">
             <div class="control-panel">
-                <button onclick="downloadUpdatedGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated video-gallery.html</button>
+                <button onclick="downloadUpdatedVideoGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated video-gallery.html</button>
             </div>
         </div>
 
-        <script type="application/json" id="embedded-database">
+        <script type="application/json" id="embedded-video-database">
         {
             "models": [],
-            "streams": [],
-            "homepage_thumbnails": []
+            "streams": []
         }
         </script>
     </div>
 
     <script src="storage.js"></script>
     <script>
-        async function downloadUpdatedGallery() {
+        document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            const models = StorageDB.getModels();
-            const streams = StorageDB.getVideoStreams();
+            try {
+                const embeddedScript = document.getElementById('embedded-video-database');
+                if (embeddedScript) {
+                    const dbData = JSON.parse(embeddedScript.textContent);
+                    if (dbData) {
+                        if (dbData.models && dbData.models.length > 0) StorageDB.saveModels(dbData.models);
+                        if (dbData.streams && dbData.streams.length > 0) StorageDB.saveVideoStreams(dbData.streams);
+                    }
+                }
+            } catch (e) {}
+        });
+
+        async function downloadUpdatedVideoGallery() {
+            await StorageDB.initDB();
+            const models = StorageDB.getModels() || [];
+            const streams = StorageDB.getVideoStreams() || [];
 
             const dbPayload = {
                 models: models,
-                streams: streams,
-                homepage_thumbnails: []
+                streams: streams
             };
 
             const htmlContent = `<!DOCTYPE html>
@@ -46,30 +58,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery Hub - Portal</title>
+    <title>Video Gallery Hub - Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.4rem; font-weight: 900;">+</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
         
         <div style="max-width: 600px; margin: 60px auto; text-align: center;">
             <div class="control-panel">
-                <button onclick="downloadUpdatedGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated video-gallery.html</button>
+                <button onclick="downloadUpdatedVideoGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated video-gallery.html</button>
             </div>
         </div>
 
-        <script type="application/json" id="embedded-database">
+        <script type="application/json" id="embedded-video-database">
         ${JSON.stringify(dbPayload, null, 8)}
         <\/script>
     </div>
 
     <script src="storage.js"><\/script>
     <script>
-        async function downloadUpdatedGallery() {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            try {
+                const embeddedScript = document.getElementById('embedded-video-database');
+                if (embeddedScript) {
+                    const dbData = JSON.parse(embeddedScript.textContent);
+                    if (dbData) {
+                        if (dbData.models && dbData.models.length > 0) StorageDB.saveModels(dbData.models);
+                        if (dbData.streams && dbData.streams.length > 0) StorageDB.saveVideoStreams(dbData.streams);
+                    }
+                }
+            } catch (e) {}
+        });
+
+        async function downloadUpdatedVideoGallery() {
             location.reload();
         }
     <\/script>
