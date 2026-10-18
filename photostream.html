@@ -244,7 +244,8 @@
         </div>
     </div>
 
-    <script src="storage.js"></script>
+    <!-- Integrated Images Storage Architecture -->
+    <script src="images-storage.js"></script>
     <script>
         let selectedModels = [];
         let selectedFolders = [];
@@ -357,7 +358,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
+            // Uses ImageStorageDB isolated images database
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                await ImageStorageDB.initDB();
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
+            }
+            
             renderModelTags();
             renderFolderTags();
 
@@ -388,14 +395,20 @@
                 urls.forEach(url => {
                     const title = generateTitleFromUrl(url);
 
-                    StorageDB.addPhotoStream({
+                    const photoPayload = {
                         title,
                         url,
                         thumbnail: url,
                         models: selectedModels,
                         folder: selectedFolders.length > 0 ? selectedFolders[0] : '',
                         folders: selectedFolders
-                    });
+                    };
+
+                    if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.addPhotoStream === 'function') {
+                        ImageStorageDB.addPhotoStream(photoPayload);
+                    } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.addPhotoStream === 'function') {
+                        StorageDB.addPhotoStream(photoPayload);
+                    }
                 });
 
                 document.getElementById('streamForm').reset();
@@ -410,7 +423,13 @@
         });
 
         function renderModelTags() {
-            let models = StorageDB.getModels() || [];
+            let models = [];
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getModels === 'function') {
+                models = ImageStorageDB.getModels() || [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
+                models = StorageDB.getModels() || [];
+            }
+            
             const container = document.getElementById('modelTagsList');
 
             if (!models || models.length === 0) {
@@ -456,7 +475,7 @@
             });
         }
 
-        // Tag Folder Directory linked to Albums (+ New Folder) according to selected Model
+        // Dynamically displays folders already created in model's albums when model is clicked
         function renderFolderTags() {
             const container = document.getElementById('folderTagsList');
             const azBar = document.getElementById('folderAZBar');
@@ -469,15 +488,27 @@
             }
 
             let foldersSet = new Set();
-            const globalFoldersDB = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+
+            // Fetch folders from ImageStorageDB / StorageDB / LocalStorage fallback
+            let allFoldersDB = [];
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getFolders === 'function') {
+                allFoldersDB = ImageStorageDB.getFolders() || [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getFolders === 'function') {
+                allFoldersDB = StorageDB.getFolders() || [];
+            } else {
+                allFoldersDB = JSON.parse(localStorage.getItem('image_portal_folders_db') || localStorage.getItem('video_portal_folders_db') || '[]');
+            }
 
             selectedModels.forEach(modelName => {
                 let dbFolders = [];
-                if (typeof StorageDB.getFolders === 'function') {
+                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getFolders === 'function') {
+                    dbFolders = (ImageStorageDB.getFolders() || []).filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
+                } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getFolders === 'function') {
                     dbFolders = StorageDB.getFolders(modelName) || [];
                 } else {
-                    dbFolders = globalFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
+                    dbFolders = allFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
                 }
+
                 dbFolders.forEach(f => {
                     const fName = typeof f === 'string' ? f : (f.name || f.title);
                     if (fName) foldersSet.add(fName.trim());
