@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Albums - Portal</title>
@@ -146,9 +153,11 @@
         </div>
     </div>
 
-    <!-- Script integrated to utilize images storage concept -->
+    <!-- Config, Storage, Viewer & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="images-storage.js"></script>
     <script src="photoviewer.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let currentModelName = '';
         let folderToRename = '';
@@ -249,7 +258,7 @@
             document.getElementById('folderModal').style.display = 'none';
         }
 
-        function submitFolderCreation() {
+        async function submitFolderCreation() {
             const folderName = document.getElementById('folderNameInput').value;
             if (!folderName || !folderName.trim()) return;
 
@@ -262,6 +271,9 @@
             }
             
             closeFolderModal();
+
+            // Trigger GitHub auto-sync before reloading
+            await GitHubSync.triggerAutoSync();
             location.reload();
         }
 
@@ -278,7 +290,7 @@
             folderToRename = '';
         }
 
-        function submitFolderRename() {
+        async function submitFolderRename() {
             const newName = document.getElementById('renameInput').value;
             if (!newName || !newName.trim() || !folderToRename) return;
             const newNameClean = newName.trim();
@@ -306,6 +318,9 @@
             ImageStorageDB.savePhotoStreams(streams);
 
             closeRenameModal();
+
+            // Trigger GitHub auto-sync before reloading
+            await GitHubSync.triggerAutoSync();
             location.reload();
         }
 
@@ -313,7 +328,7 @@
             window.location.href = `view.html?folder=${folderName}&model=${encodeURIComponent(currentModelName)}`;
         }
 
-        function deleteFolder(folderName, event) {
+        async function deleteFolder(folderName, event) {
             event.stopPropagation();
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
@@ -329,6 +344,8 @@
             });
             ImageStorageDB.savePhotoStreams(streams);
 
+            // Trigger GitHub auto-sync before reloading
+            await GitHubSync.triggerAutoSync();
             location.reload();
         }
     </script>
