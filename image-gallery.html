@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery Hub - Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="site-container">
+        <div class="nav-bar-compact">
+            <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Photostream</div></a>
+            <a href="albums.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Albums</div></a>
+        </div>
+        
+        <div style="max-width: 600px; margin: 60px auto; text-align: center;">
+            <div class="control-panel">
+                <button onclick="downloadUpdatedImageGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated image-gallery.html</button>
+            </div>
+        </div>
+
+        <script type="application/json" id="embedded-images-database">
+        {
+            "models": [],
+            "photostreams": [],
+            "folders": []
+        }
+        </script>
+    </div>
+
+    <script src="images-storage.js"></script>
+    <script>
+        async function downloadUpdatedImageGallery() {
+            await ImageStorageDB.initDB();
+            const models = ImageStorageDB.getModels();
+            const photostreams = ImageStorageDB.getPhotoStreams();
+            const folders = ImageStorageDB.getFolders();
+
+            const dbPayload = {
+                models: models,
+                photostreams: photostreams,
+                folders: folders
+            };
+
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery Hub - Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="site-container">
+        <div class="nav-bar-compact">
+            <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Photostream</div></a>
+            <a href="albums.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Albums</div></a>
+        </div>
+        
+        <div style="max-width: 600px; margin: 60px auto; text-align: center;">
+            <div class="control-panel">
+                <button onclick="downloadUpdatedImageGallery()" class="btn-primary" style="width: 100%; padding: 18px; font-size: 1rem;">Download Updated image-gallery.html</button>
+            </div>
+        </div>
+
+        <script type="application/json" id="embedded-images-database">
+        ${JSON.stringify(dbPayload, null, 8)}
+        <\/script>
+    </div>
+
+    <script src="images-storage.js"><\/script>
+    <script>
+        async function downloadUpdatedImageGallery() {
+            location.reload();
+        }
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'image-gallery.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
