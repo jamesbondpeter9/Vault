@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Photo - Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Compact Navigation Header Sizing matching index.html */
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 24px;
+            max-width: 1650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* Layout Container with 2px gap matching both box heights */
+        .stream-layout-container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            align-items: stretch;
+            max-width: 1650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .control-panel {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        .preview-wrapper {
+            height: 100%;
+            display: flex;
+        }
+
+        .live-thumb-preview-box {
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        /* Tag Section Wrapper */
+        .tag-section-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .tag-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .tag-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* A-Z Alphabet Quick-Jump / Filter Bar */
+        .az-bar {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 4px 0;
+            margin-bottom: 8px;
+            scrollbar-width: none;
+        }
+        .az-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .az-letter {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            user-select: none;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .az-letter:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .az-letter.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .az-letter.disabled {
+            opacity: 0.2;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* Scrollable Tags Container */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-muted) rgba(0,0,0,0.3);
+        }
+
+        .tags-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .tags-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+        }
+
+        .tags-container::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 6px;
+        }
+
+        .tag-pill {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag-pill.selected {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        @media (max-width: 900px) {
+            .stream-layout-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <!-- Compact Top Nav Bar with Home and Models -->
+        <div class="nav-bar-compact">
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+        </div>
+
+        <div class="stream-layout-container">
+            <div class="control-panel">
+                <div>
+                    <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 20px;">Add New Photo</h2>
+                    <form id="streamForm">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Photo URL / Embed Code</label>
+                            <input type="text" id="streamUrl" required placeholder="Paste direct link, HTML img, BBCode, or combined embed codes">
+                        </div>
+
+                        <!-- Models Tagging Section -->
+                        <div class="tag-section-wrapper">
+                            <div class="tag-section-header">
+                                <span class="tag-section-title">Tag Models</span>
+                            </div>
+                            <div class="az-bar" id="modelAZBar"></div>
+                            <div class="tags-container" id="modelTagsList">
+                                <span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>
+                            </div>
+                        </div>
+
+                        <!-- Folders Tagging Section -->
+                        <div class="tag-section-wrapper">
+                            <div class="tag-section-header">
+                                <span class="tag-section-title">Tag Folders (Albums)</span>
+                            </div>
+                            <div class="az-bar" id="folderAZBar"></div>
+                            <div class="tags-container" id="folderTagsList">
+                                <span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">Select a model first to view its folders</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Photo</button>
+                    </form>
+                </div>
+            </div>
+            <div class="preview-wrapper">
+                <div class="live-thumb-preview-box" id="previewContainer">
+                    <span style="color: var(--text-muted);">Photo Preview</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script>
+        let selectedModels = [];
+        let selectedFolders = [];
+
+        let modelLetterFilter = 'ALL';
+        let folderLetterFilter = 'ALL';
+
+        function extractImageUrl(input) {
+            if (!input) return '';
+            input = input.trim();
+
+            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
+
+            const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
+
+            const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
+            if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
+
+            return input;
+        }
+
+        // Multi-parser for combined/batch URLs, HTML tags, or BBCode strings
+        function extractAllImageUrls(input) {
+            if (!input) return [];
+            input = input.trim();
+            const urls = [];
+
+            // 1. Find all HTML img tags
+            const htmlImgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+            let match;
+            while ((match = htmlImgRegex.exec(input)) !== null) {
+                if (match[1]) urls.push(match[1].trim());
+            }
+
+            // 2. Find all BBCode [img]...[/img]
+            const bbcodeRegex = /[img](.*?)\[\/img\]/gi;
+            while ((match = bbcodeRegex.exec(input)) !== null) {
+                if (match[1]) urls.push(match[1].trim());
+            }
+
+            // 3. Find all raw HTTP/HTTPS URLs
+            const urlRegex = /https?:\/\/[^\s"'<>]+/gi;
+            while ((match = urlRegex.exec(input)) !== null) {
+                const u = match[0].trim();
+                if (!urls.includes(u)) {
+                    urls.push(u);
+                }
+            }
+
+            // Fallback split by whitespace if no structured tags matched
+            if (urls.length === 0 && input.length > 0) {
+                const lines = input.split(/\s+/);
+                lines.forEach(l => {
+                    if (l.startsWith('http://') || l.startsWith('https://')) {
+                        urls.push(l.trim());
+                    }
+                });
+            }
+
+            return urls;
+        }
+
+        function generateTitleFromUrl(url) {
+            try {
+                const cleanUrl = url.split('?')[0].split('#')[0];
+                const segments = cleanUrl.split('/');
+                const filename = segments[segments.length - 1];
+                if (filename) {
+                    const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
+                    const formatted = nameWithoutExt.replace(/[-_]/g, ' ').trim();
+                    return formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1) : 'Untitled Photo';
+                }
+            } catch (e) {}
+            return 'Untitled Photo';
+        }
+
+        function buildAZBar(barContainerId, itemsList, currentFilter, onSelectLetter) {
+            const azBar = document.getElementById(barContainerId);
+            if (!azBar) return;
+            azBar.innerHTML = '';
+
+            const availableLetters = new Set(
+                itemsList.map(item => {
+                    const name = typeof item === 'string' ? item : (item.name || item.title);
+                    return name ? name.trim().charAt(0).toUpperCase() : '';
+                })
+            );
+
+            const allBtn = document.createElement('span');
+            allBtn.className = `az-letter ${currentFilter === 'ALL' ? 'active' : ''}`;
+            allBtn.textContent = 'ALL';
+            allBtn.onclick = () => onSelectLetter('ALL');
+            azBar.appendChild(allBtn);
+
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            alphabet.forEach(letter => {
+                const span = document.createElement('span');
+                span.className = 'az-letter';
+                span.textContent = letter;
+
+                if (currentFilter === letter) {
+                    span.classList.add('active');
+                }
+
+                if (!availableLetters.has(letter)) {
+                    span.classList.add('disabled');
+                } else {
+                    span.onclick = () => onSelectLetter(letter);
+                }
+                azBar.appendChild(span);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            renderModelTags();
+            renderFolderTags();
+
+            const urlInput = document.getElementById('streamUrl');
+            const previewContainer = document.getElementById('previewContainer');
+
+            // Shows strictly the LAST extracted image for better thumbnail preview performance
+            function updateThumbPreview() {
+                let rawUrl = urlInput.value;
+                let urls = extractAllImageUrls(rawUrl);
+
+                if (urls.length > 0) {
+                    const lastImageUrl = urls[urls.length - 1];
+                    previewContainer.innerHTML = `<img src="${lastImageUrl}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;">`;
+                } else {
+                    previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
+                }
+            }
+
+            urlInput.addEventListener('input', updateThumbPreview);
+
+            document.getElementById('streamForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const rawUrl = document.getElementById('streamUrl').value;
+                const urls = extractAllImageUrls(rawUrl);
+
+                if (urls.length === 0) return;
+                
+                urls.forEach(url => {
+                    const title = generateTitleFromUrl(url);
+
+                    StorageDB.addPhotoStream({
+                        title,
+                        url,
+                        thumbnail: url,
+                        models: selectedModels,
+                        folder: selectedFolders.length > 0 ? selectedFolders[0] : '',
+                        folders: selectedFolders
+                    });
+                });
+
+                document.getElementById('streamForm').reset();
+                selectedModels = [];
+                selectedFolders = [];
+                modelLetterFilter = 'ALL';
+                folderLetterFilter = 'ALL';
+                renderModelTags();
+                renderFolderTags();
+                updateThumbPreview();
+            });
+        });
+
+        function renderModelTags() {
+            let models = StorageDB.getModels() || [];
+            const container = document.getElementById('modelTagsList');
+
+            if (!models || models.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>`;
+                document.getElementById('modelAZBar').innerHTML = '';
+                return;
+            }
+
+            models.sort((a, b) => a.name.localeCompare(b.name));
+
+            buildAZBar('modelAZBar', models, modelLetterFilter, (selectedLetter) => {
+                modelLetterFilter = selectedLetter;
+                renderModelTags();
+            });
+
+            let filteredModels = models;
+            if (modelLetterFilter !== 'ALL') {
+                filteredModels = models.filter(m => m.name.trim().charAt(0).toUpperCase() === modelLetterFilter);
+            }
+
+            container.innerHTML = '';
+
+            if (filteredModels.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models starting with '${modelLetterFilter}'</span>`;
+                return;
+            }
+
+            filteredModels.forEach(model => {
+                const tag = document.createElement('div');
+                tag.className = `tag-pill ${selectedModels.includes(model.name) ? 'selected' : ''}`;
+                tag.textContent = model.name;
+
+                tag.onclick = () => {
+                    if (selectedModels.includes(model.name)) {
+                        selectedModels = selectedModels.filter(m => m !== model.name);
+                    } else {
+                        selectedModels.push(model.name);
+                    }
+                    renderModelTags();
+                    renderFolderTags();
+                };
+                container.appendChild(tag);
+            });
+        }
+
+        // Strictly show only custom folders created via the model's own albums
+        function renderFolderTags() {
+            const container = document.getElementById('folderTagsList');
+            const azBar = document.getElementById('folderAZBar');
+
+            if (selectedModels.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">Select a model first to view its folders</span>`;
+                if (azBar) azBar.innerHTML = '';
+                selectedFolders = [];
+                return;
+            }
+
+            let foldersSet = new Set();
+            const globalFoldersDB = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+
+            selectedModels.forEach(modelName => {
+                let dbFolders = [];
+                if (typeof StorageDB.getFolders === 'function') {
+                    dbFolders = StorageDB.getFolders(modelName) || [];
+                } else {
+                    dbFolders = globalFoldersDB.filter(f => f.model === modelName);
+                }
+                dbFolders.forEach(f => {
+                    const fName = typeof f === 'string' ? f : (f.name || f.title);
+                    if (fName) foldersSet.add(fName.trim());
+                });
+            });
+
+            let folders = Array.from(foldersSet);
+
+            if (folders.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No folders found for this model</span>`;
+                if (azBar) azBar.innerHTML = '';
+                selectedFolders = [];
+                return;
+            }
+
+            folders.sort((a, b) => a.localeCompare(b));
+
+            // Automatically clean up selected folders if they don't belong to the active model selection
+            selectedFolders = selectedFolders.filter(f => folders.includes(f));
+
+            buildAZBar('folderAZBar', folders, folderLetterFilter, (selectedLetter) => {
+                folderLetterFilter = selectedLetter;
+                renderFolderTags();
+            });
+
+            let filteredFolders = folders;
+            if (folderLetterFilter !== 'ALL') {
+                filteredFolders = folders.filter(f => f.trim().charAt(0).toUpperCase() === folderLetterFilter);
+            }
+
+            container.innerHTML = '';
+
+            if (filteredFolders.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No folders starting with '${folderLetterFilter}'</span>`;
+                return;
+            }
+
+            filteredFolders.forEach(folderName => {
+                const tag = document.createElement('div');
+                tag.className = `tag-pill ${selectedFolders.includes(folderName) ? 'selected' : ''}`;
+                tag.textContent = folderName;
+
+                tag.onclick = () => {
+                    if (selectedFolders.includes(folderName)) {
+                        selectedFolders = selectedFolders.filter(f => f !== folderName);
+                    } else {
+                        selectedFolders.push(folderName);
+                    }
+                    renderFolderTags();
+                };
+                container.appendChild(tag);
+            });
+        }
+    </script>
+</body>
+</html>
