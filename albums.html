@@ -146,7 +146,8 @@
         </div>
     </div>
 
-    <script src="storage.js"></script>
+    <!-- Script integrated to utilize images storage concept -->
+    <script src="images-storage.js"></script>
     <script src="photoviewer.js"></script>
     <script>
         let currentModelName = '';
@@ -180,7 +181,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
+            // Initialize ImageStorageDB to read strictly from the isolated image database
+            await ImageStorageDB.initDB();
             const params = new URLSearchParams(window.location.search);
             currentModelName = decodeURIComponent(params.get('name') ?? '');
 
@@ -189,16 +191,13 @@
                 document.title = `${currentModelName} Albums - Portal`;
             }
 
-            const allPhotoStreams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            // Fetch photo streams exclusively from ImageStorageDB
+            const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
             const matchedItems = allPhotoStreams.filter(item => item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
 
-            let allFolders = [];
-            if (typeof StorageDB.getFolders === 'function') {
-                allFolders = (StorageDB.getFolders(currentModelName) || []).filter(f => !f.model || f.model.toLowerCase() === currentModelName.toLowerCase());
-            } else {
-                const globalFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
-                allFolders = globalFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
-            }
+            // Fetch folders exclusively from ImageStorageDB
+            let allFolders = ImageStorageDB.getFolders() || [];
+            allFolders = allFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
 
             const grid = document.getElementById('albumGrid');
             grid.innerHTML = '';
@@ -256,14 +255,10 @@
 
             const nameClean = folderName.trim();
             
-            if (typeof StorageDB.saveFolder === 'function') {
-                StorageDB.saveFolder({ name: nameClean, model: currentModelName });
-            } else {
-                let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
-                if (!allFolders.some(f => f.name.toLowerCase() === nameClean.toLowerCase() && f.model.toLowerCase() === currentModelName.toLowerCase())) {
-                    allFolders.push({ name: nameClean, model: currentModelName });
-                    localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
-                }
+            let allFolders = ImageStorageDB.getFolders();
+            if (!allFolders.some(f => f.name.toLowerCase() === nameClean.toLowerCase() && f.model.toLowerCase() === currentModelName.toLowerCase())) {
+                allFolders.push({ name: nameClean, model: currentModelName });
+                ImageStorageDB.saveFolders(allFolders);
             }
             
             closeFolderModal();
@@ -288,16 +283,15 @@
             if (!newName || !newName.trim() || !folderToRename) return;
             const newNameClean = newName.trim();
 
-            let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+            let allFolders = ImageStorageDB.getFolders();
             allFolders.forEach(f => {
                 if (f.name === folderToRename && f.model.toLowerCase() === currentModelName.toLowerCase()) {
                     f.name = newNameClean;
                 }
             });
-            localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
-            localStorage.removeItem(`folders_${currentModelName}`);
+            ImageStorageDB.saveFolders(allFolders);
 
-            let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            let streams = ImageStorageDB.getPhotoStreams();
             streams.forEach(s => {
                 const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 if (matchesModel) {
@@ -309,12 +303,7 @@
                     }
                 }
             });
-
-            if (typeof StorageDB.savePhotoStreams === 'function') {
-                StorageDB.savePhotoStreams(streams);
-            } else if (typeof StorageDB.saveStreams === 'function') {
-                StorageDB.saveStreams(streams);
-            }
+            ImageStorageDB.savePhotoStreams(streams);
 
             closeRenameModal();
             location.reload();
@@ -328,23 +317,17 @@
             event.stopPropagation();
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
-            let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
+            let allFolders = ImageStorageDB.getFolders();
             allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
-            localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
-            localStorage.removeItem(`folders_${currentModelName}`);
+            ImageStorageDB.saveFolders(allFolders);
 
-            let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            let streams = ImageStorageDB.getPhotoStreams();
             streams = streams.filter(s => {
                 const matchesFolder = s.folder === folderName || (Array.isArray(s.folders) && s.folders.includes(folderName));
                 const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 return !(matchesFolder && matchesModel);
             });
-            
-            if (typeof StorageDB.savePhotoStreams === 'function') {
-                StorageDB.savePhotoStreams(streams);
-            } else if (typeof StorageDB.saveStreams === 'function') {
-                StorageDB.saveStreams(streams);
-            }
+            ImageStorageDB.savePhotoStreams(streams);
 
             location.reload();
         }
