@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder View - Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Compact Navigation Header Sizing matching index.html */
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* Mosaic Grid configured for 180px base row height matching index.html */
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 180px;
+            grid-auto-flow: dense;
+            gap: 2px;
+            align-items: stretch;
+        }
+        @media(max-width: 1400px) { .album-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .album-grid { grid-template-columns: 1fr; } }
+
+        .mondrian-card.landscape { 
+            grid-column: span 2; 
+            grid-row: span 3; 
+        }
+
+        .mondrian-card.portrait { 
+            grid-column: span 1; 
+            grid-row: span 3; 
+        }
+
+        .mondrian-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* Portrait-specific mini-cropping styling */
+        .mondrian-card.portrait .mondrian-thumb img {
+            object-fit: cover !important;
+            object-position: center center !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <!-- Top Nav Bar matching index.html style -->
+        <div class="nav-bar-compact">
+            <a id="backLink" href="albums.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;">←</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+        </div>
+
+        <div class="album-grid" id="folderGrid"></div>
+    </div>
+
+    <!-- Inbuilt Edge-to-Edge Full-Screen Image Viewer Modal (100vw / 100vh Sizing) -->
+    <div id="inbuiltPhotoModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); backdrop-filter: blur(15px); z-index: 9999; flex-direction: column; user-select: none; overflow: hidden;">
+        <!-- Delete Current Image Button -->
+        <button onclick="deleteCurrentInbuiltImage()" title="Delete Image" style="position: absolute; top: 15px; left: 20px; background: rgba(255,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1.4rem; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; z-index: 10000; display: flex; align-items: center; justify-content: center;">&times;</button>
+        <button onclick="closeInbuiltViewer()" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; z-index: 10000; padding: 10px; line-height: 1;">&times;</button>
+        <button onclick="prevInbuiltImage()" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1.5rem; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10000; display: flex; align-items: center; justify-content: center;">&#10094;</button>
+        <button onclick="nextInbuiltImage()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1.5rem; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10000; display: flex; align-items: center; justify-content: center;">&#10095;</button>
+        
+        <!-- Zero-padding container engineered for 100vw and 100vh full screen sizing -->
+        <div id="imageScrollContainer" style="flex: 1; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; padding: 0;">
+            <img id="inbuiltModalImg" src="" alt="Fitted Image View" onclick="toggleZoom(event)" style="width: 100vw; height: 100vh; object-fit: contain; border-radius: 0; cursor: zoom-in; transform-origin: center center; transition: transform 0.25s ease;">
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script>
+        let currentViewerImages = [];
+        let currentViewerIndex = 0;
+        let isZoomedIn = false;
+
+        function extractImageUrl(input) {
+            if (!input) return '';
+            input = input.trim();
+
+            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
+
+            const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
+
+            const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
+            if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
+
+            return input;
+        }
+
+        // Helper to auto-detect image orientation (portrait vs landscape)
+        function getImageOrientation(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve(img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape');
+                };
+                img.onerror = () => resolve('landscape'); // default fallback
+                img.src = url;
+            });
+        }
+
+        function openInbuiltViewer(imagesList, index) {
+            currentViewerImages = imagesList || [];
+            currentViewerIndex = index;
+            isZoomedIn = false;
+            updateInbuiltViewerContent();
+            
+            const modal = document.getElementById('inbuiltPhotoModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeInbuiltViewer() {
+            document.getElementById('inbuiltPhotoModal').style.display = 'none';
+            isZoomedIn = false;
+        }
+
+        function nextInbuiltImage() {
+            if (currentViewerImages.length === 0) return;
+            currentViewerIndex = (currentViewerIndex + 1) % currentViewerImages.length;
+            isZoomedIn = false;
+            updateInbuiltViewerContent();
+        }
+
+        function prevInbuiltImage() {
+            if (currentViewerImages.length === 0) return;
+            currentViewerIndex = (currentViewerIndex - 1 + currentViewerImages.length) % currentViewerImages.length;
+            isZoomedIn = false;
+            updateInbuiltViewerContent();
+        }
+
+        function deleteCurrentInbuiltImage() {
+            if (currentViewerImages.length === 0) return;
+            const currentItem = currentViewerImages[currentViewerIndex];
+            if (!confirm('Are you sure you want to delete this photo?')) return;
+
+            let allPhotoStreams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            
+            allPhotoStreams = allPhotoStreams.filter(s => {
+                const sUrl = extractImageUrl(s.thumbnail || s.url || '');
+                return !(sUrl === currentItem.src && (s.title === currentItem.title || s.createdAt === currentItem.createdAt));
+            });
+
+            if (typeof StorageDB.savePhotoStreams === 'function') {
+                StorageDB.savePhotoStreams(allPhotoStreams);
+            } else if (typeof StorageDB.saveStreams === 'function') {
+                StorageDB.saveStreams(allPhotoStreams);
+            }
+
+            closeInbuiltViewer();
+            location.reload();
+        }
+
+        function toggleZoom(event) {
+            event.stopPropagation();
+            const imgEl = document.getElementById('inbuiltModalImg');
+            isZoomedIn = !isZoomedIn;
+            
+            if (isZoomedIn) {
+                const rect = imgEl.getBoundingClientRect();
+                const offsetX = event.clientX - rect.left;
+                const offsetY = event.clientY - rect.top;
+                const originX = (offsetX / rect.width) * 100;
+                const originY = (offsetY / rect.height) * 100;
+
+                imgEl.style.transformOrigin = `${originX}% ${originY}%`;
+                imgEl.style.transform = 'scale(2.5)';
+                imgEl.style.cursor = 'zoom-out';
+            } else {
+                imgEl.style.transformOrigin = 'center center';
+                imgEl.style.transform = 'scale(1.0)';
+                imgEl.style.cursor = 'zoom-in';
+            }
+        }
+
+        function updateInbuiltViewerContent() {
+            if (currentViewerImages.length === 0) return;
+            const item = currentViewerImages[currentViewerIndex];
+            const imgEl = document.getElementById('inbuiltModalImg');
+            
+            imgEl.src = item.src || '';
+            imgEl.style.transformOrigin = 'center center';
+            imgEl.style.transform = 'scale(1.0)';
+            imgEl.style.cursor = 'zoom-in';
+        }
+
+        // Keyboard support for viewer
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('inbuiltPhotoModal');
+            if (modal && modal.style.display === 'flex') {
+                if (e.key === 'Escape') closeInbuiltViewer();
+                if (e.key === 'ArrowLeft') prevInbuiltImage();
+                if (e.key === 'ArrowRight') nextInbuiltImage();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            const params = new URLSearchParams(window.location.search);
+            const folderName = decodeURIComponent(params.get('folder') ?? '');
+            const modelName = decodeURIComponent(params.get('model') ?? '');
+
+            if (folderName) {
+                document.title = `${folderName} - Folder View`;
+                if (modelName) {
+                    document.getElementById('backLink').href = `albums.html?name=${encodeURIComponent(modelName)}`;
+                }
+            }
+
+            // Fetch and robustly filter photo streams matching this specific folder and model
+            const allPhotoStreams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
+            
+            const matchedItems = allPhotoStreams.filter(item => {
+                const matchesFolder = item.folder === folderName || (Array.isArray(item.folders) && item.folders.includes(folderName));
+                const matchesModel = !modelName || (item.models && item.models.includes(modelName));
+                return matchesFolder && matchesModel;
+            });
+
+            // Sort all images in ascending order (alphabetically by title, fallback to creation time)
+            matchedItems.sort((a, b) => {
+                const titleA = (a.title || '').toLowerCase();
+                const titleB = (b.title || '').toLowerCase();
+                if (titleA !== titleB) {
+                    return titleA.localeCompare(titleB);
+                }
+                return (a.createdAt || 0) - (b.createdAt || 0);
+            });
+
+            const grid = document.getElementById('folderGrid');
+            if (matchedItems.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 60px;">This folder is empty.</div>`;
+                return;
+            }
+
+            // Pre-detect orientation for each item based on its actual image dimensions
+            const itemsWithOrientation = await Promise.all(matchedItems.map(async (item) => {
+                const imgSrc = extractImageUrl(item.thumbnail || item.url || '');
+                const orientation = await getImageOrientation(imgSrc);
+                return { ...item, imgSrc, orientation };
+            }));
+
+            const galleryList = itemsWithOrientation.map(item => ({
+                src: item.imgSrc,
+                title: item.title || 'Photo',
+                createdAt: item.createdAt
+            }));
+
+            grid.innerHTML = '';
+            itemsWithOrientation.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `mondrian-card ${item.orientation}`;
+
+                card.innerHTML = `
+                    <div class="mondrian-thumb" onclick='openInbuiltViewer(window.folderGalleryList, ${index})' style="width: 100%; height: 100%;">
+                        ${item.imgSrc ? `<img src="${item.imgSrc}" alt="${item.title || 'Photo'}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Image</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${item.title || 'Photo'}</div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+
+            window.folderGalleryList = galleryList;
+        });
+    </script>
+</body>
+</html>
