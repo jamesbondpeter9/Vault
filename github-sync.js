@@ -2,12 +2,10 @@ class GitHubSync {
     static debounceTimer = null;
 
     static async triggerAutoSync() {
-        // Clear previous timer if user is still clicking rapidly
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
         }
 
-        // Wait 2 seconds of inactivity before sending to GitHub
         return new Promise((resolve) => {
             this.debounceTimer = setTimeout(async () => {
                 await this._executeSync();
@@ -33,21 +31,59 @@ class GitHubSync {
         const branch = PortalConfig.branch;
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
-        const isImagePage = path.includes('image') || path.includes('photo');
+        
+        const isImagePage = path.includes('image') || 
+                            path.includes('photo') || 
+                            path.includes('album') || 
+                            path.includes('folder');
 
-        // 1. Gather live data directly from active storage
+        const isVideoPage = path.includes('video') || 
+                            path.includes('stream') || 
+                            path.includes('watch') || 
+                            path.includes('vault') || 
+                            path.includes('tag');
+
+        // 1. Determine target JSON filename
+        let jsonFilename = 'videos.json';
+        if (isImagePage) {
+            jsonFilename = 'images.json';
+        } else if (isVideoPage) {
+            jsonFilename = 'videos.json';
+        }
+
+        // 2. Gather live data directly from active storage
         let dbData = { models: [], photostreams: [], folders: [], streams: [] };
 
         if (isImagePage && typeof ImageStorageDB !== 'undefined') {
             dbData.models = typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [];
             dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
             dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
-        } else if (typeof StorageDB !== 'undefined') {
+        } else if (isVideoPage && typeof StorageDB !== 'undefined') {
             dbData.models = typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [];
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // 2. Update the embedded script tag in DOM
+        // Safety Guard: If local data is completely empty, fetch remote JSON to prevent accidental data wipes
+        const hasLocalData = dbData.models.length > 0 || dbData.photostreams.length > 0 || dbData.folders.length > 0 || dbData.streams.length > 0;
+        if (!hasLocalData) {
+            try {
+                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
+                if (remoteData) {
+                    const remoteHasData = (remoteData.models && remoteData.models.length > 0) || 
+                                          (remoteData.photostreams && remoteData.photostreams.length > 0) || 
+                                          (remoteData.folders && remoteData.folders.length > 0) || 
+                                          (remoteData.streams && remoteData.streams.length > 0);
+                    if (remoteHasData) {
+                        console.warn('Local storage returned empty data, preserving existing remote database integrity.');
+                        dbData = remoteData;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not verify remote JSON fallback:', e);
+            }
+        }
+
+        // 3. Update the embedded script tag in DOM
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
                           document.getElementById('embedded-images-database');
@@ -55,14 +91,24 @@ class GitHubSync {
             scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
 
-        // 3. Sync Current HTML File
+        // 4. Sync Current HTML File
         const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
         await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
 
-        // 4. Dual-Sync Corresponding JSON File
-        let jsonFilename = isImagePage ? 'images.json' : 'videos.json';
+        // 5. Dual-Sync Corresponding JSON File with complete data payload
         const jsonContent = JSON.stringify(dbData, null, 4);
         await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+    }
+
+    static async fetchRemoteJSON(owner, repo, filePath, token) {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+        const res = await fetch(apiUrl, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const decodedString = decodeURIComponent(escape(atob(data.content)));
+        return JSON.parse(decodedString);
     }
 
     static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
