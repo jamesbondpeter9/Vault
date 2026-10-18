@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Photo - Portal</title>
@@ -244,8 +251,10 @@
         </div>
     </div>
 
-    <!-- Integrated Images Storage Architecture Script -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="images-storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let selectedModels = [];
         let selectedFolders = [];
@@ -383,7 +392,7 @@
 
             urlInput.addEventListener('input', updateThumbPreview);
 
-            document.getElementById('streamForm').addEventListener('submit', (e) => {
+            document.getElementById('streamForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const rawUrl = document.getElementById('streamUrl').value;
                 const urls = extractAllImageUrls(rawUrl);
