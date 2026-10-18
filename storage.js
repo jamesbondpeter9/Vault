@@ -1,110 +1,93 @@
-const StorageDB = {
-    STREAMS_KEY: 'video_portal_streams_db',
-    MODELS_KEY: 'video_portal_models_db',
-    FOLDERS_KEY: 'video_portal_folders_db',
+class StorageDB {
+    static async initDB() {
+        if (!localStorage.getItem('video_portal_models_db')) {
+            localStorage.setItem('video_portal_models_db', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('video_portal_streams_db')) {
+            localStorage.setItem('video_portal_streams_db', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('video_portal_folders_db')) {
+            localStorage.setItem('video_portal_folders_db', JSON.stringify([]));
+        }
+        await StorageDB.syncFromEmbeddedJSON();
+    }
 
-    async initDB() {
-        if (!localStorage.getItem(this.MODELS_KEY)) localStorage.setItem(this.MODELS_KEY, JSON.stringify([]));
-        if (!localStorage.getItem(this.STREAMS_KEY)) localStorage.setItem(this.STREAMS_KEY, JSON.stringify([]));
-        if (!localStorage.getItem(this.FOLDERS_KEY)) localStorage.setItem(this.FOLDERS_KEY, JSON.stringify([]));
-
+    static async syncFromEmbeddedJSON() {
         try {
-            const response = await fetch('videos.json?' + new Date().getTime());
-            if (response.ok) {
-                const data = await response.json();
-                const localModels = JSON.parse(localStorage.getItem(this.MODELS_KEY) || '[]');
-                if (data.models && data.models.length > 0 && localModels.length === 0) {
-                    localStorage.setItem(this.MODELS_KEY, JSON.stringify(data.models));
+            const scriptTag = document.getElementById('embedded-database');
+            if (scriptTag) {
+                const embeddedData = JSON.parse(scriptTag.textContent);
+                if (embeddedData.models && embeddedData.models.length > 0) {
+                    const currentModels = StorageDB.getModels();
+                    if (currentModels.length === 0) {
+                        localStorage.setItem('video_portal_models_db', JSON.stringify(embeddedData.models));
+                    }
                 }
-                const localStreams = JSON.parse(localStorage.getItem(this.STREAMS_KEY) || '[]');
-                if (data.streams && data.streams.length > 0 && localStreams.length === 0) {
-                    localStorage.setItem(this.STREAMS_KEY, JSON.stringify(data.streams));
+                if (embeddedData.streams && embeddedData.streams.length > 0) {
+                    const currentStreams = StorageDB.getStreams();
+                    if (currentStreams.length === 0) {
+                        localStorage.setItem('video_portal_streams_db', JSON.stringify(embeddedData.streams));
+                    }
                 }
             }
         } catch (e) {
-            console.log('Running on local cache.');
+            console.log('No embedded database found or failed to parse.');
         }
-    },
+    }
 
-    getStreams() {
-        try { return JSON.parse(localStorage.getItem(this.STREAMS_KEY) || '[]'); } catch (e) { return []; }
-    },
-    saveStreams(streams) {
-        localStorage.setItem(this.STREAMS_KEY, JSON.stringify(streams));
-    },
-    addStream(streamData) {
-        const streams = this.getStreams();
-        const newStream = {
-            title: streamData.title || 'Untitled Stream',
-            url: streamData.url || '',
-            thumbnail: streamData.thumbnail || '',
-            models: streamData.models || [],
-            folder: streamData.folder || (streamData.folders && streamData.folders.length > 0 ? streamData.folders[0] : ''),
-            folders: streamData.folders || (streamData.folder ? [streamData.folder] : []),
-            type: streamData.type || 'stream',
-            createdAt: Date.now()
-        };
-        streams.unshift(newStream);
-        this.saveStreams(streams);
-        return newStream;
-    },
-
-    getModels() {
-        try { return JSON.parse(localStorage.getItem(this.MODELS_KEY) || '[]'); } catch (e) { return []; }
-    },
-    saveModels(models) {
-        localStorage.setItem(this.MODELS_KEY, JSON.stringify(models));
-    },
-    addModel(name, thumbnail, shape = 'square') {
-        const models = this.getModels();
-        const newModel = { name: name.trim(), thumbnail: thumbnail.trim(), shape, createdAt: Date.now() };
-        models.push(newModel);
-        this.saveModels(models);
-        return newModel;
-    },
-
-    getVideoStreams() {
-        return this.getStreams().filter(item => item.type === 'stream' || !item.type || item.type === 'video');
-    },
-
-    getPhotoStreams() {
-        return this.getStreams().filter(item => item.type === 'photo');
-    },
-
-    addVideoStream(streamData) {
-        return this.addStream({ ...streamData, type: 'stream' });
-    },
-
-    addPhotoStream(streamData) {
-        return this.addStream({ ...streamData, type: 'photo' });
-    },
-
-    getFolders(modelName = null) {
+    static getModels() {
         try {
-            const folders = JSON.parse(localStorage.getItem(this.FOLDERS_KEY) || '[]');
-            if (modelName) {
-                return folders.filter(f => f.model === modelName);
-            }
-            return folders;
+            return JSON.parse(localStorage.getItem('video_portal_models_db')) || [];
         } catch (e) {
             return [];
         }
-    },
+    }
 
-    saveFolder(folderObj) {
+    static saveModels(models) {
+        localStorage.setItem('video_portal_models_db', JSON.stringify(models));
+    }
+
+    static addModel(modelData) {
+        const models = StorageDB.getModels();
+        models.push({
+            name: modelData.name,
+            thumbnail: modelData.thumbnail || '',
+            shape: modelData.shape || 'portrait',
+            createdAt: Date.now()
+        });
+        StorageDB.saveModels(models);
+    }
+
+    static getStreams() {
         try {
-            const folders = this.getFolders();
-            const exists = folders.some(f => f.name === folderObj.name && f.model === folderObj.model);
-            if (!exists) {
-                folders.push({
-                    name: folderObj.name.trim(),
-                    model: folderObj.model || '',
-                    createdAt: Date.now()
-                });
-                localStorage.setItem(this.FOLDERS_KEY, JSON.stringify(folders));
-            }
+            const streams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
+            return streams.filter(s => {
+                const t = (s.type || 'stream').toLowerCase();
+                return t === 'stream' || t === 'video';
+            });
         } catch (e) {
-            console.error('Error saving folder:', e);
+            return [];
         }
     }
-};
+
+    static getVideoStreams() {
+        return StorageDB.getStreams();
+    }
+
+    static saveStreams(streams) {
+        localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
+    }
+
+    static addVideoStream(streamData) {
+        const streams = StorageDB.getStreams();
+        streams.push({
+            title: streamData.title,
+            url: streamData.url,
+            thumbnail: streamData.thumbnail || '',
+            models: streamData.models || [],
+            type: 'stream',
+            createdAt: Date.now()
+        });
+        StorageDB.saveStreams(streams);
+    }
+}
