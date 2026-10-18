@@ -6,7 +6,6 @@
     <title>Model Videos - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -16,8 +15,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
         .mondrian-nav-box {
             height: 52px !important;
             font-size: 0.85rem !important;
@@ -39,7 +36,6 @@
             color: #000;
             border-color: #fff;
         }
-
         .tag-header {
             background: var(--card-bg);
             backdrop-filter: blur(40px);
@@ -49,8 +45,6 @@
             margin-bottom: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
         }
-
-        /* Mosaic Grid configured for 140px base row height matching index.html puzzle structure */
         .tag-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -60,20 +54,9 @@
             align-items: stretch;
         }
         @media(max-width: 1400px) { .tag-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 900px) { 
-            .tag-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)); 
-                grid-auto-rows: 150px;
-            } 
-        }
-        @media(max-width: 500px) { 
-            .tag-grid { 
-                grid-template-columns: 1fr; 
-                grid-auto-rows: 190px;
-            } 
-        }
+        @media(max-width: 900px) { .tag-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; } }
+        @media(max-width: 500px) { .tag-grid { grid-template-columns: 1fr; grid-auto-rows: 190px; } }
 
-        /* Card Base Layout matching index.html / vault style */
         .mondrian-card {
             position: relative;
             width: 100%;
@@ -91,33 +74,10 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             z-index: 10;
         }
+        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
+        .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
-        /* Puzzle structure matching index.html ratios */
-        .mondrian-card.portrait {
-            grid-column: span 1; 
-            grid-row: span 2;
-            aspect-ratio: 9 / 16;
-        }
-
-        .mondrian-card.landscape { 
-            grid-column: span 2; 
-            grid-row: span 4; 
-        }
-
-        .mondrian-card.square {
-            grid-column: span 1;
-            grid-row: span 1;
-            aspect-ratio: 1 / 1;
-        }
-
-        @media(max-width: 900px) {
-            .mondrian-card.portrait,
-            .mondrian-card.landscape {
-                grid-column: span 1;
-            }
-        }
-
-        /* Thumbnail Container */
         .mondrian-thumb {
             width: 100%;
             height: 100%;
@@ -129,8 +89,6 @@
             justify-content: center;
             background: #000;
         }
-
-        /* Vault/Index edge-to-edge fill structure */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
@@ -139,8 +97,6 @@
             display: block;
             border-radius: 12px;
         }
-
-        /* Title Overlay with background blur/gradient removed */
         .mondrian-overlay {
             position: absolute;
             bottom: 0;
@@ -162,7 +118,6 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Top Nav Bar (Home & Models matching index.html) -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
@@ -188,9 +143,8 @@
                 document.title = `${modelName} Videos - Portal`;
             }
 
-            // Fetch only video streams to keep photo streams separate
             const allStreams = StorageDB.getVideoStreams();
-            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.includes(modelName));
+            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
 
             const grid = document.getElementById('tagGrid');
             if (matchedStreams.length === 0) {
@@ -199,22 +153,19 @@
             }
 
             grid.innerHTML = '';
-            matchedStreams.forEach((stream, index) => {
+            matchedStreams.forEach((stream) => {
                 const card = document.createElement('a');
                 const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
                 card.href = `watch.html?index=${globalIndex}`;
-                
-                // Default fallback class before aspect ratio detection
-                card.className = `mondrian-card portrait`;
+                card.className = 'mondrian-card portrait';
 
                 card.innerHTML = `
                     <div class="mondrian-thumb">
-                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.8rem;">No Thumbnail</div>'}
                         <div class="mondrian-overlay">${stream.title}</div>
                     </div>`;
                 grid.appendChild(card);
 
-                // Auto-detect image aspect ratio for index/vault puzzle structure alignment
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
                     img.onload = () => {
