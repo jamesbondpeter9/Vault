@@ -36,8 +36,9 @@
                 if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0) StorageDB.saveModels(dbData.models);
-                        if (dbData.streams && dbData.streams.length > 0) StorageDB.saveVideoStreams(dbData.streams);
+                        // Fully sync and overwrite local storage with embedded payload to purge deleted models/streams
+                        if (dbData.models) StorageDB.saveModels(dbData.models);
+                        if (dbData.streams) StorageDB.saveVideoStreams(dbData.streams);
                     }
                 }
             } catch (e) {}
@@ -88,8 +89,8 @@
                 if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0) StorageDB.saveModels(dbData.models);
-                        if (dbData.streams && dbData.streams.length > 0) StorageDB.saveVideoStreams(dbData.streams);
+                        if (dbData.models) StorageDB.saveModels(dbData.models);
+                        if (dbData.streams) StorageDB.saveVideoStreams(dbData.streams);
                     }
                 }
             } catch (e) {}
