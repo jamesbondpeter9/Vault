@@ -33,7 +33,7 @@ jobs:
               process.exit(0);
           }
           const htmlContent = fs.readFileSync("video-gallery.html", "utf8");
-          const match = htmlContent.match(/<script type="application\/json" id="embedded-database">([\s\S]*?)<\/script>/i);
+          const match = htmlContent.match(/<script type="application\/json" id="embedded-(?:video-)?database">([\s\S]*?)<\/script>/i);
           if (!match) {
               console.error("Embedded database script tag not found!");
               process.exit(1);
@@ -49,7 +49,7 @@ jobs:
               fs.writeFileSync("videos.json", JSON.stringify(jsonData, null, 4), "utf8");
               console.log("Successfully updated and filtered videos.json from video-gallery.html!");
           } catch(err) {
-              console.error("Invalid JSON inside embedded-database script tag:", err);
+              console.error("Invalid JSON inside embedded database script tag:", err);
               process.exit(1);
           }
           '
