@@ -48,7 +48,7 @@ class StorageDB {
     static saveModels(models) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            GitHubSync.triggerAutoSync();
+            GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error:', err));
         }
     }
 
@@ -111,7 +111,7 @@ class StorageDB {
     static saveStreams(streams) {
         localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            GitHubSync.triggerAutoSync();
+            GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error:', err));
         }
     }
 
