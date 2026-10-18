@@ -19,6 +19,7 @@ const ImageStorageDB = {
 
     saveModels(models) {
         localStorage.setItem('image_portal_models_db', JSON.stringify(models));
+        this.triggerAsyncSyncIfNeeded();
     },
 
     getFolders() {
@@ -29,6 +30,7 @@ const ImageStorageDB = {
 
     saveFolders(folders) {
         localStorage.setItem('image_portal_folders_db', JSON.stringify(folders));
+        this.triggerAsyncSyncIfNeeded();
     },
 
     getPhotoStreams() {
@@ -39,11 +41,21 @@ const ImageStorageDB = {
 
     savePhotoStreams(streams) {
         localStorage.setItem('image_portal_streams_db', JSON.stringify(streams));
+        this.triggerAsyncSyncIfNeeded();
     },
 
     addPhotoStream(photo) {
         const streams = this.getPhotoStreams();
         streams.push(photo);
         this.savePhotoStreams(streams);
+    },
+
+    triggerAsyncSyncIfNeeded() {
+        if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+            // Asynchronously trigger GitHub sync on data mutations without breaking synchronous localStorage flows
+            GitHubSync.triggerAutoSync().catch(err => {
+                console.error('Background GitHub auto-sync error:', err);
+            });
+        }
     }
 };
