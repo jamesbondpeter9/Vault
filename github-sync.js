@@ -1,5 +1,22 @@
 class GitHubSync {
+    static debounceTimer = null;
+
     static async triggerAutoSync() {
+        // Clear previous timer if user is still clicking rapidly
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+
+        // Wait 2 seconds of inactivity before sending to GitHub
+        return new Promise((resolve) => {
+            this.debounceTimer = setTimeout(async () => {
+                await this._executeSync();
+                resolve();
+            }, 2000);
+        });
+    }
+
+    static async _executeSync() {
         if (typeof PortalConfig === 'undefined') {
             console.warn('PortalConfig is not defined. Skipping auto-sync.');
             return;
@@ -22,15 +39,15 @@ class GitHubSync {
         let dbData = { models: [], photostreams: [], folders: [], streams: [] };
 
         if (isImagePage && typeof ImageStorageDB !== 'undefined') {
-            dbData.models = typeof ImageStorageDB.getModels === 'function' ? ImageStorageDB.getModels() || [] : [];
-            dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? ImageStorageDB.getPhotoStreams() || [] : [];
-            dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? ImageStorageDB.getFolders() || [] : [];
+            dbData.models = typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [];
+            dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
+            dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
         } else if (typeof StorageDB !== 'undefined') {
-            dbData.models = typeof StorageDB.getModels === 'function' ? StorageDB.getModels() || [] : [];
-            dbData.streams = typeof StorageDB.getStreams === 'function' ? StorageDB.getStreams() || [] : [];
+            dbData.models = typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [];
+            dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // 2. Update the embedded script tag in DOM so the downloaded HTML is also populated
+        // 2. Update the embedded script tag in DOM
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
                           document.getElementById('embedded-images-database');
@@ -42,7 +59,7 @@ class GitHubSync {
         const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
         await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
 
-        // 4. Dual-Sync Corresponding JSON File (images.json or videos.json)
+        // 4. Dual-Sync Corresponding JSON File
         let jsonFilename = isImagePage ? 'images.json' : 'videos.json';
         const jsonContent = JSON.stringify(dbData, null, 4);
         await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
