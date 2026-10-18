@@ -32,31 +32,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await ImageStorageDB.initDB();
-
-            // Self-hydration check from embedded database to prevent data disappearance
             try {
                 const embeddedScript = document.getElementById('embedded-images-database');
                 if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
-                    if (dbData && (dbData.models?.length > 0 || dbData.photostreams?.length > 0 || dbData.folders?.length > 0)) {
-                        const currentModels = ImageStorageDB.getModels() || [];
-                        const currentStreams = ImageStorageDB.getPhotoStreams() || [];
-                        const currentFolders = ImageStorageDB.getFolders() || [];
-
-                        if (currentModels.length === 0 && dbData.models.length > 0) {
-                            ImageStorageDB.saveModels(dbData.models);
-                        }
-                        if (currentStreams.length === 0 && dbData.photostreams.length > 0) {
-                            ImageStorageDB.savePhotoStreams(dbData.photostreams);
-                        }
-                        if (currentFolders.length === 0 && dbData.folders.length > 0) {
-                            ImageStorageDB.saveFolders(dbData.folders);
-                        }
+                    if (dbData) {
+                        if (dbData.models && dbData.models.length > 0) ImageStorageDB.saveModels(dbData.models);
+                        if (dbData.photostreams && dbData.photostreams.length > 0) ImageStorageDB.savePhotoStreams(dbData.photostreams);
+                        if (dbData.folders && dbData.folders.length > 0) ImageStorageDB.saveFolders(dbData.folders);
                     }
                 }
-            } catch (e) {
-                console.error('Error hydrating embedded database:', e);
-            }
+            } catch (e) {}
         });
 
         async function downloadUpdatedImageGallery() {
