@@ -9,11 +9,11 @@
         /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
@@ -32,7 +32,7 @@
             font-weight: 700;
             transition: all 0.2s ease;
         }
-        .mondrian-nav-box:hover, .mondrian-nav-box.active {
+        .mondrian-nav-box:hover {
             background: #fff;
             color: #000;
             border-color: #fff;
@@ -93,17 +93,13 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar with Mode Switcher & Add Model Action -->
+        <!-- Compact Top Nav Bar matching index.html specifications -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
-                <a href="models.html?mode=videos" id="videoModeBtn" class="mondrian-nav-card"><div class="mondrian-nav-box">Videos</div></a>
-                <a href="models.html?mode=images" id="imageModeBtn" class="mondrian-nav-card"><div class="mondrian-nav-box">Images</div></a>
-            </div>
             <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
         </div>
 
-        <h1 id="pageTitle" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory (Videos)</h1>
+        <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
 
         <div class="filter-bar" id="filterBar"></div>
         <div class="models-grid" id="modelsGrid"></div>
@@ -162,7 +158,7 @@
         </div>
     </div>
 
-    <script src="storage.js"></script>
+    <!-- Integrated Images Storage Architecture Script -->
     <script src="images-storage.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
@@ -171,21 +167,9 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
-        // Detect mode from URL query parameters (?mode=images or ?mode=videos)
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentMode = urlParams.get('mode') === 'images' ? 'images' : 'videos';
-
         document.addEventListener('DOMContentLoaded', async () => {
-            if (currentMode === 'images') {
-                await ImageStorageDB.initDB();
-                document.getElementById('imageModeBtn').querySelector('div').classList.add('active');
-                document.getElementById('pageTitle').textContent = 'Models Directory (Images)';
-            } else {
-                await StorageDB.initDB();
-                document.getElementById('videoModeBtn').querySelector('div').classList.add('active');
-                document.getElementById('pageTitle').textContent = 'Models Directory (Videos)';
-            }
-
+            // Explicitly initialize ImageStorageDB with full method stack
+            await ImageStorageDB.initDB();
             buildFilterBar();
             renderModels();
 
@@ -201,10 +185,44 @@
                 img.src = thumb;
                 img.onload = () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    saveNewModel(name, thumb, shape);
+                    
+                    // Construct model object with full column attributes (`name`, `thumbnail`, `shape`, `createdAt`)
+                    const modelData = {
+                        name: name,
+                        thumbnail: thumb,
+                        shape: shape,
+                        createdAt: Date.now()
+                    };
+
+                    ImageStorageDB.initDB();
+                    const models = ImageStorageDB.getModels() || [];
+                    models.push(modelData);
+                    ImageStorageDB.saveModels(models);
+
+                    nameInput.value = '';
+                    thumbInput.value = '';
+                    closeAddModelModal();
+                    currentPage = 1;
+                    renderModels();
                 };
                 img.onerror = () => {
-                    saveNewModel(name, thumb, 'square');
+                    const modelData = {
+                        name: name,
+                        thumbnail: thumb,
+                        shape: 'square',
+                        createdAt: Date.now()
+                    };
+
+                    ImageStorageDB.initDB();
+                    const models = ImageStorageDB.getModels() || [];
+                    models.push(modelData);
+                    ImageStorageDB.saveModels(models);
+
+                    nameInput.value = '';
+                    thumbInput.value = '';
+                    closeAddModelModal();
+                    currentPage = 1;
+                    renderModels();
                 };
             });
 
@@ -212,53 +230,28 @@
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = () => {
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
-                    };
+                    ImageStorageDB.initDB();
+                    const models = ImageStorageDB.getModels() || [];
+                    if (models[modelIndexToUpdateThumb]) {
+                        const img = new Image();
+                        img.src = newUrl;
+                        img.onload = () => {
+                            const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
+                            models[modelIndexToUpdateThumb].shape = shape;
+                            ImageStorageDB.saveModels(models);
+                            renderModels();
+                        };
+                        img.onerror = () => {
+                            models[modelIndexToUpdateThumb].thumbnail = newUrl;
+                            ImageStorageDB.saveModels(models);
+                            renderModels();
+                        };
+                    }
                 }
                 closeUpdateThumbModal();
             });
         });
-
-        function saveNewModel(name, thumbnail, shape) {
-            if (currentMode === 'images') {
-                const models = ImageStorageDB.getModels() || [];
-                models.push({ name, thumbnail, shape });
-                ImageStorageDB.saveModels(models);
-            } else {
-                StorageDB.addModel({ name, thumbnail, shape });
-            }
-            document.getElementById('modelName').value = '';
-            document.getElementById('modelThumb').value = '';
-            closeAddModelModal();
-            currentPage = 1;
-            renderModels();
-        }
-
-        function updateModelThumb(index, newUrl, shape) {
-            if (currentMode === 'images') {
-                const models = ImageStorageDB.getModels() || [];
-                if (models[index]) {
-                    models[index].thumbnail = newUrl;
-                    models[index].shape = shape;
-                    ImageStorageDB.saveModels(models);
-                }
-            } else {
-                const models = StorageDB.getModels() || [];
-                if (models[index]) {
-                    models[index].thumbnail = newUrl;
-                    models[index].shape = shape;
-                    StorageDB.saveModels(models);
-                }
-            }
-            renderModels();
-        }
 
         function buildFilterBar() {
             const filterBar = document.getElementById('filterBar');
@@ -280,7 +273,8 @@
         }
 
         function renderModels() {
-            const models = currentMode === 'images' ? (ImageStorageDB.getModels() || []) : (StorageDB.getModels() || []);
+            ImageStorageDB.initDB();
+            const models = ImageStorageDB.getModels() || [];
             const grid = document.getElementById('modelsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
@@ -311,7 +305,7 @@
                 card.className = `mondrian-card ${shape}`;
 
                 card.innerHTML = `
-                    <div class="mondrian-thumb" onclick="openTargetVault('${encodeURIComponent(model.name)}')">
+                    <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
                         <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
                         <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
                         ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
@@ -359,12 +353,8 @@
             }
         }
 
-        function openTargetVault(name) {
-            if (currentMode === 'images') {
-                window.location.href = `albums.html?name=${name}`;
-            } else {
-                window.location.href = `vault.html?name=${name}`;
-            }
+        function openAlbums(name) {
+            window.location.href = `albums.html?name=${name}`;
         }
 
         function openUpdateThumbModal(index) {
@@ -390,15 +380,10 @@
 
         function confirmDeleteModel() {
             if (modelIndexToDelete !== null) {
-                if (currentMode === 'images') {
-                    const models = ImageStorageDB.getModels() || [];
-                    models.splice(modelIndexToDelete, 1);
-                    ImageStorageDB.saveModels(models);
-                } else {
-                    const models = StorageDB.getModels() || [];
-                    models.splice(modelIndexToDelete, 1);
-                    StorageDB.saveModels(models);
-                }
+                ImageStorageDB.initDB();
+                const models = ImageStorageDB.getModels() || [];
+                models.splice(modelIndexToDelete, 1);
+                ImageStorageDB.saveModels(models);
                 renderModels();
             }
             closeDeleteModal();
