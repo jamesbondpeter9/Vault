@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Stream - Portal</title>
@@ -86,7 +93,10 @@
         </div>
     </div>
 
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let streamIndex = 0;
         let currentStreamItem = null;
@@ -149,11 +159,17 @@
             document.getElementById('deleteModal').style.display = 'none';
         }
 
-        function confirmDeleteStream() {
+        async function confirmDeleteStream() {
             if (!currentStreamItem) return;
             let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
             rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
             StorageDB.saveStreams(rawStreams);
+
+            // Trigger automatic GitHub synchronization before returning to index
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                await GitHubSync.triggerAutoSync();
+            }
+
             window.location.href = 'index.html';
         }
     </script>
