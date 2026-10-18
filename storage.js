@@ -14,7 +14,7 @@ class StorageDB {
 
     static async syncFromEmbeddedJSON() {
         try {
-            const scriptTag = document.getElementById('embedded-database');
+            const scriptTag = document.getElementById('embedded-database') || document.getElementById('embedded-video-database');
             if (scriptTag) {
                 const embeddedData = JSON.parse(scriptTag.textContent);
                 
@@ -65,6 +65,28 @@ class StorageDB {
             });
         }
         StorageDB.saveModels(models);
+    }
+
+    static deleteModel(modelName) {
+        if (!modelName) return;
+        const models = StorageDB.getModels();
+        const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
+        StorageDB.saveModels(filteredModels);
+
+        // Cascade delete associated video streams tagged with this model
+        const streams = StorageDB.getStreams();
+        const filteredStreams = streams.filter(s => {
+            if (!s.models) return true;
+            return !s.models.some(m => m.toLowerCase() === modelName.toLowerCase());
+        });
+        StorageDB.saveStreams(filteredStreams);
+
+        // Clean up associated folders if any exist in storage
+        try {
+            const folders = JSON.parse(localStorage.getItem('video_portal_folders_db')) || [];
+            const filteredFolders = folders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
+            localStorage.setItem('video_portal_folders_db', JSON.stringify(filteredFolders));
+        } catch (e) {}
     }
 
     static getStreams() {
