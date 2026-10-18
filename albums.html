@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -10,7 +9,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Albums - Portal</title>
+    <title>Alyx Star Albums - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Compact Navigation Header Sizing matching index.html */
@@ -122,7 +121,7 @@
         </div>
 
         <div class="tag-header">
-            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Albums</h1>
+            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Alyx Star - Albums</h1>
             <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Albums featuring this model</p>
         </div>
 
@@ -130,7 +129,7 @@
     </div>
 
     <!-- Custom Popup Modal for Folder Creation -->
-    <div id="folderModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+    <div id="folderModal" style="display: flex; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
         <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
             <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Create New Folder</h3>
             <input type="text" id="folderNameInput" placeholder="Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
@@ -349,5 +348,6 @@
             location.reload();
         }
     </script>
-</body>
-</html>
+
+
+</body></html>
