@@ -129,18 +129,19 @@
             }
 
             const allStreams = StorageDB.getStreams();
-            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.includes(modelName));
+            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
 
             // Note: Albums thumbnail image is intentionally omitted per instructions.
 
             const feat2VideoLink = document.getElementById('videoTagLink');
-            if (matchedStreams.length > 1) {
-                const s2 = matchedStreams[1];
-                if (s2.thumbnail) {
+            if (matchedStreams.length > 0) {
+                // Use case-insensitive matching or fallback to first available stream thumbnail if index 1 isn't present
+                const targetStream = matchedStreams.length > 1 ? matchedStreams[1] : matchedStreams[0];
+                if (targetStream && targetStream.thumbnail) {
                     const bgImg2 = document.createElement('img');
-                    bgImg2.src = s2.thumbnail;
-                    bgImg2.alt = s2.title;
-                    bgImg2.style.cssText = "object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1;";
+                    bgImg2.src = targetStream.thumbnail;
+                    bgImg2.alt = targetStream.title;
+                    bgImg2.style.cssText = "object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; border-radius: 20px;";
                     feat2VideoLink.prepend(bgImg2);
                 }
             }
