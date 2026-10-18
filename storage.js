@@ -17,17 +17,15 @@ class StorageDB {
             const scriptTag = document.getElementById('embedded-database');
             if (scriptTag) {
                 const embeddedData = JSON.parse(scriptTag.textContent);
-                if (embeddedData.models && embeddedData.models.length > 0) {
-                    const currentModels = StorageDB.getModels();
-                    if (currentModels.length === 0) {
-                        localStorage.setItem('video_portal_models_db', JSON.stringify(embeddedData.models));
-                    }
+                if (embeddedData.models) {
+                    localStorage.setItem('video_portal_models_db', JSON.stringify(embeddedData.models));
                 }
-                if (embeddedData.streams && embeddedData.streams.length > 0) {
-                    const currentStreams = StorageDB.getStreams();
-                    if (currentStreams.length === 0) {
-                        localStorage.setItem('video_portal_streams_db', JSON.stringify(embeddedData.streams));
-                    }
+                if (embeddedData.streams) {
+                    const videoStreams = embeddedData.streams.filter(s => {
+                        const t = (s.type || 'stream').toLowerCase();
+                        return t === 'stream' || t === 'video';
+                    });
+                    localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                 }
             }
         } catch (e) {
