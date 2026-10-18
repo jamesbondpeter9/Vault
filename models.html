@@ -422,6 +422,7 @@
                 if (targetModel) {
                     const modelName = targetModel.name;
 
+                    // 1. Delete model & cascade clean from ImageStorageDB
                     models.splice(modelIndexToDelete, 1);
                     ImageStorageDB.saveModels(models);
 
@@ -432,13 +433,10 @@
                     let allStreams = ImageStorageDB.getPhotoStreams() || [];
                     allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
                     ImageStorageDB.savePhotoStreams(allStreams);
-                }
 
-                StorageDB.initDB();
-                const videoModels = StorageDB.getModels() || [];
-                if (videoModels[modelIndexToDelete]) {
-                    videoModels.splice(modelIndexToDelete, 1);
-                    StorageDB.saveModels(videoModels);
+                    // 2. Delete model & cascade clean from StorageDB using deleteModel helper
+                    StorageDB.initDB();
+                    StorageDB.deleteModel(modelName);
                 }
 
                 renderModels();
