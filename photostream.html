@@ -210,14 +210,14 @@
                             <input type="text" id="streamUrl" required placeholder="Paste direct link, HTML img, BBCode, or combined embed codes">
                         </div>
 
-                        <!-- Models Tagging Section -->
+                        <!-- Models Tagging Section (Linked directly to models.html directory via StorageDB) -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
                             </div>
                             <div class="az-bar" id="modelAZBar"></div>
                             <div class="tags-container" id="modelTagsList">
-                                <span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>
+                                <span style="color: var(--text-muted); font-size: 0.80rem; padding: 4px;">No models in directory</span>
                             </div>
                         </div>
 
@@ -228,7 +228,7 @@
                             </div>
                             <div class="az-bar" id="folderAZBar"></div>
                             <div class="tags-container" id="folderTagsList">
-                                <span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">Select a model first to view its folders</span>
+                                <span style="color: var(--text-muted); font-size: 0.80rem; padding: 4px;">Select a model first to view its folders</span>
                             </div>
                         </div>
 
@@ -244,8 +244,7 @@
         </div>
     </div>
 
-    <!-- Integrated Images Storage Concept script -->
-    <script src="images-storage.js"></script>
+    <script src="storage.js"></script>
     <script>
         let selectedModels = [];
         let selectedFolders = [];
@@ -275,20 +274,17 @@
             input = input.trim();
             const urls = [];
 
-            // 1. Find all HTML img tags
             const htmlImgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
             let match;
             while ((match = htmlImgRegex.exec(input)) !== null) {
                 if (match[1]) urls.push(match[1].trim());
             }
 
-            // 2. Find all BBCode [img]...[/img]
             const bbcodeRegex = /[img](.*?)\[\/img\]/gi;
             while ((match = bbcodeRegex.exec(input)) !== null) {
                 if (match[1]) urls.push(match[1].trim());
             }
 
-            // 3. Find all raw HTTP/HTTPS URLs
             const urlRegex = /https?:\/\/[^\s"'<>]+/gi;
             while ((match = urlRegex.exec(input)) !== null) {
                 const u = match[0].trim();
@@ -297,7 +293,6 @@
                 }
             }
 
-            // Fallback split by whitespace if no structured tags matched
             if (urls.length === 0 && input.length > 0) {
                 const lines = input.split(/\s+/);
                 lines.forEach(l => {
@@ -362,15 +357,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize ImageStorageDB to operate on isolated image storage architecture
-            await ImageStorageDB.initDB();
+            await StorageDB.initDB();
             renderModelTags();
             renderFolderTags();
 
             const urlInput = document.getElementById('streamUrl');
             const previewContainer = document.getElementById('previewContainer');
 
-            // Shows strictly the LAST extracted image for better thumbnail preview performance
             function updateThumbPreview() {
                 let rawUrl = urlInput.value;
                 let urls = extractAllImageUrls(rawUrl);
@@ -395,7 +388,7 @@
                 urls.forEach(url => {
                     const title = generateTitleFromUrl(url);
 
-                    ImageStorageDB.addPhotoStream({
+                    StorageDB.addPhotoStream({
                         title,
                         url,
                         thumbnail: url,
@@ -417,7 +410,8 @@
         });
 
         function renderModelTags() {
-            let models = ImageStorageDB.getModels() || [];
+            // Pulls models directly from StorageDB, which is managed via models.html
+            let models = StorageDB.getModels() || [];
             const container = document.getElementById('modelTagsList');
 
             if (!models || models.length === 0) {
@@ -463,7 +457,6 @@
             });
         }
 
-        // Strictly show only custom folders created via the model's own albums using ImageStorageDB
         function renderFolderTags() {
             const container = document.getElementById('folderTagsList');
             const azBar = document.getElementById('folderAZBar');
@@ -476,10 +469,15 @@
             }
 
             let foldersSet = new Set();
-            let allFoldersDB = ImageStorageDB.getFolders() || [];
+            const globalFoldersDB = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
 
             selectedModels.forEach(modelName => {
-                let dbFolders = allFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
+                let dbFolders = [];
+                if (typeof StorageDB.getFolders === 'function') {
+                    dbFolders = StorageDB.getFolders(modelName) || [];
+                } else {
+                    dbFolders = globalFoldersDB.filter(f => f.model === modelName);
+                }
                 dbFolders.forEach(f => {
                     const fName = typeof f === 'string' ? f : (f.name || f.title);
                     if (fName) foldersSet.add(fName.trim());
@@ -497,7 +495,6 @@
 
             folders.sort((a, b) => a.localeCompare(b));
 
-            // Automatically clean up selected folders if they don't belong to the active model selection
             selectedFolders = selectedFolders.filter(f => folders.includes(f));
 
             buildAZBar('folderAZBar', folders, folderLetterFilter, (selectedLetter) => {
