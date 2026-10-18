@@ -151,7 +151,6 @@
             </div>
         </div>
 
-        <!-- Embedded Database Container for Self-Hydration Persistence -->
         <script type="application/json" id="embedded-images-database">
         {
             "models": [],
@@ -174,7 +173,6 @@
             await StorageDB.initDB();
             await ImageStorageDB.initDB();
 
-            // Self-hydration check from embedded database
             try {
                 const embeddedScript = document.getElementById('embedded-images-database');
                 if (embeddedScript) {
