@@ -16,64 +16,42 @@ class GitHubSync {
         const branch = PortalConfig.branch;
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
+        const isImagePage = path.includes('image') || path.includes('photo');
 
-        // 1. Locate the embedded database script tag in the DOM
+        // 1. Gather live data directly from active storage
+        let dbData = { models: [], photostreams: [], folders: [], streams: [] };
+
+        if (isImagePage && typeof ImageStorageDB !== 'undefined') {
+            dbData.models = typeof ImageStorageDB.getModels === 'function' ? ImageStorageDB.getModels() || [] : [];
+            dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? ImageStorageDB.getPhotoStreams() || [] : [];
+            dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? ImageStorageDB.getFolders() || [] : [];
+        } else if (typeof StorageDB !== 'undefined') {
+            dbData.models = typeof StorageDB.getModels === 'function' ? StorageDB.getModels() || [] : [];
+            dbData.streams = typeof StorageDB.getStreams === 'function' ? StorageDB.getStreams() || [] : [];
+        }
+
+        // 2. Update the embedded script tag in DOM so the downloaded HTML is also populated
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
                           document.getElementById('embedded-images-database');
-        
-        let extractedDbData = null;
-
-        // Detect correct storage engine (ImageStorageDB for images, StorageDB for videos)
-        const activeStorage = (path.includes('image') || path.includes('photo')) 
-            ? (typeof ImageStorageDB !== 'undefined' ? ImageStorageDB : null)
-            : (typeof StorageDB !== 'undefined' ? StorageDB : null);
-
         if (scriptTag) {
-            try {
-                const dbData = JSON.parse(scriptTag.textContent);
-                if (activeStorage) {
-                    if (path.includes('image') || path.includes('photo')) {
-                        dbData.models = typeof activeStorage.getModels === 'function' ? await activeStorage.getModels() : (dbData.models || []);
-                        dbData.photostreams = typeof activeStorage.getPhotoStreams === 'function' ? await activeStorage.getPhotoStreams() : (dbData.photostreams || []);
-                        dbData.folders = typeof activeStorage.getFolders === 'function' ? await activeStorage.getFolders() : (dbData.folders || []);
-                    } else {
-                        dbData.models = typeof activeStorage.getModels === 'function' ? await activeStorage.getModels() : (dbData.models || []);
-                        dbData.streams = typeof activeStorage.getStreams === 'function' ? await activeStorage.getStreams() : (dbData.streams || []);
-                    }
-                }
-                scriptTag.textContent = JSON.stringify(dbData, null, 2);
-                extractedDbData = dbData;
-            } catch (e) {
-                console.error('Failed to update embedded database before sync:', e);
-            }
+            scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
 
-        // 2. Sync Current HTML File
+        // 3. Sync Current HTML File
         const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
         await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
 
-        // 3. Dual-Sync Corresponding JSON File
-        if (extractedDbData) {
-            let jsonFilename = '';
-            if (path.includes('image') || path.includes('photo')) {
-                jsonFilename = 'images.json';
-            } else if (path.includes('video') || path.includes('watch') || path.includes('vault')) {
-                jsonFilename = 'videos.json';
-            }
-
-            if (jsonFilename) {
-                const jsonContent = JSON.stringify(extractedDbData, null, 4);
-                await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
-            }
-        }
+        // 4. Dual-Sync Corresponding JSON File (images.json or videos.json)
+        let jsonFilename = isImagePage ? 'images.json' : 'videos.json';
+        const jsonContent = JSON.stringify(dbData, null, 4);
+        await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
     }
 
     static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
         try {
-            // Get file SHA if it already exists on GitHub
             let sha = null;
             const getRes = await fetch(apiUrl, {
                 headers: { 'Authorization': `token ${token}` }
@@ -84,10 +62,8 @@ class GitHubSync {
                 sha = getData.sha;
             }
 
-            // Convert content to Unicode-safe Base64
             const base64Content = btoa(unescape(encodeURIComponent(fileContent)));
 
-            // Commit changes via GitHub REST API (PUT request)
             const putRes = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
