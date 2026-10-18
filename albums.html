@@ -190,14 +190,14 @@
             }
 
             const allPhotoStreams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
-            const matchedItems = allPhotoStreams.filter(item => item.models && item.models.includes(currentModelName));
+            const matchedItems = allPhotoStreams.filter(item => item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
 
             let allFolders = [];
             if (typeof StorageDB.getFolders === 'function') {
-                allFolders = (StorageDB.getFolders(currentModelName) || []).filter(f => !f.model || f.model === currentModelName);
+                allFolders = (StorageDB.getFolders(currentModelName) || []).filter(f => !f.model || f.model.toLowerCase() === currentModelName.toLowerCase());
             } else {
                 const globalFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
-                allFolders = globalFolders.filter(f => f.model === currentModelName);
+                allFolders = globalFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
             }
 
             const grid = document.getElementById('albumGrid');
@@ -208,7 +208,6 @@
                     return item.folder === folder.name || (Array.isArray(item.folders) && item.folders.includes(folder.name));
                 });
 
-                // Exact ascending sort matching view.html
                 folderImages.sort((a, b) => {
                     const titleA = (a.title || '').toLowerCase();
                     const titleB = (b.title || '').toLowerCase();
@@ -261,7 +260,7 @@
                 StorageDB.saveFolder({ name: nameClean, model: currentModelName });
             } else {
                 let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
-                if (!allFolders.some(f => f.name === nameClean && f.model === currentModelName)) {
+                if (!allFolders.some(f => f.name.toLowerCase() === nameClean.toLowerCase() && f.model.toLowerCase() === currentModelName.toLowerCase())) {
                     allFolders.push({ name: nameClean, model: currentModelName });
                     localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
                 }
@@ -291,7 +290,7 @@
 
             let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
             allFolders.forEach(f => {
-                if (f.name === folderToRename && f.model === currentModelName) {
+                if (f.name === folderToRename && f.model.toLowerCase() === currentModelName.toLowerCase()) {
                     f.name = newNameClean;
                 }
             });
@@ -300,7 +299,7 @@
 
             let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
             streams.forEach(s => {
-                const matchesModel = s.models && s.models.includes(currentModelName);
+                const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 if (matchesModel) {
                     if (s.folder === folderToRename) {
                         s.folder = newNameClean;
@@ -330,14 +329,14 @@
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
             let allFolders = JSON.parse(localStorage.getItem('video_portal_folders_db') || '[]');
-            allFolders = allFolders.filter(f => !(f.name === folderName && f.model === currentModelName));
+            allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
             localStorage.setItem('video_portal_folders_db', JSON.stringify(allFolders));
             localStorage.removeItem(`folders_${currentModelName}`);
 
             let streams = (typeof StorageDB.getPhotoStreams === 'function' ? StorageDB.getPhotoStreams() : StorageDB.getStreams()) || [];
             streams = streams.filter(s => {
                 const matchesFolder = s.folder === folderName || (Array.isArray(s.folders) && s.folders.includes(folderName));
-                const matchesModel = s.models && s.models.includes(currentModelName);
+                const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 return !(matchesFolder && matchesModel);
             });
             
