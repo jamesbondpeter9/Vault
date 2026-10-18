@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Access - Authentication</title>
+    <title>Portal Login</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body {
@@ -18,7 +18,7 @@
         }
         .login-card {
             background: rgba(20, 20, 20, 0.95);
-            border: 1px solid var(--card-border, #333);
+            border: 1px solid #333;
             border-radius: 20px;
             padding: 40px;
             width: 100%;
@@ -31,7 +31,7 @@
         .form-group label {
             display: block;
             font-size: 0.8rem;
-            color: var(--text-muted, #888);
+            color: #888;
             margin-bottom: 8px;
             font-weight: 700;
         }
@@ -39,7 +39,7 @@
             width: 100%;
             padding: 14px;
             border-radius: 10px;
-            border: 1px solid var(--card-border, #333);
+            border: 1px solid #333;
             background: #111;
             color: #fff;
             font-size: 0.9rem;
@@ -64,48 +64,51 @@
         .btn-submit:hover {
             background: #e6e6e6;
         }
+        .error-msg {
+            color: #ff4d4d;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 24px; text-align: center;">Portal Access</h2>
+        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 24px; text-align: center;">Portal Login</h2>
+        <div id="errorMsg" class="error-msg">Invalid username or password!</div>
         <form id="loginForm">
             <div class="form-group">
-                <label for="portalPass">Master Password</label>
-                <input type="password" id="portalPass" required placeholder="Enter master password">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter username">
             </div>
             <div class="form-group">
-                <label for="patInput">GitHub PAT (Token)</label>
-                <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password">
             </div>
-            <button type="submit" class="btn-submit">Login & Connect API</button>
+            <button type="submit" class="btn-submit">Login</button>
         </form>
     </div>
 
-    <script src="config.js"></script>
     <script>
-        // Set your desired master access password here
-        const MASTER_PASSWORD = "YOUR_MASTER_PASSWORD_HERE";
+        // Set your login credentials here for verification
+        const VALID_USERNAME = "admin";
+        const VALID_PASSWORD = "your_secure_password";
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const enteredPass = document.getElementById('portalPass').value;
-            const enteredToken = document.getElementById('patInput').value;
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
 
-            if (enteredPass === MASTER_PASSWORD) {
-                // Save login state & PAT token into sessionStorage
+            if (user === Janice && pass === James@123) {
+                // Set login session flag
                 sessionStorage.setItem('portal_authenticated', 'true');
-                if (typeof PortalConfig !== 'undefined' && PortalConfig.setToken) {
-                    PortalConfig.setToken(enteredToken);
-                } else {
-                    sessionStorage.setItem('github_pat_token', enteredToken.trim());
-                }
                 
-                // Redirect to main portal directory
-                window.location.href = 'models.html';
+                // Redirect to main index directory
+                window.location.href = 'index.html';
             } else {
-                alert('Invalid master password.');
+                document.getElementById('errorMsg').style.display = 'block';
             }
         });
     </script>
