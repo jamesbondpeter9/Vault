@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Access - Authentication</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .login-card {
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid var(--card-border, #333);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted, #888);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border, #333);
+            background: #111;
+            color: #fff;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #fff;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: #fff;
+            color: #000;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-submit:hover {
+            background: #e6e6e6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 24px; text-align: center;">Portal Access</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="portalPass">Master Password</label>
+                <input type="password" id="portalPass" required placeholder="Enter master password">
+            </div>
+            <div class="form-group">
+                <label for="patInput">GitHub PAT (Token)</label>
+                <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" required>
+            </div>
+            <button type="submit" class="btn-submit">Login & Connect API</button>
+        </form>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Set your desired master access password here
+        const MASTER_PASSWORD = "YOUR_MASTER_PASSWORD_HERE";
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const enteredPass = document.getElementById('portalPass').value;
+            const enteredToken = document.getElementById('patInput').value;
+
+            if (enteredPass === MASTER_PASSWORD) {
+                // Save login state & PAT token into sessionStorage
+                sessionStorage.setItem('portal_authenticated', 'true');
+                if (typeof PortalConfig !== 'undefined' && PortalConfig.setToken) {
+                    PortalConfig.setToken(enteredToken);
+                } else {
+                    sessionStorage.setItem('github_pat_token', enteredToken.trim());
+                }
+                
+                // Redirect to main portal directory
+                window.location.href = 'models.html';
+            } else {
+                alert('Invalid master password.');
+            }
+        });
+    </script>
+</body>
+</html>
