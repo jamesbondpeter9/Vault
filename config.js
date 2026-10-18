@@ -3,7 +3,7 @@ const PortalConfig = {
     owner: "jamesbondpeter9",
     
     // Replace with your actual GitHub repository name
-    repo: "jamesbondpeter9/Vault",
+    repo: "Vault",
     
     // The branch you want to commit to (usually 'main' or 'master')
     branch: "main",
