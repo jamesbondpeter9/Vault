@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Videos - Portal</title>
@@ -131,7 +138,10 @@
         <div class="tag-grid" id="tagGrid"></div>
     </div>
 
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
