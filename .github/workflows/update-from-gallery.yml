@@ -5,7 +5,6 @@ on:
     paths:
       - 'video-gallery.html'
 
-# Prevents mid-flight task cancellations and queues updates safely
 concurrency:
   group: gallery-sync-${{ github.ref }}
   cancel-in-progress: false
@@ -41,8 +40,14 @@ jobs:
           }
           try {
               const jsonData = JSON.parse(match[1].trim());
+              if (jsonData.streams) {
+                  jsonData.streams = jsonData.streams.filter(item => {
+                      const t = (item.type || "stream").toLowerCase();
+                      return t === "stream" || t === "video";
+                  });
+              }
               fs.writeFileSync("videos.json", JSON.stringify(jsonData, null, 4), "utf8");
-              console.log("Successfully updated videos.json from video-gallery.html!");
+              console.log("Successfully updated and filtered videos.json from video-gallery.html!");
           } catch(err) {
               console.error("Invalid JSON inside embedded-database script tag:", err);
               process.exit(1);
