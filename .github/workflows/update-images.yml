@@ -7,10 +7,15 @@ on:
       - master
     paths:
       - 'images.json'
-      - 'scripts/update-images-json.js'
+      - 'image-gallery.html'
+      - 'scripts/**'
+
+concurrency:
+  group: images-json-sync-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  validate-and-update-images:
+  validate-and-update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -24,7 +29,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Run Image Database Validation Script
+      - name: Run Images Database Validation Script
         run: node scripts/update-images-json.js
 
       - name: Commit and push changes if any
