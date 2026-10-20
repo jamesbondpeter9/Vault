@@ -59,10 +59,16 @@ class GitHubSync {
         // 2. Gather live data directly from active storage with specific payload boundaries
         let dbData = {};
 
-        if (isModelPage && typeof ModelStorage !== 'undefined') {
-            dbData = {
-                models: typeof ModelStorage.getModels === 'function' ? await ModelStorage.getModels() || [] : []
-            };
+        if (isModelPage) {
+            let modelsList = [];
+            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
+                modelsList = await ModelStorage.getModels() || [];
+            }
+            // Fallback to StorageDB if models were saved there instead
+            if (modelsList.length === 0 && typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
+                modelsList = await StorageDB.getModels() || [];
+            }
+            dbData = { models: modelsList };
         } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
             // images.json now strictly stores ONLY photostreams and folders metadata
             dbData = {
