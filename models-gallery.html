@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Registry Hub</title>
+    <!-- Include your global CSS / Glassmorphism styles here -->
+</head>
+<body>
+    <h1>Central Model Registry</h1>
+    
+    <!-- Embedded Database Script Tag for Dual-Sync -->
+    <script type="application/json" id="embedded-models-database">
+    {
+        "models": []
+    }
+    </script>
+
+    <!-- Core Scripts -->
+    <script src="scripts/modelstorage.js"></script>
+    <script src="scripts/github-sync.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            await window.ModelStorage.initDB();
+            console.log("Model database loaded successfully.");
+        });
+    </script>
+</body>
+</html>
