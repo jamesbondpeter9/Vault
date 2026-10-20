@@ -31,22 +31,10 @@ class GitHubSync {
         const branch = PortalConfig.branch;
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
-        
-        // Page identity checks
         const isModelPage = path.includes('model');
-        const isImagePage = path.includes('image') || 
-                            path.includes('photo') || 
-                            path.includes('album') || 
-                            path.includes('folder') ||
-                            path.includes('view');
+        const isImagePage = path.includes('image') || path.includes('photo') || path.includes('album') || path.includes('folder') || path.includes('view');
+        const isVideoPage = path.includes('video') || path.includes('stream') || path.includes('watch') || path.includes('vault') || path.includes('tag');
 
-        const isVideoPage = path.includes('video') || 
-                            path.includes('stream') || 
-                            path.includes('watch') || 
-                            path.includes('vault') || 
-                            path.includes('tag');
-
-        // 1. Determine target JSON filename precisely based on active page
         let jsonFilename = 'videos.json';
         if (isModelPage) {
             jsonFilename = 'models.json';
@@ -56,13 +44,12 @@ class GitHubSync {
             jsonFilename = 'videos.json';
         }
 
-        // 2. Gather live data directly from ModelStorage and active storage boundaries
         let dbData = {};
 
         if (isModelPage) {
             let modelsList = [];
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                modelsList = await ModelStorage.getModels() || [];
+                modelsList = ModelStorage.getModels() || [];
             }
             dbData = { models: Array.isArray(modelsList) ? modelsList : [] };
         } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
@@ -79,7 +66,6 @@ class GitHubSync {
             dbData = { models: [], photostreams: [], folders: [], streams: [] };
         }
 
-        // 3. Update the embedded script tag in DOM safely matching available IDs
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
                           document.getElementById('embedded-images-database') ||
@@ -88,26 +74,13 @@ class GitHubSync {
             scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
 
-        // 4. Sync Current HTML File (Only if the current path is a real file tracked in repo)
         if (path && path.endsWith('.html')) {
             const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
             await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
         }
 
-        // 5. Dual-Sync Corresponding JSON File with precise payload data
         const jsonContent = JSON.stringify(dbData, null, 4);
         await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
-    }
-
-    static async fetchRemoteJSON(owner, repo, filePath, token) {
-        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
-        const res = await fetch(apiUrl, {
-            headers: { 'Authorization': `token ${token}` }
-        });
-        if (!res.ok) return null;
-        const data = await res.json();
-        const decodedString = decodeURIComponent(escape(atob(data.content)));
-        return JSON.parse(decodedString);
     }
 
     static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
@@ -135,7 +108,7 @@ class GitHubSync {
                 body: JSON.stringify({
                     message: commitMessage,
                     content: base64Content,
-                    sha: sha,
+.                    sha: sha,
                     branch: branch
                 })
             });
