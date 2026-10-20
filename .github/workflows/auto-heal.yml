@@ -3,8 +3,8 @@ name: Auto-Heal Failed or Cancelled Sync
 on:
   workflow_run:
     workflows: 
-      - "pages-build-deployment" # Targets the official GitHub Pages build and deploy runner
-      - "Portal Sync & Deploy"    # Keep your custom sync workflow here too if you use one
+      - "pages-build-deployment"
+      - "Portal Sync & Deploy"
     types:
       - completed
 
@@ -22,7 +22,7 @@ jobs:
           script: |
             const runId = context.payload.workflow_run.id;
             const runName = context.payload.workflow_run.name;
-            console.log(`Pages workflow "${runName}" (ID: ${runId}) finished with conclusion: ${context.payload.workflow_run.conclusion}. Automatically re-running...`);
+            console.log(`Workflow "${runName}" (ID: ${runId}) finished with conclusion: ${context.payload.workflow_run.conclusion}. Automatically re-running...`);
             
             await github.rest.actions.reRunWorkflow({
               owner: context.repo.owner,
