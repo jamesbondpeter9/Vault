@@ -12,7 +12,7 @@ class ModelStorage {
             if (scriptTag && scriptTag.textContent) {
                 let embeddedData = {};
                 try {
-                    embeddedData = typeof scriptTag.textContent === 'string' ? JSON.parse(scriptTag.textContent) : scriptTag.textContent;
+                    embeddedData = JSON.parse(scriptTag.textContent);
                 } catch (e) {
                     embeddedData = {};
                 }
@@ -34,7 +34,10 @@ class ModelStorage {
             const raw = localStorage.getItem('video_portal_models_db');
             let models = raw ? JSON.parse(raw) : [];
             
-            // Fail-safe: If localStorage is empty, instantly check embedded DOM script tag
+            if (!Array.isArray(models)) {
+                models = [];
+            }
+
             if (models.length === 0) {
                 const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
                 if (scriptTag && scriptTag.textContent) {
@@ -57,7 +60,6 @@ class ModelStorage {
             const validModels = Array.isArray(models) ? models : [];
             localStorage.setItem('video_portal_models_db', JSON.stringify(validModels));
             
-            // Trigger automatic GitHub synchronization / models.json update
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error for models:', err));
             }
@@ -77,6 +79,7 @@ class ModelStorage {
             models[existingIndex].shape = modelData.shape || models[existingIndex].shape || 'portrait';
         } else {
             models.push({
+                id: modelData.id || ('m_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
                 name: modelName,
                 thumbnail: modelData.thumbnail || '',
                 shape: modelData.shape || 'portrait',
@@ -86,11 +89,16 @@ class ModelStorage {
         ModelStorage.saveModels(models);
     }
 
-    static deleteModel(modelName) {
-        if (!modelName) return;
-        const targetName = String(modelName).trim().toLowerCase();
+    static deleteModel(modelNameOrKey) {
+        if (!modelNameOrKey) return;
+        const target = String(modelNameOrKey).trim().toLowerCase();
         const models = ModelStorage.getModels();
-        const filteredModels = models.filter(m => m && m.name && m.name.toLowerCase() !== targetName);
+        const filteredModels = models.filter(m => {
+            if (!m) return false;
+            const mId = String(m.id || '').toLowerCase();
+            const mName = String(m.name || '').toLowerCase();
+            return mId !== target && mName !== target;
+        });
         ModelStorage.saveModels(filteredModels);
     }
 }
