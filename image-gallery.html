@@ -53,9 +53,9 @@
 
         async function downloadUpdatedImageGallery() {
             await ImageStorageDB.initDB();
-            const models = ImageStorageDB.getModels() || [];
-            const photostreams = ImageStorageDB.getPhotoStreams() || [];
-            const folders = ImageStorageDB.getFolders() || [];
+            const models = await ImageStorageDB.getModels() || [];
+            const photostreams = await ImageStorageDB.getPhotoStreams() || [];
+            const folders = await ImageStorageDB.getFolders() || [];
 
             const dbPayload = {
                 models: models,
@@ -121,7 +121,6 @@
 </body>
 </html>`;
 
-            // Trigger automatic GitHub synchronization when the download/update mechanism runs
             await GitHubSync.triggerAutoSync();
 
             const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -135,6 +134,4 @@
             URL.revokeObjectURL(url);
         }
     </script>
-
-
 </body></html>
