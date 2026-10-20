@@ -1,28 +1,31 @@
-name: Portal Sync & Deploy
+name: Auto-Heal Failed or Cancelled Sync
 
 on:
-  push:
-    branches: [main, master]
-    paths:
-      - '**.html'
-      - '**.js'
-      - 'scripts/**'
-      - 'models.json'
-      - 'videos.json'
-  workflow_dispatch: # Allows you to trigger it manually anytime from the Actions tab
+  workflow_run:
+    workflows: 
+      - "pages-build-deployment" # Targets the official GitHub Pages build and deploy runner
+      - "Portal Sync & Deploy"    # Keep your custom sync workflow here too if you use one
+    types:
+      - completed
+
+permissions:
+  actions: write
 
 jobs:
-  sync-and-deploy:
+  retry-if-failed:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled' }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Verify Portal Files
-        run: |
-          echo "Processing updated HTML and JS files..."
-          git status
-
-      - name: Deploy to Pages / Repository
-        run: |
-          echo "Portal sync complete!"
+      - name: Trigger Re-run
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const runName = context.payload.workflow_run.name;
+            console.log(`Pages workflow "${runName}" (ID: ${runId}) finished with conclusion: ${context.payload.workflow_run.conclusion}. Automatically re-running...`);
+            
+            await github.rest.actions.reRunWorkflow({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
