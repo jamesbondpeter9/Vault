@@ -156,18 +156,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Embedded Database for Central Model Registry Sync -->
-        <script type="application/json" id="embedded-models-database">{
-  "models": []
-}</script>
     </div>
 
     <script src="config.js"></script>
     <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="images-storage.js"></script>
-    <script src="github-sync.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
         let currentPage = 1;
@@ -218,75 +212,20 @@
                 }
                 closeUpdateThumbModal();
             });
-
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
         });
 
-        // ROBUST DATA SOURCE RESOLUTION (Includes direct models.json fetch fallback)
+        // Strict ModelStorage Data Collection
         async function fetchModelsList() {
-            // 1. Try ModelStorage class
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                const list = ModelStorage.getModels();
-                if (Array.isArray(list) && list.length > 0) return list;
+                return (await ModelStorage.getModels()) || [];
             }
-
-            // 2. Try raw LocalStorage
-            try {
-                const raw = localStorage.getItem('video_portal_models_db');
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-                }
-            } catch (e) {}
-
-            // 3. Try Embedded DOM Script Tag
-            try {
-                const scriptTag = document.getElementById('embedded-models-database');
-                if (scriptTag && scriptTag.textContent.trim()) {
-                    const data = JSON.parse(scriptTag.textContent);
-                    const source = Array.isArray(data) ? data : (data.models || []);
-                    if (source.length > 0) {
-                        localStorage.setItem('video_portal_models_db', JSON.stringify(source));
-                        return source;
-                    }
-                }
-            } catch (e) {}
-
-            // 4. Fallback: Fetch models.json directly from repository/server root
-            try {
-                const res = await fetch('./models.json?' + Date.now());
-                if (res.ok) {
-                    const json = await res.json();
-                    const remoteModels = Array.isArray(json) ? json : (json.models || []);
-                    if (remoteModels.length > 0) {
-                        localStorage.setItem('video_portal_models_db', JSON.stringify(remoteModels));
-                        const scriptTag = document.getElementById('embedded-models-database');
-                        if (scriptTag) {
-                            scriptTag.textContent = JSON.stringify({ models: remoteModels }, null, 2);
-                        }
-                        return remoteModels;
-                    }
-                }
-            } catch (e) {}
-
             return [];
         }
 
+        // Dedicated ModelStorage Persistence (No GitHub Sync)
         async function persistModelsList(models) {
-            localStorage.setItem('video_portal_models_db', JSON.stringify(models));
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
                 ModelStorage.saveModels(models);
-            }
-
-            const scriptTag = document.getElementById('embedded-models-database');
-            if (scriptTag) {
-                scriptTag.textContent = JSON.stringify({ models: models }, null, 2);
-            }
-
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
             }
         }
 
@@ -457,8 +396,13 @@
         async function confirmDeleteModel() {
             if (modelTargetKeyToDelete !== null) {
                 const models = await fetchModelsList();
-                const filtered = models.filter(m => String(m.id) !== String(modelTargetKeyToDelete) && String(m.name).toLowerCase() !== String(modelTargetKeyToDelete).toLowerCase());
-                await persistModelsList(filtered);
+                const target = models.find(m => String(m.id) === String(modelTargetKeyToDelete) || String(m.name).toLowerCase() === String(modelTargetKeyToDelete).toLowerCase());
+                if (target && target.name && typeof ModelStorage !== 'undefined' && typeof ModelStorage.deleteModel === 'function') {
+                    ModelStorage.deleteModel(target.name);
+                } else {
+                    const filtered = models.filter(m => String(m.id) !== String(modelTargetKeyToDelete) && String(m.name).toLowerCase() !== String(modelTargetKeyToDelete).toLowerCase());
+                    await persistModelsList(filtered);
+                }
                 await renderModels();
             }
             closeDeleteModal();
