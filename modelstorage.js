@@ -32,7 +32,21 @@ class ModelStorage {
     static getModels() {
         try {
             const raw = localStorage.getItem('video_portal_models_db');
-            return raw ? JSON.parse(raw) : [];
+            let models = raw ? JSON.parse(raw) : [];
+            
+            // Fail-safe: If localStorage is empty, instantly check embedded DOM script tag
+            if (models.length === 0) {
+                const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
+                if (scriptTag && scriptTag.textContent) {
+                    const embeddedData = JSON.parse(scriptTag.textContent);
+                    const sourceModels = Array.isArray(embeddedData) ? embeddedData : (embeddedData.models || []);
+                    if (sourceModels.length > 0) {
+                        models = sourceModels;
+                        localStorage.setItem('video_portal_models_db', JSON.stringify(models));
+                    }
+                }
+            }
+            return models;
         } catch (e) {
             return [];
         }
