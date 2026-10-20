@@ -179,12 +179,6 @@
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
                 await ModelStorage.initDB();
             }
-            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
-                await StorageDB.initDB();
-            }
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                await ImageStorageDB.initDB();
-            }
 
             buildFilterBar();
             await renderModels();
@@ -225,28 +219,39 @@
                 closeUpdateThumbModal();
             });
 
-            // Trigger real-time background sync on load
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
         });
 
+        // SINGLE SOURCE OF TRUTH RESOLUTION
         async function fetchModelsList() {
+            // 1. Try ModelStorage
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                const list = await ModelStorage.getModels();
+                const list = ModelStorage.getModels();
                 if (Array.isArray(list) && list.length > 0) return list;
             }
+
+            // 2. Try raw LocalStorage
             try {
                 const raw = localStorage.getItem('video_portal_models_db');
-                const parsed = raw ? JSON.parse(raw) : [];
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
             } catch (e) {}
-            
+
+            // 3. Try Embedded DOM Script Tag
             try {
                 const scriptTag = document.getElementById('embedded-models-database');
-                if (scriptTag && scriptTag.textContent) {
+                if (scriptTag && scriptTag.textContent.trim()) {
                     const data = JSON.parse(scriptTag.textContent);
-                    return Array.isArray(data) ? data : (data.models || []);
+                    const source = Array.isArray(data) ? data : (data.models || []);
+                    if (source.length > 0) {
+                        // Hydrate local storage with the DOM data so future queries are instant
+                        localStorage.setItem('video_portal_models_db', JSON.stringify(source));
+                        return source;
+                    }
                 }
             } catch (e) {}
 
@@ -254,19 +259,19 @@
         }
 
         async function persistModelsList(models) {
+            // Write to LocalStorage
+            localStorage.setItem('video_portal_models_db', JSON.stringify(models));
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
-                await ModelStorage.saveModels(models);
-            } else {
-                localStorage.setItem('video_portal_models_db', JSON.stringify(models));
+                ModelStorage.saveModels(models);
             }
 
-            // Immediately update embedded script tag for fast DOM/JSON synchronization
+            // Sync Embedded DOM Script
             const scriptTag = document.getElementById('embedded-models-database');
             if (scriptTag) {
                 scriptTag.textContent = JSON.stringify({ models: models }, null, 2);
             }
 
-            // Trigger GitHub auto-sync in real time
+            // Trigger GitHub auto-sync
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
@@ -361,7 +366,6 @@
                 card.className = `mondrian-card ${shape}`;
 
                 const escapedKey = String(model.modelKey).replace(/'/g, "\\'");
-                const escapedName = String(model.name).replace(/'/g, "\\'");
 
                 card.innerHTML = `
                     <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
