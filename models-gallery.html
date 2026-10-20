@@ -1,27 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
-    <title>Model Registry Hub</title>
-    <!-- Include your global CSS / Glassmorphism styles here -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Registry Hub - Portal</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Central Model Registry</h1>
-    
-    <!-- Embedded Database Script Tag for Dual-Sync -->
-    <script type="application/json" id="embedded-models-database">
-    {
-        "models": []
-    }
-    </script>
+    <div class="site-container">
+        <h1 style="color: #fff; font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;">Central Model Registry</h1>
+        
+        <!-- Embedded Database Script Tag for Dual-Sync -->
+        <script type="application/json" id="embedded-models-database">
+        {
+            "models": []
+        }
+        </script>
+    </div>
 
     <!-- Core Scripts -->
+    <script src="config.js"></script>
     <script src="scripts/modelstorage.js"></script>
     <script src="scripts/github-sync.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            await window.ModelStorage.initDB();
-            console.log("Model database loaded successfully.");
+            if (typeof window.ModelStorage !== 'undefined' && typeof window.ModelStorage.initDB === 'function') {
+                await window.ModelStorage.initDB();
+                
+                try {
+                    const embeddedScript = document.getElementById('embedded-models-database');
+                    if (embeddedScript) {
+                        const dbData = JSON.parse(embeddedScript.textContent);
+                        if (dbData && Array.isArray(dbData.models) && dbData.models.length > 0) {
+                            if (typeof window.ModelStorage.saveModels === 'function') {
+                                await window.ModelStorage.saveModels(dbData.models);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not parse embedded models database:', e);
+                }
+
+                console.log("Model database loaded successfully.");
+            }
+
+            // Trigger real-time background auto-sync on load to verify models.json
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                await GitHubSync.triggerAutoSync();
+            }
         });
     </script>
 </body>
