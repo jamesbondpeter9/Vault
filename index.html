@@ -161,18 +161,25 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            // Fetch only video streams so photo streams added via photostream.html won't show here
-            const streams = StorageDB.getVideoStreams();
+            
+            // Fetch only video streams asynchronously from StorageDB
+            const streams = await StorageDB.getStreams() || [];
+            const videoStreams = streams.filter(item => {
+                const type = (item.type || 'stream').toLowerCase();
+                return type === 'stream' || type === 'video';
+            });
+
             const grid = document.getElementById('streamsGrid');
             
-            if (streams.length === 0) {
+            if (videoStreams.length === 0) {
                 grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
+                await GitHubSync.triggerAutoSync();
                 return;
             }
             
             grid.innerHTML = '';
             
-            streams.forEach((stream, index) => {
+            videoStreams.forEach((stream, index) => {
                 const card = document.createElement('a');
                 card.href = `watch.html?index=${index}`;
                 card.className = `mondrian-card portrait`; // Default fallback
@@ -200,6 +207,9 @@
                     };
                 }
             });
+
+            // Trigger background auto-sync to keep videos.json verified on load
+            await GitHubSync.triggerAutoSync();
         });
     </script>
 </body>
