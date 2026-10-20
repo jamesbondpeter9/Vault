@@ -140,21 +140,26 @@
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="config.js"></script>
+    <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
+                await ModelStorage.initDB();
+            }
             await StorageDB.initDB();
+
             const params = new URLSearchParams(window.location.search);
-            const modelName = decodeURIComponent(params.get('name') ?? '');
+            const modelName = decodeURIComponent(params.get('name') ?? '').trim();
 
             if (modelName) {
                 document.getElementById('tagTitle').textContent = `${modelName} - Videos`;
                 document.title = `${modelName} Videos - Portal`;
             }
 
-            const allStreams = StorageDB.getVideoStreams();
-            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
+            const allStreams = StorageDB.getVideoStreams() || [];
+            const matchedStreams = allStreams.filter(stream => stream.models && Array.isArray(stream.models) && stream.models.some(m => String(m).toLowerCase() === modelName.toLowerCase()));
 
             const grid = document.getElementById('tagGrid');
             if (matchedStreams.length === 0) {
@@ -165,29 +170,31 @@
             grid.innerHTML = '';
             matchedStreams.forEach((stream) => {
                 const card = document.createElement('a');
-                const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `watch.html?index=${globalIndex}`;
+                const globalIndex = allStreams.findIndex(s => s && s.url === stream.url && s.title === stream.title);
+                card.href = `watch.html?index=${globalIndex >= 0 ? globalIndex : 0}`;
                 card.className = 'mondrian-card portrait';
 
                 card.innerHTML = `
                     <div class="mondrian-thumb">
-                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.8rem;">No Thumbnail</div>'}
-                        <div class="mondrian-overlay">${stream.title}</div>
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title || ''}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.8rem;">No Thumbnail</div>'}
+                        <div class="mondrian-overlay">${stream.title || 'Untitled'}</div>
                     </div>`;
                 grid.appendChild(card);
 
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
-                    img.onload = () => {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        if (ratio < 0.85) {
-                            card.className = 'mondrian-card portrait';
-                        } else if (ratio > 1.25) {
-                            card.className = 'mondrian-card landscape';
-                        } else {
-                            card.className = 'mondrian-card square';
-                        }
-                    };
+                    if (img) {
+                        img.onload = () => {
+                            const ratio = img.naturalWidth / img.naturalHeight;
+                            if (ratio < 0.85) {
+                                card.className = 'mondrian-card portrait';
+                            } else if (ratio > 1.25) {
+                                card.className = 'mondrian-card landscape';
+                            } else {
+                                card.className = 'mondrian-card square';
+                            }
+                        };
+                    }
                 }
             });
         });
