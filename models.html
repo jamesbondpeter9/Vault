@@ -224,9 +224,9 @@
             }
         });
 
-        // SINGLE SOURCE OF TRUTH RESOLUTION
+        // ROBUST DATA SOURCE RESOLUTION (Includes direct models.json fetch fallback)
         async function fetchModelsList() {
-            // 1. Try ModelStorage
+            // 1. Try ModelStorage class
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
                 const list = ModelStorage.getModels();
                 if (Array.isArray(list) && list.length > 0) return list;
@@ -248,9 +248,25 @@
                     const data = JSON.parse(scriptTag.textContent);
                     const source = Array.isArray(data) ? data : (data.models || []);
                     if (source.length > 0) {
-                        // Hydrate local storage with the DOM data so future queries are instant
                         localStorage.setItem('video_portal_models_db', JSON.stringify(source));
                         return source;
+                    }
+                }
+            } catch (e) {}
+
+            // 4. Fallback: Fetch models.json directly from repository/server root
+            try {
+                const res = await fetch('./models.json?' + Date.now());
+                if (res.ok) {
+                    const json = await res.json();
+                    const remoteModels = Array.isArray(json) ? json : (json.models || []);
+                    if (remoteModels.length > 0) {
+                        localStorage.setItem('video_portal_models_db', JSON.stringify(remoteModels));
+                        const scriptTag = document.getElementById('embedded-models-database');
+                        if (scriptTag) {
+                            scriptTag.textContent = JSON.stringify({ models: remoteModels }, null, 2);
+                        }
+                        return remoteModels;
                     }
                 }
             } catch (e) {}
@@ -259,19 +275,16 @@
         }
 
         async function persistModelsList(models) {
-            // Write to LocalStorage
             localStorage.setItem('video_portal_models_db', JSON.stringify(models));
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
                 ModelStorage.saveModels(models);
             }
 
-            // Sync Embedded DOM Script
             const scriptTag = document.getElementById('embedded-models-database');
             if (scriptTag) {
                 scriptTag.textContent = JSON.stringify({ models: models }, null, 2);
             }
 
-            // Trigger GitHub auto-sync
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
