@@ -20,15 +20,15 @@ class GitHubSync {
             return;
         }
 
-        const token = PortalConfig.getToken();
+        const token = PortalConfig.getToken ? PortalConfig.getToken() : PortalConfig.token;
         if (!token) {
-            console.warn('GitHub PAT token not found. Skipping auto-sync.');
+            console.warn('GitHub PAT token not found in PortalConfig. Skipping auto-sync.');
             return;
         }
 
         const owner = PortalConfig.owner;
         const repo = PortalConfig.repo;
-        const branch = PortalConfig.branch;
+        const branch = PortalConfig.branch || 'main';
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
         const isModelPage = path.includes('model');
@@ -74,13 +74,15 @@ class GitHubSync {
             scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
 
+        // 1. Commit updated JSON file directly to GitHub
+        const jsonContent = JSON.stringify(dbData, null, 4);
+        await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+
+        // 2. Commit updated HTML file with embedded script tag
         if (path && path.endsWith('.html')) {
             const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
             await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
         }
-
-        const jsonContent = JSON.stringify(dbData, null, 4);
-        await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
     }
 
     static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
@@ -89,7 +91,10 @@ class GitHubSync {
         try {
             let sha = null;
             const getRes = await fetch(apiUrl, {
-                headers: { 'Authorization': `token ${token}` }
+                headers: { 
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
             });
             
             if (getRes.ok) {
@@ -103,24 +108,25 @@ class GitHubSync {
                 method: 'PUT',
                 headers: {
                     'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     message: commitMessage,
                     content: base64Content,
-.                    sha: sha,
+                    sha: sha,
                     branch: branch
                 })
             });
 
             if (putRes.ok) {
-                console.log(`Successfully synced ${filePath} to GitHub repository!`);
+                console.log(`[GitHubSync] Successfully synced ${filePath} to GitHub repository!`);
             } else {
                 const errData = await putRes.json();
-                console.error(`GitHub API commit error for ${filePath}:`, errData.message);
+                console.error(`[GitHubSync] API commit error for ${filePath}:`, errData.message);
             }
         } catch (err) {
-            console.error(`GitHub Sync Exception for ${filePath}:`, err);
+            console.error(`[GitHubSync] Exception for ${filePath}:`, err);
         }
     }
 }
