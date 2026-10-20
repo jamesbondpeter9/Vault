@@ -247,7 +247,11 @@
             document.getElementById('modelThumb').value = '';
             closeAddModelModal();
             currentPage = 1;
-            await renderModels();
+            
+            // Brief write buffer timeout to allow IndexedDB transaction commit to settle
+            setTimeout(async () => {
+                await renderModels();
+            }, 100);
 
             // Trigger GitHub auto-sync
             await GitHubSync.triggerAutoSync();
@@ -262,7 +266,9 @@
                 await ModelStorage.saveModel(target);
             }
 
-            await renderModels();
+            setTimeout(async () => {
+                await renderModels();
+            }, 100);
 
             // Trigger GitHub auto-sync
             await GitHubSync.triggerAutoSync();
