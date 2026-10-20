@@ -64,13 +64,12 @@ class GitHubSync {
                 models: typeof ModelStorage.getModels === 'function' ? await ModelStorage.getModels() || [] : []
             };
         } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
+            // images.json now strictly stores ONLY photostreams and folders metadata
             dbData = {
-                models: typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [],
                 photostreams: typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [],
                 folders: typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : []
             };
         } else if (isVideoPage && typeof StorageDB !== 'undefined') {
-            // Requirement 2 & 4: Ensure video pages sync ONLY streams and models as structured in videos.json
             dbData = {
                 models: typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [],
                 streams: typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : []
