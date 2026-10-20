@@ -56,23 +56,13 @@ class GitHubSync {
             jsonFilename = 'videos.json';
         }
 
-// 2. Gather live data directly from active storage with specific payload boundaries
+        // 2. Gather live data directly from ModelStorage and active storage boundaries
         let dbData = {};
 
         if (isModelPage) {
             let modelsList = [];
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
                 modelsList = await ModelStorage.getModels() || [];
-            }
-            if (modelsList.length === 0 && typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
-                modelsList = await StorageDB.getModels() || [];
-            }
-            // Absolute fallback to direct localStorage if helper methods miss it
-            if (modelsList.length === 0) {
-                try {
-                    const rawLocal = localStorage.getItem('video_portal_models_db');
-                    if (rawLocal) modelsList = JSON.parse(rawLocal) || [];
-                } catch (e) {}
             }
             dbData = { models: Array.isArray(modelsList) ? modelsList : [] };
         } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
