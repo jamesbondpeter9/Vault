@@ -221,8 +221,8 @@
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
                             </div>
-                            <div class="az-bar" id="modelAZBar"><span class="az-letter active">ALL</span><span class="az-letter">A</span><span class="az-letter disabled">B</span><span class="az-letter disabled">C</span><span class="az-letter disabled">D</span><span class="az-letter disabled">E</span><span class="az-letter disabled">F</span><span class="az-letter disabled">G</span><span class="az-letter disabled">H</span><span class="az-letter disabled">I</span><span class="az-letter disabled">J</span><span class="az-letter disabled">K</span><span class="az-letter disabled">L</span><span class="az-letter disabled">M</span><span class="az-letter disabled">N</span><span class="az-letter disabled">O</span><span class="az-letter disabled">P</span><span class="az-letter disabled">Q</span><span class="az-letter disabled">R</span><span class="az-letter">S</span><span class="az-letter disabled">T</span><span class="az-letter disabled">U</span><span class="az-letter disabled">V</span><span class="az-letter disabled">W</span><span class="az-letter disabled">X</span><span class="az-letter disabled">Y</span><span class="az-letter disabled">Z</span></div>
-                            <div class="tags-container" id="modelTagsList"><div class="tag-pill selected">Alyx Star</div><div class="tag-pill ">Sophia Leone</div></div>
+                            <div class="az-bar" id="modelAZBar"></div>
+                            <div class="tags-container" id="modelTagsList"></div>
                         </div>
 
                         <!-- Folders Tagging Section -->
@@ -230,8 +230,8 @@
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Folders (Albums)</span>
                             </div>
-                            <div class="az-bar" id="folderAZBar"><span class="az-letter active">ALL</span><span class="az-letter">A</span><span class="az-letter disabled">B</span><span class="az-letter disabled">C</span><span class="az-letter disabled">D</span><span class="az-letter disabled">E</span><span class="az-letter disabled">F</span><span class="az-letter disabled">G</span><span class="az-letter disabled">H</span><span class="az-letter disabled">I</span><span class="az-letter disabled">J</span><span class="az-letter disabled">K</span><span class="az-letter disabled">L</span><span class="az-letter disabled">M</span><span class="az-letter disabled">N</span><span class="az-letter disabled">O</span><span class="az-letter disabled">P</span><span class="az-letter disabled">Q</span><span class="az-letter disabled">R</span><span class="az-letter disabled">S</span><span class="az-letter disabled">T</span><span class="az-letter disabled">U</span><span class="az-letter disabled">V</span><span class="az-letter disabled">W</span><span class="az-letter disabled">X</span><span class="az-letter disabled">Y</span><span class="az-letter disabled">Z</span></div>
-                            <div class="tags-container" id="folderTagsList"><div class="tag-pill selected">AS1</div></div>
+                            <div class="az-bar" id="folderAZBar"></div>
+                            <div class="tags-container" id="folderTagsList"></div>
                         </div>
 
                         <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Photo</button>
@@ -239,13 +239,14 @@
                 </div>
             </div>
             <div class="preview-wrapper">
-                <div class="live-thumb-preview-box" id="previewContainer"><img src="https://i.ibb.co/jv688nT5/Gianna082.jpg" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;"></div>
+                <div class="live-thumb-preview-box" id="previewContainer"><span style="color: var(--text-muted);">Photo Preview</span></div>
             </div>
         </div>
     </div>
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="config.js"></script>
+    <script src="scripts/modelstorage.js"></script>
     <script src="images-storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
@@ -360,13 +361,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize ImageStorageDB to ensure exclusive access to the isolated image database
+            // Asynchronously initialize both ModelStorage and ImageStorageDB to hydrate metadata
+            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
+                await ModelStorage.initDB();
+            }
             if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
                 await ImageStorageDB.initDB();
             }
 
-            renderModelTags();
-            renderFolderTags();
+            await renderModelTags();
+            await renderFolderTags();
 
             const urlInput = document.getElementById('streamUrl');
             const previewContainer = document.getElementById('previewContainer');
@@ -414,17 +418,17 @@
                 selectedFolders = [];
                 modelLetterFilter = 'ALL';
                 folderLetterFilter = 'ALL';
-                renderModelTags();
-                renderFolderTags();
+                await renderModelTags();
+                await renderFolderTags();
                 updateThumbPreview();
             });
         });
 
-        // Pulls models exclusively from ImageStorageDB (populated via models.html)
-        function renderModelTags() {
+        // Pulls model metadata exclusively from models.json via ModelStorage (modelstorage.js)
+        async function renderModelTags() {
             let models = [];
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getModels === 'function') {
-                models = ImageStorageDB.getModels() || [];
+            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
+                models = await ModelStorage.getModels() || [];
             }
 
             const container = document.getElementById('modelTagsList');
@@ -437,9 +441,9 @@
 
             models.sort((a, b) => a.name.localeCompare(b.name));
 
-            buildAZBar('modelAZBar', models, modelLetterFilter, (selectedLetter) => {
+            buildAZBar('modelAZBar', models, modelLetterFilter, async (selectedLetter) => {
                 modelLetterFilter = selectedLetter;
-                renderModelTags();
+                await renderModelTags();
             });
 
             let filteredModels = models;
@@ -459,21 +463,21 @@
                 tag.className = `tag-pill ${selectedModels.includes(model.name) ? 'selected' : ''}`;
                 tag.textContent = model.name;
 
-                tag.onclick = () => {
+                tag.onclick = async () => {
                     if (selectedModels.includes(model.name)) {
                         selectedModels = selectedModels.filter(m => m !== model.name);
                     } else {
                         selectedModels.push(model.name);
                     }
-                    renderModelTags();
-                    renderFolderTags();
+                    await renderModelTags();
+                    await renderFolderTags();
                 };
                 container.appendChild(tag);
             });
         }
 
         // Dynamically displays folders already created in model's albums when model is clicked
-        function renderFolderTags() {
+        async function renderFolderTags() {
             const container = document.getElementById('folderTagsList');
             const azBar = document.getElementById('folderAZBar');
 
@@ -493,7 +497,6 @@
 
             selectedModels.forEach(modelName => {
                 let dbFolders = allFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
-                dbFolders.getToken = true; // placeholder safeguard
                 dbFolders.forEach(f => {
                     const fName = typeof f === 'string' ? f : (f.name || f.title);
                     if (fName) foldersSet.add(fName.trim());
@@ -513,9 +516,9 @@
 
             selectedFolders = selectedFolders.filter(f => folders.includes(f));
 
-            buildAZBar('folderAZBar', folders, folderLetterFilter, (selectedLetter) => {
+            buildAZBar('folderAZBar', folders, folderLetterFilter, async (selectedLetter) => {
                 folderLetterFilter = selectedLetter;
-                renderFolderTags();
+                await renderFolderTags();
             });
 
             let filteredFolders = folders;
@@ -535,13 +538,13 @@
                 tag.className = `tag-pill ${selectedFolders.includes(folderName) ? 'selected' : ''}`;
                 tag.textContent = folderName;
 
-                tag.onclick = () => {
+                tag.onclick = async () => {
                     if (selectedFolders.includes(folderName)) {
                         selectedFolders = selectedFolders.filter(f => f !== folderName);
                     } else {
                         selectedFolders.push(folderName);
                     }
-                    renderFolderTags();
+                    await renderFolderTags();
                 };
                 container.appendChild(tag);
             });
