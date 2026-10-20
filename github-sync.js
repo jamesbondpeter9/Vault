@@ -32,6 +32,9 @@ class GitHubSync {
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
         
+        // Added model page detection
+        const isModelPage = path.includes('model');
+
         const isImagePage = path.includes('image') || 
                             path.includes('photo') || 
                             path.includes('album') || 
@@ -45,7 +48,9 @@ class GitHubSync {
 
         // 1. Determine target JSON filename
         let jsonFilename = 'videos.json';
-        if (isImagePage) {
+        if (isModelPage) {
+            jsonFilename = 'models.json';
+        } else if (isImagePage) {
             jsonFilename = 'images.json';
         } else if (isVideoPage) {
             jsonFilename = 'videos.json';
@@ -54,7 +59,9 @@ class GitHubSync {
         // 2. Gather live data directly from active storage
         let dbData = { models: [], photostreams: [], folders: [], streams: [] };
 
-        if (isImagePage && typeof ImageStorageDB !== 'undefined') {
+        if (isModelPage && typeof ModelStorage !== 'undefined') {
+            dbData.models = typeof ModelStorage.getModels === 'function' ? await ModelStorage.getModels() || [] : [];
+        } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
             dbData.models = typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [];
             dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
             dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
@@ -86,7 +93,8 @@ class GitHubSync {
         // 3. Update the embedded script tag in DOM
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
-                          document.getElementById('embedded-images-database');
+                          document.getElementById('embedded-images-database') ||
+                          document.getElementById('embedded-models-database');
         if (scriptTag) {
             scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
