@@ -226,8 +226,8 @@
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
                             </div>
-                            <div class="az-bar" id="modelAZBar"><span class="az-letter active">ALL</span><span class="az-letter">A</span><span class="az-letter disabled">B</span><span class="az-letter disabled">C</span><span class="az-letter disabled">D</span><span class="az-letter disabled">E</span><span class="az-letter disabled">F</span><span class="az-letter disabled">G</span><span class="az-letter disabled">H</span><span class="az-letter disabled">I</span><span class="az-letter disabled">J</span><span class="az-letter disabled">K</span><span class="az-letter disabled">L</span><span class="az-letter disabled">M</span><span class="az-letter disabled">N</span><span class="az-letter disabled">O</span><span class="az-letter disabled">P</span><span class="az-letter disabled">Q</span><span class="az-letter disabled">R</span><span class="az-letter">S</span><span class="az-letter disabled">T</span><span class="az-letter disabled">U</span><span class="az-letter disabled">V</span><span class="az-letter disabled">W</span><span class="az-letter disabled">X</span><span class="az-letter disabled">Y</span><span class="az-letter disabled">Z</span></div>
-                            <div class="tags-container" id="modelTagsList"><div class="tag-pill selected">Alyx Star</div><div class="tag-pill ">Sophia Leone</div><div class="tag-pill ">Sophia Leone</div><div class="tag-pill ">Sophia Leone</div><div class="tag-pill ">Sophia Leone</div><div class="tag-pill ">Sophia Leone</div></div>
+                            <div class="az-bar" id="modelAZBar"></div>
+                            <div class="tags-container" id="modelTagsList"></div>
                         </div>
 
                         <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Stream</button>
@@ -235,13 +235,14 @@
                 </div>
             </div>
             <div class="preview-wrapper">
-                <div class="live-thumb-preview-box" id="previewContainer"><img src="https://cdni.pornpics.com/1280/3/18/84477943/84477943_009_8cca.jpg" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;"></div>
+                <div class="live-thumb-preview-box" id="previewContainer"><span style="color: var(--text-muted);">Thumbnail Preview</span></div>
             </div>
         </div>
     </div>
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="config.js"></script>
+    <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
@@ -279,116 +280,3 @@
                 if (!availableLetters.has(letter)) {
                     span.classList.add('disabled');
                 } else {
-                    span.onclick = () => onSelectLetter(letter);
-                }
-                azBar.appendChild(span);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
-            renderModelTags();
-
-            const urlInput = document.getElementById('streamUrl');
-            const thumbInput = document.getElementById('streamThumbnail');
-            const previewContainer = document.getElementById('previewContainer');
-
-            function updateThumbPreview() {
-                let url = urlInput.value.trim();
-                let thumb = thumbInput.value.trim();
-                
-                if (!thumb && url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
-                    let ytId = '';
-                    if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
-                    else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
-                    else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                    if (ytId) thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                }
-
-                if (thumb) {
-                    previewContainer.innerHTML = `<img src="${thumb}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;">`;
-                } else {
-                    previewContainer.innerHTML = `<span style="color: var(--text-muted);">Thumbnail Preview</span>`;
-                }
-            }
-
-            urlInput.addEventListener('input', updateThumbPreview);
-            thumbInput.addEventListener('input', updateThumbPreview);
-
-            document.getElementById('streamForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const title = document.getElementById('streamTitle').value.trim();
-                const url = document.getElementById('streamUrl').value.trim();
-                let thumbnail = document.getElementById('streamThumbnail').value.trim();
-
-                if (!thumbnail && url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
-                    let ytId = '';
-                    if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
-                    else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
-                    else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                    if (ytId) thumbnail = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                }
-
-                if (!title || !url) return;
-                
-                StorageDB.addVideoStream({
-                    title,
-                    url,
-                    thumbnail: thumbnail || '',
-                    models: selectedModels
-                });
-
-                alert('Stream saved successfully!');
-                window.location.href = 'index.html';
-            });
-        });
-
-        function renderModelTags() {
-            let models = StorageDB.getModels() || [];
-            const container = document.getElementById('modelTagsList');
-
-            if (!models || models.length === 0) {
-                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>`;
-                document.getElementById('modelAZBar').innerHTML = '';
-                return;
-            }
-
-            models.sort((a, b) => a.name.localeCompare(b.name));
-
-            buildAZBar('modelAZBar', models, modelLetterFilter, (selectedLetter) => {
-                modelLetterFilter = selectedLetter;
-                renderModelTags();
-            });
-
-            let filteredModels = models;
-            if (modelLetterFilter !== 'ALL') {
-                filteredModels = models.filter(m => m.name.trim().charAt(0).toUpperCase() === modelLetterFilter);
-            }
-
-            container.innerHTML = '';
-
-            if (filteredModels.length === 0) {
-                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models starting with '${modelLetterFilter}'</span>`;
-                return;
-            }
-
-            filteredModels.forEach(model => {
-                const tag = document.createElement('div');
-                tag.className = `tag-pill ${selectedModels.includes(model.name) ? 'selected' : ''}`;
-                tag.textContent = model.name;
-
-                tag.onclick = () => {
-                    if (selectedModels.includes(model.name)) {
-                        selectedModels = selectedModels.filter(m => m !== model.name);
-                    } else {
-                        selectedModels.push(model.name);
-                    }
-                    renderModelTags();
-                };
-                container.appendChild(tag);
-            });
-        }
-    </script>
-
-
-</body></html>
