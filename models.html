@@ -105,24 +105,12 @@
 
         <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
 
-        <div class="filter-bar" id="filterBar"><button class="filter-btn active">ALL</button><button class="filter-btn ">A</button><button class="filter-btn ">B</button><button class="filter-btn ">C</button><button class="filter-btn ">D</button><button class="filter-btn ">E</button><button class="filter-btn ">F</button><button class="filter-btn ">G</button><button class="filter-btn ">H</button><button class="filter-btn ">I</button><button class="filter-btn ">J</button><button class="filter-btn ">K</button><button class="filter-btn ">L</button><button class="filter-btn ">M</button><button class="filter-btn ">N</button><button class="filter-btn ">O</button><button class="filter-btn ">P</button><button class="filter-btn ">Q</button><button class="filter-btn ">R</button><button class="filter-btn ">S</button><button class="filter-btn ">T</button><button class="filter-btn ">U</button><button class="filter-btn ">V</button><button class="filter-btn ">W</button><button class="filter-btn ">X</button><button class="filter-btn ">Y</button><button class="filter-btn ">Z</button></div>
-        <div class="models-grid" id="modelsGrid"><div class="mondrian-card portrait">
-                    <div class="mondrian-thumb" onclick="openAlbums('Danger')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal('m_1792488443866_mmyfb')" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal('m_1792488443866_mmyfb')" title="Delete model">×</button>
-                        <img src="https://www.porntrex.com/get_image/14/3f911ba2f2890f247606db45a871bcab/sources/3000/3516/167468.jpg/" alt="Danger" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">Danger</div>
-                    </div></div><div class="mondrian-card portrait">
-                    <div class="mondrian-thumb" onclick="openAlbums('Jennifer%20White')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal('m_1792497565050_o4vy1')" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal('m_1792497565050_o4vy1')" title="Delete model">×</button>
-                        <img src="https://cdni.pornpics.com/1280/1/368/30862310/30862310_001_c34c.jpg" alt="Jennifer White" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">Jennifer White</div>
-                    </div></div></div>
+        <div class="filter-bar" id="filterBar"></div>
+        <div class="models-grid" id="modelsGrid"></div>
 
         <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
 
-        <div id="modelModal" style="display: flex; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
+        <div id="modelModal" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
             <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
                 <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Add New Model</h3>
                 <form id="modelForm">
@@ -250,25 +238,7 @@
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
                 return (await ModelStorage.getModels()) || [];
             }
-            try {
-                const raw = localStorage.getItem('video_portal_models_db');
-                return raw ? JSON.parse(raw) : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        async function persistModelsList(models) {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
-                await ModelStorage.saveModels(models);
-            } else {
-                localStorage.setItem('video_portal_models_db', JSON.stringify(models));
-            }
-
-            // Trigger GitHub auto-sync in real time
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
+            return [];
         }
 
         async function saveModelToRegistry(name, thumbnail, shape) {
@@ -279,17 +249,26 @@
             if (existingIdx >= 0) {
                 models[existingIdx].thumbnail = thumbnail;
                 models[existingIdx].shape = shape;
+                if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
+                    ModelStorage.saveModels(models);
+                }
             } else {
-                models.push({
+                const newModelData = {
                     id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                     name: modelName,
                     thumbnail: thumbnail,
                     shape: shape,
                     createdAt: Date.now()
-                });
+                };
+                if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.addModel === 'function') {
+                    ModelStorage.addModel(newModelData);
+                } else {
+                    models.push(newModelData);
+                    if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
+                        ModelStorage.saveModels(models);
+                    }
+                }
             }
-
-            await persistModelsList(models);
 
             document.getElementById('modelName').value = '';
             document.getElementById('modelThumb').value = '';
@@ -304,7 +283,9 @@
             if (target) {
                 target.thumbnail = newUrl;
                 target.shape = shape;
-                await persistModelsList(models);
+                if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
+                    ModelStorage.saveModels(models);
+                }
             }
             await renderModels();
         }
@@ -439,8 +420,17 @@
         async function confirmDeleteModel() {
             if (modelTargetKeyToDelete !== null) {
                 const models = await fetchModelsList();
-                const filtered = models.filter(m => String(m.id) !== String(modelTargetKeyToDelete) && String(m.name).toLowerCase() !== String(modelTargetKeyToDelete).toLowerCase());
-                await persistModelsList(filtered);
+                const target = models.find(m => String(m.id) === String(modelTargetKeyToDelete) || String(m.name).toLowerCase() === String(modelTargetKeyToDelete).toLowerCase());
+                if (target && target.name) {
+                    if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.deleteModel === 'function') {
+                        ModelStorage.deleteModel(target.name);
+                    } else {
+                        const filtered = models.filter(m => String(m.id) !== String(modelTargetKeyToDelete) && String(m.name).toLowerCase() !== String(modelTargetKeyToDelete).toLowerCase());
+                        if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
+                            ModelStorage.saveModels(filtered);
+                        }
+                    }
+                }
                 await renderModels();
             }
             closeDeleteModal();
@@ -449,5 +439,4 @@
         function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
         function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
-
 </body></html>
