@@ -8,6 +8,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: auto-heal-${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   actions: write
 
