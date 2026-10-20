@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -153,7 +152,7 @@
             <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
-        <div class="home-grid" id="streamsGrid"></div>
+        <div class="home-grid" id="streamsGrid"><div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div></div>
     </div>
     
     <script src="config.js"></script>
@@ -213,5 +212,6 @@
             await GitHubSync.triggerAutoSync();
         });
     </script>
-</body>
-</html>
+
+
+</body></html>
