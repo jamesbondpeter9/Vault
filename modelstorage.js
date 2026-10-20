@@ -3,29 +3,31 @@ class ModelStorage {
         if (!localStorage.getItem('video_portal_models_db')) {
             localStorage.setItem('video_portal_models_db', JSON.stringify([]));
         }
-        await ModelStorage.syncFromEmbeddedJSON();
+        await ModelStorage.syncFromRemoteJSON();
     }
 
-    static async syncFromEmbeddedJSON() {
+    static async syncFromRemoteJSON() {
         try {
-            const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
-            if (scriptTag && scriptTag.textContent) {
-                let embeddedData = {};
-                try {
-                    embeddedData = JSON.parse(scriptTag.textContent);
-                } catch (e) {
-                    embeddedData = {};
-                }
-
-                const currentModels = ModelStorage.getModels();
-                const sourceModels = Array.isArray(embeddedData) ? embeddedData : (embeddedData.models || []);
-
-                if (currentModels.length === 0 && sourceModels.length > 0) {
-                    localStorage.setItem('video_portal_models_db', JSON.stringify(sourceModels));
+            const currentModels = ModelStorage.getModels();
+            if (currentModels.length === 0) {
+                const remoteModels = await ModelStorage.fetchModelsJson();
+                if (remoteModels.length > 0) {
+                    localStorage.setItem('video_portal_models_db', JSON.stringify(remoteModels));
                 }
             }
         } catch (e) {
-            console.log('No embedded models database found or failed to parse.');
+            console.log('Failed to sync models from remote models.json.');
+        }
+    }
+
+    static async fetchModelsJson() {
+        try {
+            const res = await fetch('./models.json?' + Date.now());
+            if (!res.ok) return [];
+            const data = await res.json();
+            return Array.isArray(data) ? data : (data.models || []);
+        } catch (e) {
+            return [];
         }
     }
 
@@ -36,18 +38,6 @@ class ModelStorage {
             
             if (!Array.isArray(models)) {
                 models = [];
-            }
-
-            if (models.length === 0) {
-                const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
-                if (scriptTag && scriptTag.textContent) {
-                    const embeddedData = JSON.parse(scriptTag.textContent);
-                    const sourceModels = Array.isArray(embeddedData) ? embeddedData : (embeddedData.models || []);
-                    if (sourceModels.length > 0) {
-                        models = sourceModels;
-                        localStorage.setItem('video_portal_models_db', JSON.stringify(models));
-                    }
-                }
             }
             return models;
         } catch (e) {
@@ -60,6 +50,7 @@ class ModelStorage {
             const validModels = Array.isArray(models) ? models : [];
             localStorage.setItem('video_portal_models_db', JSON.stringify(validModels));
             
+            // GitHubSync bridge to write/remove changes in models.json
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error for models:', err));
             }
