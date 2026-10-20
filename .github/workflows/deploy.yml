@@ -1,0 +1,32 @@
+name: Portal Sync & Deploy
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      # Watch specific core data and media management files/folders
+      - 'models/**'
+      - 'stream/**'
+      - 'photo/**'
+      - 'models.json'
+      - 'videos.json'
+      - 'photostream.html'
+      - 'vault.html'
+      
+  workflow_dispatch: # Allows manual triggers anytime from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Portal Files
+        run: |
+          echo "Changes detected in models, streams, photos, or core portal files. Running deployment..."
+          git status
