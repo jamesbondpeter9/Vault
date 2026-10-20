@@ -3,14 +3,22 @@ class ModelStorageDB {
         this.dbName = "PortalModelsDB";
         this.storeName = "models";
         this.db = null;
+        this.initPromise = null;
     }
 
     async initDB() {
-        return new Promise((resolve, reject) => {
+        if (this.db) return this.db;
+        if (this.initPromise) return this.initPromise;
+
+        this.initPromise = new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, 1);
-            request.onerror = () => reject(request.error);
+            request.onerror = () => {
+                this.initPromise = null;
+                reject(request.error);
+            };
             request.onsuccess = () => {
                 this.db = request.result;
+                this.initPromise = null;
                 resolve(this.db);
             };
             request.onupgradeneeded = (event) => {
@@ -20,6 +28,7 @@ class ModelStorageDB {
                 }
             };
         });
+        return this.initPromise;
     }
 
     async getModels() {
@@ -28,7 +37,7 @@ class ModelStorageDB {
             const transaction = this.db.transaction(this.storeName, "readonly");
             const store = transaction.objectStore(this.storeName);
             const request = store.getAll();
-            request.onsuccess = () => resolve(request.result);
+            request.onsuccess = () => resolve(request.result || []);
             request.onerror = () => reject(request.error);
         });
     }
