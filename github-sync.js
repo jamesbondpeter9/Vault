@@ -56,7 +56,7 @@ class GitHubSync {
             jsonFilename = 'videos.json';
         }
 
-        // 2. Gather live data directly from active storage with specific payload boundaries
+// 2. Gather live data directly from active storage with specific payload boundaries
         let dbData = {};
 
         if (isModelPage) {
@@ -64,13 +64,18 @@ class GitHubSync {
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
                 modelsList = await ModelStorage.getModels() || [];
             }
-            // Fallback to StorageDB if models were saved there instead
             if (modelsList.length === 0 && typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
                 modelsList = await StorageDB.getModels() || [];
             }
-            dbData = { models: modelsList };
+            // Absolute fallback to direct localStorage if helper methods miss it
+            if (modelsList.length === 0) {
+                try {
+                    const rawLocal = localStorage.getItem('video_portal_models_db');
+                    if (rawLocal) modelsList = JSON.parse(rawLocal) || [];
+                } catch (e) {}
+            }
+            dbData = { models: Array.isArray(modelsList) ? modelsList : [] };
         } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
-            // images.json now strictly stores ONLY photostreams and folders metadata
             dbData = {
                 photostreams: typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [],
                 folders: typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : []
@@ -82,23 +87,6 @@ class GitHubSync {
             };
         } else {
             dbData = { models: [], photostreams: [], folders: [], streams: [] };
-        }
-
-        // Safety Guard: If local data is completely empty, fetch remote JSON to prevent accidental data wipes
-        const hasLocalData = Object.values(dbData).some(arr => Array.isArray(arr) && arr.length > 0);
-        if (!hasLocalData) {
-            try {
-                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
-                if (remoteData) {
-                    const remoteHasData = Object.values(remoteData).some(arr => Array.isArray(arr) && arr.length > 0);
-                    if (remoteHasData) {
-                        console.warn('Local storage returned empty data, preserving existing remote database integrity.');
-                        dbData = remoteData;
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not verify remote JSON fallback:', e);
-            }
         }
 
         // 3. Update the embedded script tag in DOM safely matching available IDs
