@@ -222,7 +222,7 @@
             return [];
         }
 
-        // Dedicated ModelStorage Persistence (No GitHub Sync)
+        // Dedicated ModelStorage Persistence
         async function persistModelsList(models) {
             if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
                 ModelStorage.saveModels(models);
