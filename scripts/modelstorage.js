@@ -1,22 +1,25 @@
 class ModelStorage {
     static async initDB() {
-        if (!localStorage.getItem('video_portal_models_db')) {
-            localStorage.setItem('video_portal_models_db', JSON.stringify([]));
-        }
-        await ModelStorage.syncFromRemoteJSON();
-    }
-
-    static async syncFromRemoteJSON() {
-        try {
-            const currentModels = ModelStorage.getModels();
-            if (currentModels.length === 0) {
-                const remoteModels = await ModelStorage.fetchModelsJson();
-                if (remoteModels.length > 0) {
-                    localStorage.setItem('video_portal_models_db', JSON.stringify(remoteModels));
-                }
+        let models = ModelStorage.getModels();
+        
+        if (models.length === 0) {
+            const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
+            if (scriptTag && scriptTag.textContent.trim()) {
+                try {
+                    const parsed = JSON.parse(scriptTag.textContent);
+                    models = Array.isArray(parsed) ? parsed : (parsed.models || []);
+                } catch (e) {}
             }
-        } catch (e) {
-            console.log('Failed to sync models from remote models.json.');
+        }
+
+        if (models.length === 0) {
+            models = await ModelStorage.fetchModelsJson();
+        }
+
+        if (models.length > 0) {
+            localStorage.setItem('video_portal_models_db', JSON.stringify(models));
+        } else if (!localStorage.getItem('video_portal_models_db')) {
+            localStorage.setItem('video_portal_models_db', JSON.stringify([]));
         }
     }
 
@@ -34,12 +37,8 @@ class ModelStorage {
     static getModels() {
         try {
             const raw = localStorage.getItem('video_portal_models_db');
-            let models = raw ? JSON.parse(raw) : [];
-            
-            if (!Array.isArray(models)) {
-                models = [];
-            }
-            return models;
+            const models = raw ? JSON.parse(raw) : [];
+            return Array.isArray(models) ? models : [];
         } catch (e) {
             return [];
         }
@@ -50,7 +49,11 @@ class ModelStorage {
             const validModels = Array.isArray(models) ? models : [];
             localStorage.setItem('video_portal_models_db', JSON.stringify(validModels));
             
-            // GitHubSync bridge to write/remove changes in models.json
+            const scriptTag = document.getElementById('embedded-models-database') || document.getElementById('embedded-database');
+            if (scriptTag) {
+                scriptTag.textContent = JSON.stringify({ models: validModels }, null, 2);
+            }
+
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error for models:', err));
             }
