@@ -3,9 +3,12 @@ name: Auto-Heal Failed or Cancelled Sync
 on:
   workflow_run:
     workflows: 
-      - "Portal Sync & Deploy" # <-- IMPORTANT: Replace this exact string with the name inside your main workflow's "name: ..." property
+      - "Portal Sync & Deploy"
     types:
       - completed
+
+permissions:
+  actions: write
 
 jobs:
   retry-if-failed:
