@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: 
       - "Portal Sync & Deploy"
+      - "Development Sync"  # Add any other workflow names here
     types:
       - completed
 
