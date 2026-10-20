@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -9,7 +10,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A - Video Portal</title>
+    <title>Watch Stream - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .nav-bar-compact {
@@ -64,21 +65,23 @@
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <div class="mondrian-nav-card" onclick="openDeleteStreamModal()" style="cursor: pointer;">
-                <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">×</div>
+                <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">&times;</div>
             </div>
         </div>
 
         <div class="watch-container">
-            <div class="player-wrapper" id="playerContainer"><video src="https://s79.bigcdn.cc/pubs/6ad504c5825c44.10324191/1080.mp4" controls="" autoplay="" style="width:100%;height:100%;"></video></div>
+            <div class="player-wrapper" id="playerContainer">
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Loading player...</div>
+            </div>
             <div class="stream-info-panel">
                 <div>
-                    <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">A</h1>
-                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap;"><span style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--card-border); color: rgb(255, 255, 255); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Sophia Leone</span><span style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--card-border); color: rgb(255, 255, 255); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Alyx Star</span></div>
+                    <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">Loading stream...</h1>
+                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
                 </div>
             </div>
         </div>
 
-        <div id="deleteModal" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
+        <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Stream</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this stream from your portal?</p>
@@ -115,7 +118,6 @@
             document.getElementById('streamTitle').textContent = currentStreamItem.title;
 
             const tagsContainer = document.getElementById('modelTags');
-            tagsContainer.innerHTML = '';
             if (currentStreamItem.models && currentStreamItem.models.length > 0) {
                 currentStreamItem.models.forEach(modelName => {
                     const tag = document.createElement('span');
@@ -159,20 +161,17 @@
 
         async function confirmDeleteStream() {
             if (!currentStreamItem) return;
-            let rawStreams = StorageDB.getStreams() || [];
-            rawStreams = rawStreams.filter(s => !(s && s.url === currentStreamItem.url && s.title === currentStreamItem.title));
+            let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
+            rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
             StorageDB.saveStreams(rawStreams);
 
             // Trigger automatic GitHub synchronization before returning to index
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                try {
-                    await GitHubSync.triggerAutoSync();
-                } catch (err) {
-                    console.error('GitHub auto-sync error:', err);
-                }
+                await GitHubSync.triggerAutoSync();
             }
 
             window.location.href = 'index.html';
         }
     </script>
-</body></html>
+</body>
+</html>
