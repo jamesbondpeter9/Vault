@@ -156,12 +156,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- Embedded Database Tag for Offline/File Protocol Fallback -->
+        <script type="application/json" id="embedded-models-database">{
+  "models": []
+}</script>
     </div>
 
     <script src="config.js"></script>
     <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="images-storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
         let currentPage = 1;
@@ -189,10 +195,20 @@
                 img.src = thumb;
                 img.onload = async () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    await saveModelToRegistry(name, thumb, shape);
+                    ModelStorage.addModel({ name, thumbnail: thumb, shape });
+                    closeAddModelModal();
+                    document.getElementById('modelName').value = '';
+                    document.getElementById('modelThumb').value = '';
+                    currentPage = 1;
+                    await renderModels();
                 };
                 img.onerror = async () => {
-                    await saveModelToRegistry(name, thumb, 'square');
+                    ModelStorage.addModel({ name, thumbnail: thumb, shape: 'square' });
+                    closeAddModelModal();
+                    document.getElementById('modelName').value = '';
+                    document.getElementById('modelThumb').value = '';
+                    currentPage = 1;
+                    await renderModels();
                 };
             });
 
@@ -200,72 +216,29 @@
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelTargetKeyToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = async () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        await updateModelThumbInRegistry(modelTargetKeyToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = async () => {
-                        await updateModelThumbInRegistry(modelTargetKeyToUpdateThumb, newUrl, 'square');
-                    };
+                    const models = ModelStorage.getModels();
+                    const target = models.find(m => String(m.id) === String(modelTargetKeyToUpdateThumb) || String(m.name).toLowerCase() === String(modelTargetKeyToUpdateThumb).toLowerCase());
+                    if (target) {
+                        const img = new Image();
+                        img.src = newUrl;
+                        img.onload = async () => {
+                            const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                            ModelStorage.addModel({ name: target.name, thumbnail: newUrl, shape });
+                            await renderModels();
+                        };
+                        img.onerror = async () => {
+                            ModelStorage.addModel({ name: target.name, thumbnail: newUrl, shape: 'square' });
+                            await renderModels();
+                        };
+                    }
                 }
                 closeUpdateThumbModal();
             });
+
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                await GitHubSync.triggerAutoSync();
+            }
         });
-
-        // Strict ModelStorage Data Collection
-        async function fetchModelsList() {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                return (await ModelStorage.getModels()) || [];
-            }
-            return [];
-        }
-
-        // Dedicated ModelStorage Persistence
-        async function persistModelsList(models) {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.saveModels === 'function') {
-                ModelStorage.saveModels(models);
-            }
-        }
-
-        async function saveModelToRegistry(name, thumbnail, shape) {
-            const models = await fetchModelsList();
-            const modelName = name.trim();
-            const existingIdx = models.findIndex(m => m && m.name && m.name.toLowerCase() === modelName.toLowerCase());
-
-            if (existingIdx >= 0) {
-                models[existingIdx].thumbnail = thumbnail;
-                models[existingIdx].shape = shape;
-            } else {
-                models.push({
-                    id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                    name: modelName,
-                    thumbnail: thumbnail,
-                    shape: shape,
-                    createdAt: Date.now()
-                });
-            }
-
-            await persistModelsList(models);
-
-            document.getElementById('modelName').value = '';
-            document.getElementById('modelThumb').value = '';
-            closeAddModelModal();
-            currentPage = 1;
-            await renderModels();
-        }
-
-        async function updateModelThumbInRegistry(targetKey, newUrl, shape) {
-            const models = await fetchModelsList();
-            const target = models.find(m => String(m.id) === String(targetKey) || String(m.name).toLowerCase() === String(targetKey).toLowerCase());
-            if (target) {
-                target.thumbnail = newUrl;
-                target.shape = shape;
-                await persistModelsList(models);
-            }
-            await renderModels();
-        }
 
         function buildFilterBar() {
             const filterBar = document.getElementById('filterBar');
@@ -287,7 +260,7 @@
         }
 
         async function renderModels() {
-            const models = await fetchModelsList();
+            const models = ModelStorage.getModels() || [];
             const grid = document.getElementById('modelsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
@@ -395,13 +368,10 @@
 
         async function confirmDeleteModel() {
             if (modelTargetKeyToDelete !== null) {
-                const models = await fetchModelsList();
+                const models = ModelStorage.getModels();
                 const target = models.find(m => String(m.id) === String(modelTargetKeyToDelete) || String(m.name).toLowerCase() === String(modelTargetKeyToDelete).toLowerCase());
-                if (target && target.name && typeof ModelStorage !== 'undefined' && typeof ModelStorage.deleteModel === 'function') {
+                if (target && target.name) {
                     ModelStorage.deleteModel(target.name);
-                } else {
-                    const filtered = models.filter(m => String(m.id) !== String(modelTargetKeyToDelete) && String(m.name).toLowerCase() !== String(modelTargetKeyToDelete).toLowerCase());
-                    await persistModelsList(filtered);
                 }
                 await renderModels();
             }
