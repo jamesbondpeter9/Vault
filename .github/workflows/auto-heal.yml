@@ -1,0 +1,25 @@
+name: Auto-Heal Failed or Cancelled Sync
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"] # Replace with your main workflow name
+    types:
+      - completed
+
+jobs:
+  retry-if-failed:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled' }}
+    steps:
+      - name: Trigger Re-run
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            console.log(`Workflow run ${runId} failed or was cancelled. Automatically re-running...`);
+            
+            await github.rest.actions.reRunWorkflow({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
