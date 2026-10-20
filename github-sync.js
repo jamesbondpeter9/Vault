@@ -20,69 +20,95 @@ class GitHubSync {
             return;
         }
 
-        const token = PortalConfig.getToken ? PortalConfig.getToken() : PortalConfig.token;
+        const token = PortalConfig.getToken();
         if (!token) {
-            console.warn('GitHub PAT token not found in PortalConfig. Skipping auto-sync.');
+            console.warn('GitHub PAT token not found. Skipping auto-sync.');
             return;
         }
 
         const owner = PortalConfig.owner;
         const repo = PortalConfig.repo;
-        const branch = PortalConfig.branch || 'main';
+        const branch = PortalConfig.branch;
 
         const path = window.location.pathname.split('/').pop() || 'index.html';
-        const isModelPage = path.includes('model');
-        const isImagePage = path.includes('image') || path.includes('photo') || path.includes('album') || path.includes('folder') || path.includes('view');
-        const isVideoPage = path.includes('video') || path.includes('stream') || path.includes('watch') || path.includes('vault') || path.includes('tag');
+        
+        const isImagePage = path.includes('image') || 
+                            path.includes('photo') || 
+                            path.includes('album') || 
+                            path.includes('folder');
 
+        const isVideoPage = path.includes('video') || 
+                            path.includes('stream') || 
+                            path.includes('watch') || 
+                            path.includes('vault') || 
+                            path.includes('tag');
+
+        // 1. Determine target JSON filename
         let jsonFilename = 'videos.json';
-        if (isModelPage) {
-            jsonFilename = 'models.json';
-        } else if (isImagePage) {
+        if (isImagePage) {
             jsonFilename = 'images.json';
         } else if (isVideoPage) {
             jsonFilename = 'videos.json';
         }
 
-        let dbData = {};
+        // 2. Gather live data directly from active storage
+        let dbData = { models: [], photostreams: [], folders: [], streams: [] };
 
-        if (isModelPage) {
-            let modelsList = [];
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                modelsList = ModelStorage.getModels() || [];
-            }
-            dbData = { models: Array.isArray(modelsList) ? modelsList : [] };
-        } else if (isImagePage && typeof ImageStorageDB !== 'undefined') {
-            dbData = {
-                photostreams: typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [],
-                folders: typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : []
-            };
+        if (isImagePage && typeof ImageStorageDB !== 'undefined') {
+            dbData.models = typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [];
+            dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
+            dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
         } else if (isVideoPage && typeof StorageDB !== 'undefined') {
-            dbData = {
-                models: typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [],
-                streams: typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : []
-            };
-        } else {
-            dbData = { models: [], photostreams: [], folders: [], streams: [] };
+            dbData.models = typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [];
+            dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
+        // Safety Guard: If local data is completely empty, fetch remote JSON to prevent accidental data wipes
+        const hasLocalData = dbData.models.length > 0 || dbData.photostreams.length > 0 || dbData.folders.length > 0 || dbData.streams.length > 0;
+        if (!hasLocalData) {
+            try {
+                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
+                if (remoteData) {
+                    const remoteHasData = (remoteData.models && remoteData.models.length > 0) || 
+                                          (remoteData.photostreams && remoteData.photostreams.length > 0) || 
+                                          (remoteData.folders && remoteData.folders.length > 0) || 
+                                          (remoteData.streams && remoteData.streams.length > 0);
+                    if (remoteHasData) {
+                        console.warn('Local storage returned empty data, preserving existing remote database integrity.');
+                        dbData = remoteData;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not verify remote JSON fallback:', e);
+            }
+        }
+
+        // 3. Update the embedded script tag in DOM
         const scriptTag = document.getElementById('embedded-database') || 
                           document.getElementById('embedded-video-database') || 
-                          document.getElementById('embedded-images-database') ||
-                          document.getElementById('embedded-models-database');
+                          document.getElementById('embedded-images-database');
         if (scriptTag) {
             scriptTag.textContent = JSON.stringify(dbData, null, 2);
         }
 
-        // 1. Commit updated JSON file directly to GitHub
+        // 4. Sync Current HTML File
+        const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
+
+        // 5. Dual-Sync Corresponding JSON File with complete data payload
         const jsonContent = JSON.stringify(dbData, null, 4);
         await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+    }
 
-        // 2. Commit updated HTML file with embedded script tag
-        if (path && path.endsWith('.html')) {
-            const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-            await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
-        }
+    static async fetchRemoteJSON(owner, repo, filePath, token) {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+        const res = await fetch(apiUrl, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const decodedString = decodeURIComponent(escape(atob(data.content)));
+        return JSON.parse(decodedString);
     }
 
     static async pushToGitHub(owner, repo, branch, token, filePath, fileContent, commitMessage) {
@@ -91,10 +117,7 @@ class GitHubSync {
         try {
             let sha = null;
             const getRes = await fetch(apiUrl, {
-                headers: { 
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
+                headers: { 'Authorization': `token ${token}` }
             });
             
             if (getRes.ok) {
@@ -108,7 +131,6 @@ class GitHubSync {
                 method: 'PUT',
                 headers: {
                     'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -120,13 +142,13 @@ class GitHubSync {
             });
 
             if (putRes.ok) {
-                console.log(`[GitHubSync] Successfully synced ${filePath} to GitHub repository!`);
+                console.log(`Successfully synced ${filePath} to GitHub repository!`);
             } else {
                 const errData = await putRes.json();
-                console.error(`[GitHubSync] API commit error for ${filePath}:`, errData.message);
+                console.error(`GitHub API commit error for ${filePath}:`, errData.message);
             }
         } catch (err) {
-            console.error(`[GitHubSync] Exception for ${filePath}:`, err);
+            console.error(`GitHub Sync Exception for ${filePath}:`, err);
         }
     }
 }
