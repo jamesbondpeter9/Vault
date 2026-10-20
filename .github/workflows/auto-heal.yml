@@ -2,7 +2,8 @@ name: Auto-Heal Failed or Cancelled Sync
 
 on:
   workflow_run:
-    workflows: ["CI/CD Pipeline"] # Replace with your main workflow name
+    workflows: 
+      - "Portal Sync & Deploy" # <-- IMPORTANT: Replace this exact string with the name inside your main workflow's "name: ..." property
     types:
       - completed
 
@@ -16,7 +17,8 @@ jobs:
         with:
           script: |
             const runId = context.payload.workflow_run.id;
-            console.log(`Workflow run ${runId} failed or was cancelled. Automatically re-running...`);
+            const runName = context.payload.workflow_run.name;
+            console.log(`Workflow "${runName}" (ID: ${runId}) finished with conclusion: ${context.payload.workflow_run.conclusion}. Automatically re-running...`);
             
             await github.rest.actions.reRunWorkflow({
               owner: context.repo.owner,
