@@ -43,12 +43,15 @@
                 if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0) ImageStorageDB.saveModels(dbData.models);
-                        if (dbData.photostreams && dbData.photostreams.length > 0) ImageStorageDB.savePhotoStreams(dbData.photostreams);
-                        if (dbData.folders && dbData.folders.length > 0) ImageStorageDB.saveFolders(dbData.folders);
+                        if (dbData.models && dbData.models.length > 0) await ImageStorageDB.saveModels(dbData.models);
+                        if (dbData.photostreams && dbData.photostreams.length > 0) await ImageStorageDB.savePhotoStreams(dbData.photostreams);
+                        if (dbData.folders && dbData.folders.length > 0) await ImageStorageDB.saveFolders(dbData.folders);
                     }
                 }
             } catch (e) {}
+
+            // Trigger real-time background sync on load to keep images.json updated automatically
+            await GitHubSync.triggerAutoSync();
         });
 
         async function downloadUpdatedImageGallery() {
@@ -106,12 +109,14 @@
                 if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0) ImageStorageDB.saveModels(dbData.models);
-                        if (dbData.photostreams && dbData.photostreams.length > 0) ImageStorageDB.savePhotoStreams(dbData.photostreams);
-                        if (dbData.folders && dbData.folders.length > 0) ImageStorageDB.saveFolders(dbData.folders);
+                        if (dbData.models && dbData.models.length > 0) await ImageStorageDB.saveModels(dbData.models);
+                        if (dbData.photostreams && dbData.photostreams.length > 0) await ImageStorageDB.savePhotoStreams(dbData.photostreams);
+                        if (dbData.folders && dbData.folders.length > 0) await ImageStorageDB.saveFolders(dbData.folders);
                     }
                 }
             } catch (e) {}
+
+            await GitHubSync.triggerAutoSync();
         });
 
         async function downloadUpdatedImageGallery() {
