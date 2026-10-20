@@ -178,11 +178,17 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await ModelStorage.initDB();
-            await StorageDB.initDB();
-            await ImageStorageDB.initDB();
+            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
+                await ModelStorage.initDB();
+            }
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
+            }
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                await ImageStorageDB.initDB();
+            }
 
-            // Sync from embedded-models-database if local storage is empty
+            // Real-time metadata sync from models.json or embedded database fallback
             try {
                 const emb = document.getElementById('embedded-models-database');
                 if (emb) {
@@ -191,10 +197,10 @@
                         const currentModels = await ModelStorage.getModels() || [];
                         if (currentModels.length === 0) {
                             for (const m of embData.models) {
-                                await ModelStorage.saveModel(m);
-                            }
-                        }
-                    }
+                              await ModelStorage.saveModel(m);
+                          }
+                      }
+                  }
                 }
             } catch (e) {}
 
@@ -214,202 +220,208 @@
                 img.onload = async () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
                     await saveModelToRegistry(name, thumb, shape);
-                };
+              };
                 img.onerror = async () => {
                     await saveModelToRegistry(name, thumb, 'square');
-                };
-            });
+              };
+          });
 
-            document.getElementById('updateThumbForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const newUrl = document.getElementById('newThumbUrl').value.trim();
-                if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = async () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        await updateModelThumbInRegistry(modelIndexToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = async () => {
-                        await updateModelThumbInRegistry(modelIndexToUpdateThumb, newUrl, 'square');
-                    };
-                }
-                closeUpdateThumbModal();
-            });
+          document.getElementById('updateThumbForm').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const newUrl = document.getElementById('newThumbUrl').value.trim();
+              if (modelIndexToUpdateThumb !== null && newUrl) {
+                  const img = new Image();
+                  img.src = newUrl;
+                  img.onload = async () => {
+                      const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                      await updateModelThumbInRegistry(modelIndexToUpdateThumb, newUrl, shape);
+                  };
+                  img.onerror = async () => {
+                      await updateModelThumbInRegistry(modelIndexToUpdateThumb, newUrl, 'square');
+                  };
+              }
+              closeUpdateThumbModal();
         });
 
-        async function saveModelToRegistry(name, thumbnail, shape) {
-            const modelData = { id: Date.now(), name, thumbnail, shape, createdAt: Date.now() };
-
-            await ModelStorage.saveModel(modelData);
-
-            document.getElementById('modelName').value = '';
-            document.getElementById('modelThumb').value = '';
-            closeAddModelModal();
-            currentPage = 1;
-            
-            // Brief write buffer timeout to allow IndexedDB transaction commit to settle
-            setTimeout(async () => {
-                await renderModels();
-            }, 100);
-
-            // Trigger GitHub auto-sync
+        // Trigger real-time background sync on load to verify models.json
+        if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
             await GitHubSync.triggerAutoSync();
         }
+    });
 
-        async function updateModelThumbInRegistry(id, newUrl, shape) {
-            const models = await ModelStorage.getModels() || [];
-            const target = models.find(m => m.id === id || m.originalIndex === id);
-            if (target) {
-                target.thumbnail = newUrl;
-                target.shape = shape;
-                await ModelStorage.saveModel(target);
-            }
+    async function saveModelToRegistry(name, thumbnail, shape) {
+        const modelData = { id: Date.now(), name, thumbnail, shape, createdAt: Date.now() };
 
-            setTimeout(async () => {
-                await renderModels();
-            }, 100);
+        await ModelStorage.saveModel(modelData);
 
-            // Trigger GitHub auto-sync
+        document.getElementById('modelName').value = '';
+        document.getElementById('modelThumb').value = '';
+        closeAddModelModal();
+        currentPage = 1;
+        
+        await renderModels();
+
+        // Trigger GitHub auto-sync in real time
+        if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
             await GitHubSync.triggerAutoSync();
         }
+    }
 
-        function buildFilterBar() {
-            const filterBar = document.getElementById('filterBar');
-            const letters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
-            filterBar.innerHTML = '';
-            letters.forEach(letter => {
-                const btn = document.createElement('button');
-                btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
-                btn.textContent = letter;
-                btn.onclick = async () => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentLetterFilter = letter;
-                    currentPage = 1;
-                    await renderModels();
-                };
-                filterBar.appendChild(btn);
-            });
+    async function updateModelThumbInRegistry(id, newUrl, shape) {
+        const models = await ModelStorage.getModels() || [];
+        const target = models.find(m => m.id === id || m.originalIndex === id);
+        if (target) {
+            target.thumbnail = newUrl;
+            target.shape = shape;
+            await ModelStorage.saveModel(target);
         }
 
-        async function renderModels() {
-            const models = await ModelStorage.getModels() || [];
-            const grid = document.getElementById('modelsGrid');
-            const paginationBar = document.getElementById('paginationBar');
-            
-            const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: m.id || idx }));
-            const filtered = modelsWithIndex.filter(m => {
-                if (currentLetterFilter === 'ALL') return true;
-                return m.name.toUpperCase().startsWith(currentLetterFilter);
-            });
+        await renderModels();
 
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div>`;
-                paginationBar.innerHTML = '';
-                return;
-            }
+        // Trigger GitHub auto-sync in real time
+        if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+            await GitHubSync.triggerAutoSync();
+        }
+    }
 
-            const totalPages = Math.ceil(filtered.length / pageSize);
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+    function buildFilterBar() {
+        const filterBar = document.getElementById('filterBar');
+        const letters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+        filterBar.innerHTML = '';
+        letters.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
+            btn.textContent = letter;
+            btn.onclick = async () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLetterFilter = letter;
+                currentPage = 1;
+                await renderModels();
+            };
+            filterBar.appendChild(btn);
+        });
+    }
 
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const paginatedItems = filtered.slice(startIndex, endIndex);
+    async function renderModels() {
+        const models = await ModelStorage.getModels() || [];
+        const grid = document.getElementById('modelsGrid');
+        const paginationBar = document.getElementById('paginationBar');
+        
+        const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: m.id || idx }));
+        const filtered = modelsWithIndex.filter(m => {
+            if (currentLetterFilter === 'ALL') return true;
+            return m.name.toUpperCase().startsWith(currentLetterFilter);
+        });
 
-            grid.innerHTML = '';
-            paginatedItems.forEach((model) => {
-                const card = document.createElement('div');
-                const shape = model.shape || 'portrait';
-                card.className = `mondrian-card ${shape}`;
-
-                card.innerHTML = `
-                    <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
-                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
-                    </div>`;
-                grid.appendChild(card);
-            });
-
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div>`;
             paginationBar.innerHTML = '';
-            if (totalPages > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'filter-btn';
-                prevBtn.textContent = '← Prev';
-                prevBtn.disabled = currentPage === 1;
-                prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
-                prevBtn.onclick = async () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        await renderModels();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(prevBtn);
-
-                const pageInfo = document.createElement('span');
-                pageInfo.style.color = 'var(--text-muted)';
-                pageInfo.style.fontSize = '0.85rem';
-                pageInfo.style.fontWeight = '700';
-                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-                paginationBar.appendChild(pageInfo);
-
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'filter-btn';
-                nextBtn.textContent = 'Next →';
-                nextBtn.disabled = currentPage === totalPages;
-                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
-                nextBtn.onclick = async () => {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        await renderModels();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(nextBtn);
-            }
+            return;
         }
 
-        function openAlbums(name) {
-            window.location.href = `albums.html?name=${name}`;
+        const totalPages = Math.ceil(filtered.length / pageSize);
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedItems = filtered.slice(startIndex, endIndex);
+
+        grid.innerHTML = '';
+        paginatedItems.forEach((model) => {
+            const card = document.createElement('div');
+            const shape = model.shape || 'portrait';
+            card.className = `mondrian-card ${shape}`;
+
+            card.innerHTML = `
+                <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
+                    <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
+                    <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
+                    ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
+                </div>`;
+            grid.appendChild(card);
+        });
+
+        paginationBar.innerHTML = '';
+        if (totalPages > 1) {
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'filter-btn';
+            prevBtn.textContent = '← Prev';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
+            prevBtn.onclick = async () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    await renderModels();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            paginationBar.appendChild(prevBtn);
+
+            const pageInfo = document.createElement('span');
+            pageInfo.style.color = 'var(--text-muted)';
+            pageInfo.style.fontSize = '0.85rem';
+            pageInfo.style.fontWeight = '700';
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            paginationBar.appendChild(pageInfo);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'filter-btn';
+            nextBtn.textContent = 'Next →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
+            nextBtn.onclick = async () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    await renderModels();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            paginationBar.appendChild(nextBtn);
         }
+    }
 
-        function openUpdateThumbModal(id) {
-            modelIndexToUpdateThumb = id;
-            document.getElementById('newThumbUrl').value = '';
-            document.getElementById('updateThumbModal').style.display = 'flex';
-        }
+    function openAlbums(name) {
+        window.location.href = `albums.html?name=${name}`;
+    }
 
-        function closeUpdateThumbModal() {
-            modelIndexToUpdateThumb = null;
-            document.getElementById('updateThumbModal').style.display = 'none';
-        }
+    function openUpdateThumbModal(id) {
+        modelIndexToUpdateThumb = id;
+        document.getElementById('newThumbUrl').value = '';
+        document.getElementById('updateThumbModal').style.display = 'flex';
+    }
 
-        function openDeleteModal(id) {
-            modelIndexToDelete = id;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
+    function closeUpdateThumbModal() {
+        modelIndexToUpdateThumb = null;
+        document.getElementById('updateThumbModal').style.display = 'none';
+    }
 
-        function closeDeleteModal() {
-            modelIndexToDelete = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
+    function openDeleteModal(id) {
+        modelIndexToDelete = id;
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
 
-        async function confirmDeleteModel() {
-            if (modelIndexToDelete !== null) {
-                await ModelStorage.deleteModel(modelIndexToDelete);
-                await renderModels();
+    function closeDeleteModal() {
+        modelIndexToDelete = null;
+        document.getElementById('deleteModal').style.display = 'none';
+    }
 
-                // Trigger GitHub auto-sync
+    async function confirmDeleteModel() {
+        if (modelIndexToDelete !== null) {
+            await ModelStorage.deleteModel(modelIndexToDelete);
+            await renderModels();
+
+            // Trigger GitHub auto-sync in real time
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
-            closeDeleteModal();
         }
+        closeDeleteModal();
+    }
 
-        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
-        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
+    function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
+    function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
 </body></html>
