@@ -100,6 +100,88 @@
             position: absolute;
             inset: 0;
         }
+
+        /* Inbuilt 99vw x 99vh Image Viewer Styles */
+        #inbuiltPhotoViewer {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #inbuiltPhotoViewer.active {
+            display: flex;
+        }
+        .viewer-content-box {
+            width: 99vw;
+            height: 99vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .viewer-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+          }
+        .viewer-nav-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 30%;
+            z-index: 10;
+            cursor: pointer;
+        }
+        .viewer-nav-left { left: 0; }
+        .viewer-nav-right { right: 0; }
+        .viewer-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.2s ease;
+        }
+        .viewer-close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .viewer-title-bar {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            z-index: 20;
+            pointer-events: none;
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -118,6 +200,17 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
+    <!-- Inbuilt 99vw x 99vh Image Viewer Overlay -->
+    <div id="inbuiltPhotoViewer">
+        <div class="viewer-content-box">
+            <div class="viewer-close-btn" onclick="closeInbuiltViewer()">&times;</div>
+            <div class="viewer-nav-zone viewer-nav-left" onclick="viewerPrevImage()" title="Previous Image"></div>
+            <img id="viewerImageElement" class="viewer-image" src="" alt="Full View">
+            <div class="viewer-nav-zone viewer-nav-right" onclick="viewerNextImage()" title="Next Image"></div>
+            <div id="viewerTitleElement" class="viewer-title-bar"></div>
+        </div>
+    </div>
+
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="config.js"></script>
     <script src="images-storage.js"></script>
@@ -126,6 +219,7 @@
     <script>
         let currentFolderName = '';
         let currentModelName = '';
+        let currentViewerIndex = 0;
 
         function extractImageUrl(input) {
             if (!input) return '';
@@ -214,17 +308,46 @@
             window.folderImagesList = folderImages;
         });
 
+        // Inbuilt Image Viewer Handlers
         function openPhotoModal(index) {
-            if (window.folderImagesList && window.folderImagesList[index]) {
-                const photo = window.folderImagesList[index];
-                const url = extractImageUrl(photo.thumbnail || photo.url);
-                if (typeof openPhotoviewer === 'function') {
-                    openPhotoviewer(url, photo.title);
-                } else {
-                    window.open(url, '_blank');
-                }
-            }
+            if (!window.folderImagesList || !window.folderImagesList[index]) return;
+            currentViewerIndex = index;
+            updateViewerDisplay();
+            document.getElementById('inbuiltPhotoViewer').classList.add('active');
         }
+
+        function closeInbuiltViewer() {
+            document.getElementById('inbuiltPhotoViewer').classList.remove('active');
+        }
+
+        function viewerPrevImage() {
+            if (!window.folderImagesList || window.folderImagesList.length === 0) return;
+            currentViewerIndex = (currentViewerIndex - 1 + window.folderImagesList.length) % window.folderImagesList.length;
+            updateViewerDisplay();
+        }
+
+        function viewerNextImage() {
+            if (!window.folderImagesList || window.folderImagesList.length === 0) return;
+            currentViewerIndex = (currentViewerIndex + 1) % window.folderImagesList.length;
+            updateViewerDisplay();
+        }
+
+        function updateViewerDisplay() {
+            const photo = window.folderImagesList[currentViewerIndex];
+            if (!photo) return;
+            const url = extractImageUrl(photo.thumbnail || photo.url);
+            document.getElementById('viewerImageElement').src = url;
+            document.getElementById('viewerTitleElement').textContent = photo.title || 'Photo';
+        }
+
+        // Keyboard navigation for viewer
+        document.addEventListener('keydown', (e) => {
+            const viewer = document.getElementById('inbuiltPhotoViewer');
+            if (!viewer.classList.contains('active')) return;
+            if (e.key === 'ArrowLeft') viewerPrevImage();
+            if (e.key === 'ArrowRight') viewerNextImage();
+            if (e.key === 'Escape') closeInbuiltViewer();
+        });
 
         async function deletePhoto(index, event) {
             event.stopPropagation();
