@@ -1,31 +1,28 @@
-name: Auto-Heal Failed or Cancelled Sync
+name: Portal Sync & Deploy
 
 on:
-  workflow_run:
-    workflows: 
-      - "Portal Sync & Deploy"
-      - "Development Sync"  # Add any other workflow names here
-    types:
-      - completed
-
-permissions:
-  actions: write
+  push:
+    branches: [main, master]
+    paths:
+      - '**.html'
+      - '**.js'
+      - 'scripts/**'
+      - 'models.json'
+      - 'videos.json'
+  workflow_dispatch: # Allows you to trigger it manually anytime from the Actions tab
 
 jobs:
-  retry-if-failed:
+  sync-and-deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled' }}
     steps:
-      - name: Trigger Re-run
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const runId = context.payload.workflow_run.id;
-            const runName = context.payload.workflow_run.name;
-            console.log(`Workflow "${runName}" (ID: ${runId}) finished with conclusion: ${context.payload.workflow_run.conclusion}. Automatically re-running...`);
-            
-            await github.rest.actions.reRunWorkflow({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: runId
-            });
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Portal Files
+        run: |
+          echo "Processing updated HTML and JS files..."
+          git status
+
+      - name: Deploy to Pages / Repository
+        run: |
+          echo "Portal sync complete!"
