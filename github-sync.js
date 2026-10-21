@@ -13,8 +13,8 @@ class GitHubSync {
 
         return new Promise((resolve) => {
             this.debounceTimer = setTimeout(async () => {
-                await this._executeSync();
-                resolve();
+                const success = await this._executeSync();
+                resolve(success);
             }, 2000);
         });
     }
@@ -22,13 +22,13 @@ class GitHubSync {
     static async _executeSync() {
         if (typeof PortalConfig === 'undefined') {
             console.warn('PortalConfig is not defined. Skipping auto-sync.');
-            return;
+            return false;
         }
 
         const token = PortalConfig.getToken();
         if (!token) {
             console.warn('GitHub PAT token not found. Skipping auto-sync.');
-            return;
+            return false;
         }
 
         const owner = PortalConfig.owner;
@@ -49,7 +49,6 @@ class GitHubSync {
                             path.includes('tag') ||
                             path.includes('index');
 
-        // 1. Determine target JSON filename
         let jsonFilename = 'videos.json';
         if (isImagePage) {
             jsonFilename = 'images.json';
@@ -57,7 +56,6 @@ class GitHubSync {
             jsonFilename = 'videos.json';
         }
 
-        // 2. Gather live data directly from active storage
         let dbData = { models: [], photostreams: [], folders: [], streams: [] };
 
         if (isImagePage && typeof ImageStorageDB !== 'undefined') {
@@ -69,7 +67,6 @@ class GitHubSync {
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // Safety Guard: If local data is completely empty, fetch remote JSON to prevent accidental data wipes
         const hasLocalData = dbData.models.length > 0 || dbData.photostreams.length > 0 || dbData.folders.length > 0 || dbData.streams.length > 0;
         if (!hasLocalData) {
             try {
@@ -89,13 +86,15 @@ class GitHubSync {
             }
         }
 
-        // 3. Sync Current HTML File
+        // 1. Sync Current HTML File
         const updatedHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
+        const htmlSynced = await this.pushToGitHub(owner, repo, branch, token, path, updatedHTML, `Auto-sync: Updated ${path} via portal`);
 
-        // 4. Sync Corresponding JSON File with complete data payload
+        // 2. Sync Corresponding JSON File and verify success
         const jsonContent = JSON.stringify(dbData, null, 4);
-        await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+        const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Auto-sync: Updated ${jsonFilename} via portal`);
+
+        return jsonSynced; // Returns true if videos.json/images.json was successfully committed to GitHub
     }
 
     static async fetchRemoteJSON(owner, repo, filePath, token) {
@@ -141,12 +140,15 @@ class GitHubSync {
 
             if (putRes.ok) {
                 console.log(`Successfully synced ${filePath} to GitHub repository!`);
+                return true;
             } else {
                 const errData = await putRes.json();
                 console.error(`GitHub API commit error for ${filePath}:`, errData.message);
+                return false;
             }
         } catch (err) {
             console.error(`GitHub Sync Exception for ${filePath}:`, err);
+            return false;
         }
     }
 }
