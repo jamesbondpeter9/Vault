@@ -1,0 +1,33 @@
+name: Validate Videos JSON
+
+on:
+  push:
+  _branches:
+      - main
+      - master
+    paths:
+      - 'videos.json'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run Schema Validation
+        run: node scripts/validate-videos.js
+
+      - name: Commit normalized changes if any
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated schema normalization for videos.json [skip ci]"
+          file_pattern: "videos.json"
