@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -110,17 +111,17 @@
 
         <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
 
-        <div id="modelModal" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
+        <div id="modelModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
                 <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Add New Model</h3>
                 <form id="modelForm">
                     <div style="margin-bottom: 14px;">
                         <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Model Name</label>
-                        <input type="text" id="modelName" required="" placeholder="Enter model name">
+                        <input type="text" id="modelName" required placeholder="Enter model name">
                     </div>
                     <div style="margin-bottom: 20px;">
                         <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Photo / Thumbnail URL</label>
-                        <input type="text" id="modelThumb" required="" placeholder="https://...">
+                        <input type="text" id="modelThumb" required placeholder="https://...">
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button type="submit" class="btn-primary" style="flex:1;">Save Model</button>
@@ -136,7 +137,7 @@
                 <form id="updateThumbForm">
                     <div style="margin-bottom: 20px;">
                         <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">New Thumbnail URL</label>
-                        <input type="text" id="newThumbUrl" required="" placeholder="https://...">
+                        <input type="text" id="newThumbUrl" required placeholder="https://...">
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button type="submit" class="btn-primary" style="flex:1;">Update</button>
@@ -146,7 +147,7 @@
             </div>
         </div>
 
-        <div id="deleteModal" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
+        <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Model</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this model from the directory?</p>
@@ -157,14 +158,23 @@
             </div>
         </div>
 
-        <!-- Embedded Database Tag for Offline/File Protocol Fallback -->
-        <script type="application/json" id="embedded-models-database">{
-  "models": []
-}</script>
+        <!-- Embedded Databases for Cross-Gallery Sync & Self-Hydration -->
+        <script type="application/json" id="embedded-images-database">
+        {
+            "models": [],
+            "photostreams": [],
+            "folders": []
+        }
+        </script>
+        <script type="application/json" id="embedded-video-database">
+        {
+            "models": [],
+            "streams": []
+        }
+        </script>
     </div>
 
     <script src="config.js"></script>
-    <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="images-storage.js"></script>
     <script src="github-sync.js"></script>
@@ -172,18 +182,45 @@
         let currentLetterFilter = 'ALL';
         let currentPage = 1;
         const pageSize = 20;
-        let modelTargetKeyToDelete = null;
-        let modelTargetKeyToUpdateThumb = null;
+        let modelIndexToDelete = null;
+        let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
-                await ModelStorage.initDB();
-            }
+            await StorageDB.initDB();
+            await ImageStorageDB.initDB();
+
+            // Sync from image-gallery.html embedded database if available
+            try {
+                const imgEmb = document.getElementById('embedded-images-database');
+                if (imgEmb) {
+                    const imgData = JSON.parse(imgEmb.textContent);
+                    if (imgData && imgData.models && imgData.models.length > 0) {
+                        const curImgModels = ImageStorageDB.getModels() || [];
+                        if (curImgModels.length === 0) {
+                            ImageStorageDB.saveModels(imgData.models);
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // Sync from video-gallery.html embedded database if available
+            try {
+                const vidEmb = document.getElementById('embedded-video-database');
+                if (vidEmb) {
+                    const vidData = JSON.parse(vidEmb.textContent);
+                    if (vidData && vidData.models && vidData.models.length > 0) {
+                        const curVidModels = StorageDB.getModels() || [];
+                        if (curVidModels.length === 0) {
+                            StorageDB.saveModels(vidData.models);
+                        }
+                    }
+                }
+            } catch (e) {}
 
             buildFilterBar();
-            await renderModels();
+            renderModels();
 
-            document.getElementById('modelForm').addEventListener('submit', async (e) => {
+            document.getElementById('modelForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const nameInput = document.getElementById('modelName');
                 const thumbInput = document.getElementById('modelThumb');
@@ -193,52 +230,78 @@
 
                 const img = new Image();
                 img.src = thumb;
-                img.onload = async () => {
+                img.onload = () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    ModelStorage.addModel({ name, thumbnail: thumb, shape });
-                    closeAddModelModal();
-                    document.getElementById('modelName').value = '';
-                    document.getElementById('modelThumb').value = '';
-                    currentPage = 1;
-                    await renderModels();
+                    saveModelToBoth(name, thumb, shape);
                 };
-                img.onerror = async () => {
-                    ModelStorage.addModel({ name, thumbnail: thumb, shape: 'square' });
-                    closeAddModelModal();
-                    document.getElementById('modelName').value = '';
-                    document.getElementById('modelThumb').value = '';
-                    currentPage = 1;
-                    await renderModels();
+                img.onerror = () => {
+                    saveModelToBoth(name, thumb, 'square');
                 };
             });
 
-            document.getElementById('updateThumbForm').addEventListener('submit', async (e) => {
+            document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
-                if (modelTargetKeyToUpdateThumb !== null && newUrl) {
-                    const models = ModelStorage.getModels();
-                    const target = models.find(m => String(m.id) === String(modelTargetKeyToUpdateThumb) || String(m.name).toLowerCase() === String(modelTargetKeyToUpdateThumb).toLowerCase());
-                    if (target) {
-                        const img = new Image();
-                        img.src = newUrl;
-                        img.onload = async () => {
-                            const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                            ModelStorage.addModel({ name: target.name, thumbnail: newUrl, shape });
-                            await renderModels();
-                        };
-                        img.onerror = async () => {
-                            ModelStorage.addModel({ name: target.name, thumbnail: newUrl, shape: 'square' });
-                            await renderModels();
-                        };
-                    }
+                if (modelIndexToUpdateThumb !== null && newUrl) {
+                    const img = new Image();
+                    img.src = newUrl;
+                    img.onload = () => {
+                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, shape);
+                    };
+                    img.onerror = () => {
+                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, 'square');
+                    };
                 }
                 closeUpdateThumbModal();
             });
-
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
         });
+
+        async function saveModelToBoth(name, thumbnail, shape) {
+            const modelData = { name, thumbnail, shape, createdAt: Date.now() };
+
+            StorageDB.initDB();
+            const videoModels = StorageDB.getModels() || [];
+            videoModels.push(modelData);
+            StorageDB.saveModels(videoModels);
+
+            ImageStorageDB.initDB();
+            const imageModels = ImageStorageDB.getModels() || [];
+            imageModels.push(modelData);
+            ImageStorageDB.saveModels(imageModels);
+
+            document.getElementById('modelName').value = '';
+            document.getElementById('modelThumb').value = '';
+            closeAddModelModal();
+            currentPage = 1;
+            renderModels();
+
+            // Trigger GitHub auto-sync
+            await GitHubSync.triggerAutoSync();
+        }
+
+        async function updateModelThumbInBoth(index, newUrl, shape) {
+            StorageDB.initDB();
+            const videoModels = StorageDB.getModels() || [];
+            if (videoModels[index]) {
+                videoModels[index].thumbnail = newUrl;
+                videoModels[index].shape = shape;
+                StorageDB.saveModels(videoModels);
+            }
+
+            ImageStorageDB.initDB();
+            const imageModels = ImageStorageDB.getModels() || [];
+            if (imageModels[index]) {
+                imageModels[index].thumbnail = newUrl;
+                imageModels[index].shape = shape;
+                ImageStorageDB.saveModels(imageModels);
+            }
+
+            renderModels();
+
+            // Trigger GitHub auto-sync
+            await GitHubSync.triggerAutoSync();
+        }
 
         function buildFilterBar() {
             const filterBar = document.getElementById('filterBar');
@@ -246,28 +309,29 @@
             filterBar.innerHTML = '';
             letters.forEach(letter => {
                 const btn = document.createElement('button');
-                btn.className = `filter-btn ${letter === currentLetterFilter ? 'active' : ''}`;
+                btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
                 btn.textContent = letter;
-                btn.onclick = async () => {
+                btn.onclick = () => {
                     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     currentLetterFilter = letter;
                     currentPage = 1;
-                    await renderModels();
+                    renderModels();
                 };
                 filterBar.appendChild(btn);
             });
         }
 
-        async function renderModels() {
-            const models = ModelStorage.getModels() || [];
+        function renderModels() {
+            ImageStorageDB.initDB();
+            const models = ImageStorageDB.getModels() || [];
             const grid = document.getElementById('modelsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
-            const modelsWithKey = models.map((m, idx) => ({ ...m, modelKey: m.id || m.name || idx }));
-            const filtered = modelsWithKey.filter(m => {
+            const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: idx }));
+            const filtered = modelsWithIndex.filter(m => {
                 if (currentLetterFilter === 'ALL') return true;
-                return m.name && m.name.toUpperCase().startsWith(currentLetterFilter);
+                return m.name.toUpperCase().startsWith(currentLetterFilter);
             });
 
             if (filtered.length === 0) {
@@ -287,15 +351,13 @@
             grid.innerHTML = '';
             paginatedItems.forEach((model) => {
                 const card = document.createElement('div');
-                const shape = model.shape || 'portrait';
+                const shape = model.shape || (model.originalIndex % 2 === 0 ? 'portrait' : 'landscape');
                 card.className = `mondrian-card ${shape}`;
-
-                const escapedKey = String(model.modelKey).replace(/'/g, "\\'");
 
                 card.innerHTML = `
                     <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal('${escapedKey}')" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal('${escapedKey}')" title="Delete model">&times;</button>
+                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
+                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
                         ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
                     </div>`;
@@ -309,10 +371,10 @@
                 prevBtn.textContent = '← Prev';
                 prevBtn.disabled = currentPage === 1;
                 prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
-                prevBtn.onclick = async () => {
+                prevBtn.onclick = () => {
                     if (currentPage > 1) {
                         currentPage--;
-                        await renderModels();
+                        renderModels();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
@@ -330,10 +392,10 @@
                 nextBtn.textContent = 'Next →';
                 nextBtn.disabled = currentPage === totalPages;
                 nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
-                nextBtn.onclick = async () => {
+                nextBtn.onclick = () => {
                     if (currentPage < totalPages) {
                         currentPage++;
-                        await renderModels();
+                        renderModels();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
@@ -342,38 +404,60 @@
         }
 
         function openAlbums(name) {
-            window.location.href = `vault.html?name=${name}`;
+            window.location.href = `albums.html?name=${name}`;
         }
 
-        function openUpdateThumbModal(key) {
-            modelTargetKeyToUpdateThumb = key;
+        function openUpdateThumbModal(index) {
+            modelIndexToUpdateThumb = index;
             document.getElementById('newThumbUrl').value = '';
             document.getElementById('updateThumbModal').style.display = 'flex';
         }
 
         function closeUpdateThumbModal() {
-            modelTargetKeyToUpdateThumb = null;
+            modelIndexToUpdateThumb = null;
             document.getElementById('updateThumbModal').style.display = 'none';
         }
 
-        function openDeleteModal(key) {
-            modelTargetKeyToDelete = key;
+        function openDeleteModal(index) {
+            modelIndexToDelete = index;
             document.getElementById('deleteModal').style.display = 'flex';
         }
 
         function closeDeleteModal() {
-            modelTargetKeyToDelete = null;
+            modelIndexToDelete = null;
             document.getElementById('deleteModal').style.display = 'none';
         }
 
         async function confirmDeleteModel() {
-            if (modelTargetKeyToDelete !== null) {
-                const models = ModelStorage.getModels();
-                const target = models.find(m => String(m.id) === String(modelTargetKeyToDelete) || String(m.name).toLowerCase() === String(modelTargetKeyToDelete).toLowerCase());
-                if (target && target.name) {
-                    ModelStorage.deleteModel(target.name);
+            if (modelIndexToDelete !== null) {
+                ImageStorageDB.initDB();
+                const models = ImageStorageDB.getModels() || [];
+                const targetModel = models[modelIndexToDelete];
+                
+                if (targetModel) {
+                    const modelName = targetModel.name;
+
+                    // 1. Delete model & cascade clean from ImageStorageDB
+                    models.splice(modelIndexToDelete, 1);
+                    ImageStorageDB.saveModels(models);
+
+                    let allFolders = ImageStorageDB.getFolders() || [];
+                    allFolders = allFolders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
+                    ImageStorageDB.saveFolders(allFolders);
+
+                    let allStreams = ImageStorageDB.getPhotoStreams() || [];
+                    allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
+                    ImageStorageDB.savePhotoStreams(allStreams);
+
+                    // 2. Delete model & cascade clean from StorageDB using deleteModel helper
+                    StorageDB.initDB();
+                    StorageDB.deleteModel(modelName);
                 }
-                await renderModels();
+
+                renderModels();
+
+                // Trigger GitHub auto-sync
+                await GitHubSync.triggerAutoSync();
             }
             closeDeleteModal();
         }
@@ -381,4 +465,5 @@
         function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
         function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
-</body></html>
+</body>
+</html>
