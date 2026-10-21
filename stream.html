@@ -320,7 +320,7 @@
             urlInput.addEventListener('input', updateThumbPreview);
             thumbInput.addEventListener('input', updateThumbPreview);
 
-            document.getElementById('streamForm').addEventListener('submit', (e) => {
+            document.getElementById('streamForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const title = document.getElementById('streamTitle').value.trim();
                 const url = document.getElementById('streamUrl').value.trim();
@@ -336,14 +336,15 @@
 
                 if (!title || !url) return;
                 
-                StorageDB.addVideoStream({
+                // Await immediate storage save and GitHub sync before redirecting
+                await StorageDB.addVideoStream({
                     title,
                     url,
                     thumbnail: thumbnail || '',
                     models: selectedModels
                 });
 
-                alert('Stream saved successfully!');
+                alert('Stream saved and synced to GitHub successfully!');
                 window.location.href = 'index.html';
             });
         });
