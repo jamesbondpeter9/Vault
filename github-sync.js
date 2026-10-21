@@ -1,9 +1,14 @@
 class GitHubSync {
     static debounceTimer = null;
 
-    static async triggerAutoSync() {
+    static async triggerAutoSync(immediate = false) {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
+            this.debounceTimer = null;
+        }
+
+        if (immediate) {
+            return await this._executeSync();
         }
 
         return new Promise((resolve) => {
