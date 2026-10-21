@@ -336,16 +336,20 @@
 
                 if (!title || !url) return;
                 
-                // Await immediate storage save and GitHub sync before redirecting
-                await StorageDB.addVideoStream({
+                // Await storage save and verify GitHub sync response
+                const syncSuccess = await StorageDB.addVideoStream({
                     title,
                     url,
                     thumbnail: thumbnail || '',
                     models: selectedModels
                 });
 
-                alert('Stream saved and synced to GitHub successfully!');
-                window.location.href = 'index.html';
+                if (syncSuccess) {
+                    alert('Stream saved and successfully updated in videos.json!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Stream saved locally, but GitHub sync failed! Please check your connection or PAT token.');
+                }
             });
         });
 
