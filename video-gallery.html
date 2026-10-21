@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -25,27 +26,26 @@
             </div>
         </div>
 
-        <script type="application/json" id="embedded-video-database">{
-  "models": [],
-  "streams": []
-}</script>
+        <script type="application/json" id="embedded-video-database">
+        {
+            "models": [],
+            "streams": []
+        }
+        </script>
     </div>
 
     <script src="config.js"></script>
-    <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
-                await ModelStorage.initDB();
-            }
             await StorageDB.initDB();
             try {
                 const embeddedScript = document.getElementById('embedded-video-database');
-                if (embeddedScript && embeddedScript.textContent) {
+                if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
+                        // Fully sync and overwrite local storage with embedded payload to purge deleted models/streams
                         if (dbData.models) StorageDB.saveModels(dbData.models);
                         if (dbData.streams) StorageDB.saveVideoStreams(dbData.streams);
                     }
@@ -54,19 +54,8 @@
         });
 
         async function downloadUpdatedVideoGallery() {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
-                await ModelStorage.initDB();
-            }
             await StorageDB.initDB();
-
-            let models = [];
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                models = await ModelStorage.getModels() || [];
-            }
-            if ((!models || models.length === 0) && typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
-                models = StorageDB.getModels() || [];
-            }
-
+            const models = StorageDB.getModels() || [];
             const streams = StorageDB.getVideoStreams() || [];
 
             const dbPayload = {
@@ -107,18 +96,14 @@
     </div>
 
     <script src="config.js"><\/script>
-    <script src="scripts/modelstorage.js"><\/script>
     <script src="storage.js"><\/script>
     <script src="github-sync.js"><\/script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
-                await ModelStorage.initDB();
-            }
             await StorageDB.initDB();
             try {
                 const embeddedScript = document.getElementById('embedded-video-database');
-                if (embeddedScript && embeddedScript.textContent) {
+                if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
                         if (dbData.models) StorageDB.saveModels(dbData.models);
@@ -135,14 +120,8 @@
 </body>
 </html>`;
 
-            // Trigger GitHub auto-sync during export/download with error catching
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                try {
-                    await GitHubSync.triggerAutoSync();
-                } catch (err) {
-                    console.error('GitHub auto-sync error during export:', err);
-                }
-            }
+            // Trigger GitHub auto-sync during export/download
+            await GitHubSync.triggerAutoSync();
 
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -155,4 +134,5 @@
             URL.revokeObjectURL(url);
         }
     </script>
-</body></html>
+</body>
+</html>
