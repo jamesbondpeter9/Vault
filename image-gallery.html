@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -25,11 +26,13 @@
             </div>
         </div>
 
-        <script type="application/json" id="embedded-images-database">{
-  "models": [],
-  "photostreams": [],
-  "folders": []
-}</script>
+        <script type="application/json" id="embedded-images-database">
+        {
+            "models": [],
+            "photostreams": [],
+            "folders": []
+        }
+        </script>
     </div>
 
     <script src="config.js"></script>
@@ -37,34 +40,25 @@
     <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                await ImageStorageDB.initDB();
-            }
+            await ImageStorageDB.initDB();
             try {
                 const embeddedScript = document.getElementById('embedded-images-database');
-                if (embeddedScript && embeddedScript.textContent.trim()) {
+                if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0 && typeof ImageStorageDB.saveModels === 'function') await ImageStorageDB.saveModels(dbData.models);
-                        if (dbData.photostreams && dbData.photostreams.length > 0 && typeof ImageStorageDB.savePhotoStreams === 'function') await ImageStorageDB.savePhotoStreams(dbData.photostreams);
-                        if (dbData.folders && dbData.folders.length > 0 && typeof ImageStorageDB.saveFolders === 'function') await ImageStorageDB.saveFolders(dbData.folders);
+                        if (dbData.models && dbData.models.length > 0) ImageStorageDB.saveModels(dbData.models);
+                        if (dbData.photostreams && dbData.photostreams.length > 0) ImageStorageDB.savePhotoStreams(dbData.photostreams);
+                        if (dbData.folders && dbData.folders.length > 0) ImageStorageDB.saveFolders(dbData.folders);
                     }
                 }
             } catch (e) {}
-
-            // Trigger real-time background sync on load to keep images.json updated automatically
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
         });
 
         async function downloadUpdatedImageGallery() {
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                await ImageStorageDB.initDB();
-            }
-            const models = (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getModels === 'function') ? await ImageStorageDB.getModels() || [] : [];
-            const photostreams = (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getPhotoStreams === 'function') ? await ImageStorageDB.getPhotoStreams() || [] : [];
-            const folders = (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getFolders === 'function') ? await ImageStorageDB.getFolders() || [] : [];
+            await ImageStorageDB.initDB();
+            const models = ImageStorageDB.getModels() || [];
+            const photostreams = ImageStorageDB.getPhotoStreams() || [];
+            const folders = ImageStorageDB.getFolders() || [];
 
             const dbPayload = {
                 models: models,
@@ -109,24 +103,18 @@
     <script src="github-sync.js"><\/script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                await ImageStorageDB.initDB();
-            }
+            await ImageStorageDB.initDB();
             try {
                 const embeddedScript = document.getElementById('embedded-images-database');
-                if (embeddedScript && embeddedScript.textContent.trim()) {
+                if (embeddedScript) {
                     const dbData = JSON.parse(embeddedScript.textContent);
                     if (dbData) {
-                        if (dbData.models && dbData.models.length > 0 && typeof ImageStorageDB.saveModels === 'function') await ImageStorageDB.saveModels(dbData.models);
-                        if (dbData.photostreams && dbData.photostreams.length > 0 && typeof ImageStorageDB.savePhotoStreams === 'function') await ImageStorageDB.savePhotoStreams(dbData.photostreams);
-                        if (dbData.folders && dbData.folders.length > 0 && typeof ImageStorageDB.saveFolders === 'function') await ImageStorageDB.saveFolders(dbData.folders);
+                        if (dbData.models && dbData.models.length > 0) ImageStorageDB.saveModels(dbData.models);
+                        if (dbData.photostreams && dbData.photostreams.length > 0) ImageStorageDB.savePhotoStreams(dbData.photostreams);
+                        if (dbData.folders && dbData.folders.length > 0) ImageStorageDB.saveFolders(dbData.folders);
                     }
                 }
             } catch (e) {}
-
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
         });
 
         async function downloadUpdatedImageGallery() {
@@ -136,9 +124,8 @@
 </body>
 </html>`;
 
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
-            }
+            // Trigger automatic GitHub synchronization when the download/update mechanism runs
+            await GitHubSync.triggerAutoSync();
 
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -151,4 +138,5 @@
             URL.revokeObjectURL(url);
         }
     </script>
-</body></html>
+</body>
+</html>
