@@ -9,31 +9,42 @@ class StorageDB {
         if (!localStorage.getItem('video_portal_folders_db')) {
             localStorage.setItem('video_portal_folders_db', JSON.stringify([]));
         }
-        await StorageDB.syncFromEmbeddedJSON();
+        await StorageDB.syncFromRemoteJSON();
     }
 
-    static async syncFromEmbeddedJSON() {
+    static async syncFromRemoteJSON() {
         try {
-            const scriptTag = document.getElementById('embedded-database') || document.getElementById('embedded-video-database');
-            if (scriptTag) {
-                const embeddedData = JSON.parse(scriptTag.textContent);
-                
-                const currentModels = StorageDB.getModels();
-                if (currentModels.length === 0 && embeddedData.models && embeddedData.models.length > 0) {
-                    localStorage.setItem('video_portal_models_db', JSON.stringify(embeddedData.models));
-                }
-
-                const currentStreams = StorageDB.getStreams();
-                if (currentStreams.length === 0 && embeddedData.streams && embeddedData.streams.length > 0) {
-                    const videoStreams = embeddedData.streams.filter(s => {
-                        const t = (s.type || 'stream').toLowerCase();
-                        return t === 'stream' || t === 'video';
+            const currentModels = StorageDB.getModels();
+            const currentStreams = StorageDB.getStreams();
+            
+            if (currentModels.length === 0 && currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
+                const token = PortalConfig.getToken();
+                if (token) {
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/videos.json`;
+                    const res = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${token}` }
                     });
-                    localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                    if (res.ok) {
+                        const data = await res.json();
+                        const decodedString = decodeURIComponent(escape(atob(data.content)));
+                        const remoteData = JSON.parse(decodedString);
+
+                        if (remoteData.models && Array.isArray(remoteData.models)) {
+                            localStorage.setItem('video_portal_models_db', JSON.stringify(remoteData.models));
+                        }
+                        if (remoteData.streams && Array.isArray(remoteData.streams)) {
+                            const videoStreams = remoteData.streams.filter(s => {
+                                const t = (s.type || 'stream').toLowerCase();
+                                return t === 'stream' || t === 'video';
+                            });
+                            localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                        }
+                        console.log('Successfully bootstrapped storage from remote videos.json!');
+                    }
                 }
             }
         } catch (e) {
-            console.log('No embedded database found or failed to parse.');
+            console.log('Could not fetch remote videos.json during init:', e);
         }
     }
 
