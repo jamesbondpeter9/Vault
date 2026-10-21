@@ -1,4 +1,24 @@
 {
-    "models": [],
-    "streams": []
+    "models": [
+        {
+            "name": "A",
+            "thumbnail": "https://cdni.pornpics.com/1280/7/637/10327548/10327548_005_f3f7.jpg",
+            "shape": "portrait",
+            "createdAt": 1792605748166
+        }
+    ],
+    "photostreams": [],
+    "folders": [],
+    "streams": [
+        {
+            "title": "A",
+            "url": "https://s26.bigcdn.cc/pubs/6ad8fd4b0e3fe0.68283120/1080.mp4",
+            "thumbnail": "https://cdni.pornpics.com/1280/7/769/60131134/60131134_011_16e2.jpg",
+            "models": [
+                "A"
+            ],
+            "type": "stream",
+            "createdAt": 1792606903575
+        }
+    ]
 }
