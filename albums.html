@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -9,7 +10,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alyx Star Albums - Portal</title>
+    <title>Model Albums - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Compact Navigation Header Sizing matching index.html */
@@ -121,7 +122,7 @@
         </div>
 
         <div class="tag-header">
-            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Alyx Star - Albums</h1>
+            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Albums</h1>
             <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Albums featuring this model</p>
         </div>
 
@@ -129,7 +130,7 @@
     </div>
 
     <!-- Custom Popup Modal for Folder Creation -->
-    <div id="folderModal" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+    <div id="folderModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
         <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
             <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Create New Folder</h3>
             <input type="text" id="folderNameInput" placeholder="Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
@@ -189,19 +190,22 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize ImageStorageDB to read strictly from the isolated image database
             await ImageStorageDB.initDB();
             const params = new URLSearchParams(window.location.search);
-            currentModelName = decodeURIComponent(params.get('name') ?? '').trim();
+            currentModelName = decodeURIComponent(params.get('name') ?? '');
 
             if (currentModelName) {
                 document.getElementById('tagTitle').textContent = `${currentModelName} - Albums`;
                 document.title = `${currentModelName} Albums - Portal`;
             }
 
-            const allPhotoStreams = await ImageStorageDB.getPhotoStreams() || [];
+            // Fetch photo streams exclusively from ImageStorageDB
+            const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
             const matchedItems = allPhotoStreams.filter(item => item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
 
-            let allFolders = await ImageStorageDB.getFolders() || [];
+            // Fetch folders exclusively from ImageStorageDB
+            let allFolders = ImageStorageDB.getFolders() || [];
             allFolders = allFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
 
             const grid = document.getElementById('albumGrid');
@@ -233,7 +237,9 @@
                 folderCard.className = `mondrian-card ${orientation}`;
                 folderCard.innerHTML = `
                     <div class="mondrian-thumb" onclick="openFolderPage('${encodeURIComponent(folder.name)}')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                        <!-- Top-left Rename (+) Button -->
                         <button onclick="openRenameModal('${folder.name.replace(/'/g, "\\'")}', event)" title="Rename Folder" style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1;">+</button>
+                        <!-- Top-right Delete Button -->
                         <button onclick="deleteFolder('${folder.name.replace(/'/g, "\\'")}', event)" title="Delete Folder" style="position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1;">&times;</button>
                         ${firstImage ? `<img src="${firstImage}" alt="${folder.name}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="font-size: 1.5rem; margin-bottom: 4px;">📁</div>'}
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; font-weight: 700; font-size: 0.75rem; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${folder.name}</div>
@@ -258,14 +264,15 @@
 
             const nameClean = folderName.trim();
             
-            let allFolders = await ImageStorageDB.getFolders() || [];
+            let allFolders = ImageStorageDB.getFolders();
             if (!allFolders.some(f => f.name.toLowerCase() === nameClean.toLowerCase() && f.model.toLowerCase() === currentModelName.toLowerCase())) {
                 allFolders.push({ name: nameClean, model: currentModelName });
-                await ImageStorageDB.saveFolders(allFolders);
+                ImageStorageDB.saveFolders(allFolders);
             }
             
             closeFolderModal();
 
+            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
@@ -288,15 +295,15 @@
             if (!newName || !newName.trim() || !folderToRename) return;
             const newNameClean = newName.trim();
 
-            let allFolders = await ImageStorageDB.getFolders() || [];
+            let allFolders = ImageStorageDB.getFolders();
             allFolders.forEach(f => {
                 if (f.name === folderToRename && f.model.toLowerCase() === currentModelName.toLowerCase()) {
                     f.name = newNameClean;
                 }
             });
-            await ImageStorageDB.saveFolders(allFolders);
+            ImageStorageDB.saveFolders(allFolders);
 
-            let streams = await ImageStorageDB.getPhotoStreams() || [];
+            let streams = ImageStorageDB.getPhotoStreams();
             streams.forEach(s => {
                 const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 if (matchesModel) {
@@ -308,10 +315,11 @@
                     }
                 }
             });
-            await ImageStorageDB.savePhotoStreams(streams);
+            ImageStorageDB.savePhotoStreams(streams);
 
             closeRenameModal();
 
+            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
@@ -324,20 +332,22 @@
             event.stopPropagation();
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
-            let allFolders = await ImageStorageDB.getFolders() || [];
+            let allFolders = ImageStorageDB.getFolders();
             allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
-            await ImageStorageDB.saveFolders(allFolders);
+            ImageStorageDB.saveFolders(allFolders);
 
-            let streams = await ImageStorageDB.getPhotoStreams() || [];
+            let streams = ImageStorageDB.getPhotoStreams();
             streams = streams.filter(s => {
                 const matchesFolder = s.folder === folderName || (Array.isArray(s.folders) && s.folders.includes(folderName));
                 const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
                 return !(matchesFolder && matchesModel);
             });
-            await ImageStorageDB.savePhotoStreams(streams);
+            ImageStorageDB.savePhotoStreams(streams);
 
+            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
     </script>
-</body></html>
+</body>
+</html>
