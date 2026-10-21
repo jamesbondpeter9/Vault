@@ -45,14 +45,14 @@ class StorageDB {
         }
     }
 
-    static saveModels(models) {
+    static async saveModels(models, immediate = false) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error:', err));
+            await GitHubSync.triggerAutoSync(immediate).catch(err => console.error('GitHub auto-sync error:', err));
         }
     }
 
-    static addModel(modelData) {
+    static async addModel(modelData) {
         const models = StorageDB.getModels();
         const existingIndex = models.findIndex(m => m.name.toLowerCase() === modelData.name.toLowerCase());
         
@@ -67,14 +67,14 @@ class StorageDB {
                 createdAt: Date.now()
             });
         }
-        StorageDB.saveModels(models);
+        await StorageDB.saveModels(models, true);
     }
 
-    static deleteModel(modelName) {
+    static async deleteModel(modelName) {
         if (!modelName) return;
         const models = StorageDB.getModels();
         const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
-        StorageDB.saveModels(filteredModels);
+        await StorageDB.saveModels(filteredModels, true);
 
         // Cascade delete associated video streams tagged with this model
         const streams = StorageDB.getStreams();
@@ -82,7 +82,7 @@ class StorageDB {
             if (!s.models) return true;
             return !s.models.some(m => m.toLowerCase() === modelName.toLowerCase());
         });
-        StorageDB.saveStreams(filteredStreams);
+        await StorageDB.saveStreams(filteredStreams, true);
 
         // Clean up associated folders if any exist in storage
         try {
@@ -108,14 +108,14 @@ class StorageDB {
         return StorageDB.getStreams();
     }
 
-    static saveStreams(streams) {
+    static async saveStreams(streams, immediate = false) {
         localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            GitHubSync.triggerAutoSync().catch(err => console.error('GitHub auto-sync error:', err));
+            await GitHubSync.triggerAutoSync(immediate).catch(err => console.error('GitHub auto-sync error:', err));
         }
     }
 
-    static addVideoStream(streamData) {
+    static async addVideoStream(streamData) {
         const streams = StorageDB.getStreams();
         streams.push({
             title: streamData.title,
@@ -125,6 +125,6 @@ class StorageDB {
             type: 'stream',
             createdAt: Date.now()
         });
-        StorageDB.saveStreams(streams);
+        await StorageDB.saveStreams(streams, true);
     }
 }
