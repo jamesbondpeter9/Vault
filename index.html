@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -28,7 +29,7 @@
             border-radius: 12px !important;
         }
 
-        /* 4-Column Mosaic Grid System with Mobile Phone Portrait Adaptability */
+        /* 4-Column (2+2=4) Mosaic Grid System */
         .home-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -39,16 +40,15 @@
         }
         @media(max-width: 900px) { 
             .home-grid { 
-              grid-template-columns: repeat(2, minmax(0, 1fr)); 
-              grid-auto-rows: 150px;
-          } 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 150px;
+            } 
         }
         @media(max-width: 500px) { 
             .home-grid { 
-              grid-template-columns: repeat(2, minmax(0, 1fr)); /* Optimized 2-column portrait layout for mobile phones */
-              grid-auto-rows: 160px;
-            gap: 4px;
-          } 
+                grid-template-columns: 1fr; 
+                grid-auto-rows: 190px;
+            } 
         }
 
         /* Card Base Layout */
@@ -77,17 +77,17 @@
             aspect-ratio: 9 / 16;
         }
 
-        /* Landscape: 2 Columns out of 4 with increased vertical height */
+        /* Landscape: 2 Columns out of 4 (2+2=4) with further increased vertical height (span 4) */
         .mondrian-card.landscape {
             grid-column: span 2; 
-            grid-row: span 4;
+            grid-row: span 4; /* Increased vertical height */
         }
 
-        @media(max-width: 500px) {
+        @media(max-width: 900px) {
+            .mondrian-card.portrait,
             .mondrian-card.landscape {
-              grid-column: span 2; /* Full width on mobile portrait for landscape cards */
-              grid-row: span 2;
-          }
+                grid-column: span 1; /* Adapts cleanly to mobile layout */
+            }
         }
 
         /* Square Tile Variant */
@@ -152,7 +152,7 @@
             <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
-        <div class="home-grid" id="streamsGrid"><div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div></div>
+        <div class="home-grid" id="streamsGrid"></div>
     </div>
     
     <script src="config.js"></script>
@@ -161,25 +161,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            
-            // Fetch only video streams asynchronously from StorageDB
-            const streams = await StorageDB.getStreams() || [];
-            const videoStreams = streams.filter(item => {
-                const type = (item.type || 'stream').toLowerCase();
-                return type === 'stream' || type === 'video';
-            });
-
+            // Fetch only video streams so photo streams added via photostream.html won't show here
+            const streams = StorageDB.getVideoStreams();
             const grid = document.getElementById('streamsGrid');
             
-            if (videoStreams.length === 0) {
+            if (streams.length === 0) {
                 grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
-                await GitHubSync.triggerAutoSync();
                 return;
             }
             
             grid.innerHTML = '';
             
-            videoStreams.forEach((stream, index) => {
+            streams.forEach((stream, index) => {
                 const card = document.createElement('a');
                 card.href = `watch.html?index=${index}`;
                 card.className = `mondrian-card portrait`; // Default fallback
@@ -207,11 +200,7 @@
                     };
                 }
             });
-
-            // Trigger background auto-sync to keep videos.json verified on load
-            await GitHubSync.triggerAutoSync();
         });
     </script>
-
-
-</body></html>
+</body>
+</html>
