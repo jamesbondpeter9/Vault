@@ -99,43 +99,18 @@
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="config.js"></script>
-    <script src="scripts/modelstorage.js"></script>
     <script src="storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.initDB === 'function') {
-                await ModelStorage.initDB();
-            }
             await StorageDB.initDB();
-
             const params = new URLSearchParams(window.location.search);
-            const modelName = decodeURIComponent(params.get('name') ?? '').trim();
+            const modelName = decodeURIComponent(params.get('name') ?? '');
 
             if (modelName) {
                 document.title = `${modelName} - Vault`;
                 document.getElementById('albumsTagLink').href = `albums.html?name=${encodeURIComponent(modelName)}`;
                 document.getElementById('videoTagLink').href = `videotag.html?name=${encodeURIComponent(modelName)}`;
-            }
-
-            // Fetch model metadata from ModelStorage (models.json) or StorageDB fallback
-            let modelsList = [];
-            if (typeof ModelStorage !== 'undefined' && typeof ModelStorage.getModels === 'function') {
-                modelsList = await ModelStorage.getModels() || [];
-            }
-            if ((!modelsList || modelsList.length === 0) && typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
-                modelsList = StorageDB.getModels() || [];
-            }
-
-            const currentModel = modelsList.find(m => m && m.name && m.name.toLowerCase() === modelName.toLowerCase());
-            const feat1AlbumsLink = document.getElementById('albumsTagLink');
-
-            if (currentModel && currentModel.thumbnail) {
-                const bgImg1 = document.createElement('img');
-                bgImg1.src = currentModel.thumbnail;
-                bgImg1.alt = currentModel.name;
-                bgImg1.style.cssText = "object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; border-radius: 20px;";
-                feat1AlbumsLink.prepend(bgImg1);
             }
 
             const allStreams = StorageDB.getStreams();
