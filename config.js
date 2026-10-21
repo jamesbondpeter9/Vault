@@ -1,20 +1,18 @@
 const PortalConfig = {
-    // Replace with your actual GitHub username or organization
-    owner: "jamesbondpeter9",
-    
-    // Replace with your actual GitHub repository name
-    repo: "Vault",
-    
-    // The branch you want to commit to (usually 'main' or 'master')
-    branch: "main",
-
-    // Helper to get your GitHub Personal Access Token (PAT) securely from localStorage
-    getToken() {
-        return localStorage.getItem('github_pat_token') || '';
-    },
-
-    // Helper to save your token
-    setToken(token) {
-        localStorage.setItem('github_pat_token', token.trim());
+    owner: 'jamesbondpeter9', // Keep your GitHub username here
+    repo: 'Vault',  // Keep your repository name here
+    branch: 'main',                // or 'master'
+    getToken: function() {
+        // Automatically checks browser storage for the token
+        return localStorage.getItem('github_token') || sessionStorage.getItem('github_token') || null;
     }
 };
+
+// Console helper function to save your token easily
+function setGitHubToken(token) {
+    if (!token || !token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+        console.warn('Warning: Token format looks unusual. Make sure it is a valid GitHub PAT.');
+    }
+    localStorage.setItem('github_token', token.trim());
+    console.log('GitHub PAT token successfully saved to browser localStorage!');
+}
