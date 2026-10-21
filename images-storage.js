@@ -52,7 +52,7 @@ const ImageStorageDB = {
 
     triggerAsyncSyncIfNeeded() {
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            // Asynchronously trigger GitHub sync on data mutations in real-time across photostream, albums, and view pages
+            // Asynchronously trigger GitHub sync on data mutations without breaking synchronous localStorage flows
             GitHubSync.triggerAutoSync().catch(err => {
                 console.error('Background GitHub auto-sync error:', err);
             });
