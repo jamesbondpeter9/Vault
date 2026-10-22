@@ -370,8 +370,12 @@
         async function confirmDeleteModel() {
             if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
                 const models = ModelStorageDB.getModels() || [];
-                models.splice(modelIndexToDelete, 1);
-                await ModelStorageDB.saveAndSyncModels(models, true);
+                const targetModel = models[modelIndexToDelete];
+                
+                if (targetModel) {
+                    // Uses ModelStorageDB.deleteModel to properly remove from localStorage and sync to GitHub
+                    await ModelStorageDB.deleteModel(targetModel.name);
+                }
                 renderModels();
             }
             closeDeleteModal();
