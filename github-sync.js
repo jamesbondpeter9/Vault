@@ -38,9 +38,9 @@ class GitHubSync {
         const pathname = window.location.pathname.toLowerCase();
         
         let jsonFilename = 'Media/videos.json';
-        let dbData = { streams: [] };
+        let dbData = {};
 
-        // Determine target file and payload based on the active page path
+        // Route sync payloads based on active directory / page
         if (pathname.includes('/model/') || pathname.includes('models.html')) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
@@ -54,12 +54,13 @@ class GitHubSync {
             }
         } else {
             jsonFilename = 'Media/videos.json';
+            dbData = { streams: [] };
             if (typeof StorageDB !== 'undefined') {
                 dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
             }
         }
 
-        // Safety fallback if local storage payload is empty
+        // Safety fallback if local database payload is empty
         const hasLocalData = (dbData.streams && dbData.streams.length > 0) || (dbData.models && dbData.models.length > 0) || (dbData.photostreams && dbData.photostreams.length > 0);
         if (!hasLocalData) {
             try {
