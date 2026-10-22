@@ -130,10 +130,22 @@ class StorageDB {
         return await StorageDB.saveStreams(streams, true);
     }
 
-    // Added deleteStream method matching the clean Model section pattern
-    static async deleteStream(streamUrl, streamTitle) {
+// Hardened deleteStream supporting both index or property matching
+    static async deleteStream(identifier) {
         const streams = StorageDB.getStreams();
-        const filteredStreams = streams.filter(s => !(s.url === streamUrl && s.title === streamTitle));
+        let filteredStreams = [];
+
+        if (typeof identifier === 'number') {
+            // Delete by exact array index
+            filteredStreams = streams.filter((_, index) => index !== identifier);
+        } else if (typeof identifier === 'object' && identifier !== null) {
+            // Delete by matching url and title
+            filteredStreams = streams.filter(s => !(s.url === identifier.url && s.title === identifier.title));
+        } else {
+            filteredStreams = streams;
+        }
+
+        console.log('Deleting stream. Remaining count:', filteredStreams.length);
         return await StorageDB.saveStreams(filteredStreams, true);
     }
 }
