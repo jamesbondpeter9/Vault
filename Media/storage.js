@@ -129,4 +129,11 @@ class StorageDB {
         });
         return await StorageDB.saveStreams(streams, true);
     }
+
+    // Added deleteStream method matching the clean Model section pattern
+    static async deleteStream(streamUrl, streamTitle) {
+        const streams = StorageDB.getStreams();
+        const filteredStreams = streams.filter(s => !(s.url === streamUrl && s.title === streamTitle));
+        return await StorageDB.saveStreams(filteredStreams, true);
+    }
 }
