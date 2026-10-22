@@ -35,8 +35,8 @@ class GitHubSync {
         const repo = PortalConfig.repo;
         const branch = PortalConfig.branch;
 
-        // Directly point to vault/Media/videos.json relative to repository root
-        const jsonFilePath = 'vault/Media/videos.json';
+        // Correct path targeting Media/videos.json relative to repository root
+        const jsonFilePath = 'Media/videos.json';
 
         let dbData = { streams: [] };
         if (typeof StorageDB !== 'undefined') {
