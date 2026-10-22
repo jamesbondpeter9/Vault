@@ -34,8 +34,6 @@ class GitHubSync {
         const owner = PortalConfig.owner;
         const repo = PortalConfig.repo;
         const branch = PortalConfig.branch;
-
-        // Correct path targeting Media/videos.json relative to repository root
         const jsonFilePath = 'Media/videos.json';
 
         let dbData = { streams: [] };
@@ -43,20 +41,7 @@ class GitHubSync {
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // Safety fallback if local storage is empty
-        const hasLocalStreams = dbData.streams.length > 0;
-        if (!hasLocalStreams) {
-            try {
-                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilePath, token);
-                if (remoteData && remoteData.streams && remoteData.streams.length > 0) {
-                    dbData.streams = remoteData.streams;
-                }
-            } catch (e) {
-                console.warn('Could not verify remote JSON fallback:', e);
-            }
-        }
-
-        // Sync videos.json payload
+        // Sync local state directly to GitHub without accidental remote overriding
         const jsonContent = JSON.stringify(dbData, null, 4);
         const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilePath, jsonContent, `Stream sync: Updated ${jsonFilePath} via portal`);
 
