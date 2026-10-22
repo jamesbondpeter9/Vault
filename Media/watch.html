@@ -94,6 +94,7 @@
     </div>
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+<!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="../config.js"></script>
     <script src="storage.js"></script>
     <script src="../github-sync.js"></script>
@@ -166,10 +167,10 @@
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
-            rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
+            let streams = StorageDB.getStreams();
+            streams = streams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
             
-            const syncSuccess = await StorageDB.saveStreams(rawStreams, true);
+            const syncSuccess = await StorageDB.saveStreams(streams, true);
 
             if (syncSuccess) {
                 window.location.href = '../index.html';
@@ -180,5 +181,3 @@
             }
         }
     </script>
-</body>
-</html>
