@@ -86,11 +86,11 @@
         <form id="loginForm">
             <div>
                 <label>Username</label>
-                <input type="text" id="usernameInput" required placeholder="Janice">
+                <input type="text" id="usernameInput" required placeholder="Enter username">
             </div>
             <div>
                 <label>Password</label>
-                <input type="password" id="usernameInput" required placeholder="James@123">
+                <input type="password" id="usernameInput" required placeholder="Enter password">
             </div>
             <button type="submit" class="login-btn">Log In</button>
             <div id="errorMsg" class="error-msg">Incorrect username or password. Please try again.</div>
@@ -105,8 +105,8 @@
             const password = document.getElementById('usernameInput').value;
             
             // Set your desired credentials here or map them from PortalConfig
-            const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'admin';
-            const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'admin';
+            const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
+            const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
 
             if (username === correctUsername && password === correctPassword) {
                 sessionStorage.setItem('portal_authenticated', 'true');
