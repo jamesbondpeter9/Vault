@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = '../login.html';
+            window.location.href = 'login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Stream - Portal</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -63,7 +63,7 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <div class="mondrian-nav-card" onclick="openDeleteStreamModal()" style="cursor: pointer;">
                 <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">&times;</div>
             </div>
@@ -94,9 +94,9 @@
     </div>
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="../config.js"></script>
+    <script src="config.js"></script>
     <script src="storage.js"></script>
-    <script src="../github-sync.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let streamIndex = 0;
         let currentStreamItem = null;
@@ -160,30 +160,24 @@
         }
 
         async function confirmDeleteStream() {
+            if (!currentStreamItem) return;
+            
+            // Smooth UI Feedback: Update button text & disable during deletion sync
             const deleteBtn = document.getElementById('confirmDeleteBtn');
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            try {
-                // Use StorageDB deletion mechanism with timeout safeguard against ERR_ABORTED
-                if (typeof StorageDB !== 'undefined' && typeof StorageDB.deleteVideoStream === 'function') {
-                    const deletePromise = StorageDB.deleteVideoStream(streamIndex);
-                    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
-                    await Promise.race([deletePromise, timeoutPromise]);
-                } else {
-                    // Fallback local splice if StorageDB method isn't reached
-                    let streams = StorageDB.getStreams();
-                    if (streamIndex >= 0 && streamIndex < streams.length) {
-                        streams.splice(streamIndex, 1);
-                        localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
-                    }
-                }
+            let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
+            rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
+            
+            const syncSuccess = await StorageDB.saveStreams(rawStreams, true);
 
-                // Redirect back home smoothly
-                window.location.href = '../index.html';
-            } catch (err) {
-                console.error('Delete exception:', err);
-                window.location.href = '../index.html';
+            if (syncSuccess) {
+                window.location.href = 'index.html';
+            } else {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Delete';
+                alert('Stream removed locally, but GitHub sync failed! Please check your connection or token.');
             }
         }
     </script>
