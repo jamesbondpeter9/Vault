@@ -198,7 +198,7 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar with Home and Models matching index.html -->
+        <!-- Compact Top Nav Bar with Home and Models -->
         <div class="nav-bar-compact">
             <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
@@ -222,7 +222,7 @@
                             <input type="text" id="streamThumbnail" placeholder="Leave blank for auto YouTube thumb">
                         </div>
 
-                        <!-- Models Tagging Section (Advanced Photostream A-Z Bar Feature) -->
+                        <!-- Models Tagging Section (A-Z Bar Feature) -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -245,7 +245,7 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <!-- Integrated Root Config, Storage & GitHub Sync Scripts -->
     <script src="../config.js"></script>
     <script src="storage.js"></script>
     <script src="../github-sync.js"></script>
@@ -339,18 +339,13 @@
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Syncing to GitHub...';
-                
-                const streams = StorageDB.getStreams();
-                streams.push({
+
+                const syncSuccess = await StorageDB.addVideoStream({
                     title,
                     url,
                     thumbnail: thumbnail || '',
-                    models: selectedModels,
-                    type: 'stream',
-                    createdAt: Date.now()
+                    models: selectedModels
                 });
-
-                const syncSuccess = await StorageDB.saveStreams(streams, true);
 
                 if (syncSuccess) {
                     window.location.href = '../index.html';
