@@ -148,7 +148,8 @@
             <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="image-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
-            <a href="stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <!-- Updated "+" navigation link pointing to media/stream.html -->
+            <a href="media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
             <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
@@ -161,7 +162,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            // Fetch only video streams so photo streams added via photostream.html won't show here
+            // Fetch only video streams (loaded from media/videos.json)
             const streams = StorageDB.getVideoStreams();
             const grid = document.getElementById('streamsGrid');
             
