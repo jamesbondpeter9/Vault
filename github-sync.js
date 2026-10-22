@@ -74,6 +74,7 @@ class GitHubSync {
                 sha = getData.sha;
             }
 
+            // Safe UTF-8 Base64 encoding
             const base64Content = btoa(unescape(encodeURIComponent(fileContent)));
 
             const putRes = await fetch(apiUrl, {
