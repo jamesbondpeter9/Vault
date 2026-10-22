@@ -5,15 +5,14 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Photo - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
-        /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -48,7 +47,6 @@
             border-color: #fff;
         }
 
-        /* Layout Container with 2px gap matching both box heights */
         .stream-layout-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -82,7 +80,6 @@
             box-sizing: border-box;
         }
 
-        /* Tag Section Wrapper */
         .tag-section-wrapper {
             margin-bottom: 16px;
         }
@@ -100,7 +97,6 @@
             color: var(--text-muted);
         }
 
-        /* A-Z Alphabet Quick-Jump / Filter Bar */
         .az-bar {
             display: flex;
             gap: 4px;
@@ -109,9 +105,7 @@
             margin-bottom: 8px;
             scrollbar-width: none;
         }
-        .az-bar::-webkit-scrollbar {
-            display: none;
-        }
+        .az-bar::-webkit-scrollbar { display: none; }
 
         .az-letter {
             font-size: 0.75rem;
@@ -127,24 +121,10 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .az-letter:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
+        .az-letter:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+        .az-letter.active { background: #fff; color: #000; border-color: #fff; }
+        .az-letter.disabled { opacity: 0.2; cursor: default; pointer-events: none; }
 
-        .az-letter.active {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
-
-        .az-letter.disabled {
-            opacity: 0.2;
-            cursor: default;
-            pointer-events: none;
-        }
-
-        /* Scrollable Tags Container */
         .tags-container {
             display: flex;
             flex-wrap: wrap;
@@ -160,19 +140,9 @@
             scrollbar-color: var(--text-muted) rgba(0,0,0,0.3);
         }
 
-        .tags-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .tags-container::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.3);
-            border-radius: 6px;
-        }
-
-        .tags-container::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 6px;
-        }
+        .tags-container::-webkit-scrollbar { width: 6px; }
+        .tags-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 6px; }
+        .tags-container::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 6px; }
 
         .tag-pill {
             background: rgba(255, 255, 255, 0.1);
@@ -186,25 +156,18 @@
             transition: all 0.2s ease;
         }
 
-        .tag-pill.selected {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
+        .tag-pill.selected { background: #fff; color: #000; border-color: #fff; }
 
         @media (max-width: 900px) {
-            .stream-layout-container {
-                grid-template-columns: 1fr;
-            }
+            .stream-layout-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar with Home and Models -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
         <div class="stream-layout-container">
@@ -217,7 +180,6 @@
                             <input type="text" id="streamUrl" required placeholder="Paste direct link, HTML img, BBCode, or combined embed codes">
                         </div>
 
-                        <!-- Models Tagging Section -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -228,7 +190,6 @@
                             </div>
                         </div>
 
-                        <!-- Folders Tagging Section -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Folders (Albums)</span>
@@ -251,34 +212,15 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script src="images-storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let selectedModels = [];
         let selectedFolders = [];
-
         let modelLetterFilter = 'ALL';
         let folderLetterFilter = 'ALL';
 
-        function extractImageUrl(input) {
-            if (!input) return '';
-            input = input.trim();
-
-            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
-            if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
-
-            const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
-            if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
-
-            const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
-            if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
-
-            return input;
-        }
-
-        // Multi-parser for combined/batch URLs, HTML tags, or BBCode strings
         function extractAllImageUrls(input) {
             if (!input) return [];
             input = input.trim();
@@ -290,7 +232,7 @@
                 if (match[1]) urls.push(match[1].trim());
             }
 
-            const bbcodeRegex = /[img](.*?)\[\/img\]/gi;
+            const bbcodeRegex = /\[img\](.*?)\[\/img\]/gi;
             while ((match = bbcodeRegex.exec(input)) !== null) {
                 if (match[1]) urls.push(match[1].trim());
             }
@@ -298,20 +240,14 @@
             const urlRegex = /https?:\/\/[^\s"'<>]+/gi;
             while ((match = urlRegex.exec(input)) !== null) {
                 const u = match[0].trim();
-                if (!urls.includes(u)) {
-                    urls.push(u);
-                }
+                if (!urls.includes(u)) urls.push(u);
             }
 
             if (urls.length === 0 && input.length > 0) {
-                const lines = input.split(/\s+/);
-                lines.forEach(l => {
-                    if (l.startsWith('http://') || l.startsWith('https://')) {
-                        urls.push(l.trim());
-                    }
+                input.split(/\s+/).forEach(l => {
+                    if (l.startsWith('http://') || l.startsWith('https://')) urls.push(l.trim());
                 });
             }
-
             return urls;
         }
 
@@ -347,16 +283,11 @@
             allBtn.onclick = () => onSelectLetter('ALL');
             azBar.appendChild(allBtn);
 
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-            alphabet.forEach(letter => {
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => {
                 const span = document.createElement('span');
                 span.className = 'az-letter';
                 span.textContent = letter;
-
-                if (currentFilter === letter) {
-                    span.classList.add('active');
-                }
-
+                if (currentFilter === letter) span.classList.add('active');
                 if (!availableLetters.has(letter)) {
                     span.classList.add('disabled');
                 } else {
@@ -367,7 +298,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize ImageStorageDB to ensure exclusive access to the isolated image database
             if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
                 await ImageStorageDB.initDB();
             }
@@ -378,42 +308,29 @@
             const urlInput = document.getElementById('streamUrl');
             const previewContainer = document.getElementById('previewContainer');
 
-            function updateThumbPreview() {
-                let rawUrl = urlInput.value;
-                let urls = extractAllImageUrls(rawUrl);
-
+            urlInput.addEventListener('input', () => {
+                const urls = extractAllImageUrls(urlInput.value);
                 if (urls.length > 0) {
-                    const lastImageUrl = urls[urls.length - 1];
-                    previewContainer.innerHTML = `<img src="${lastImageUrl}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;">`;
+                    previewContainer.innerHTML = `<img src="${urls[urls.length - 1]}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;">`;
                 } else {
                     previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
                 }
-            }
-
-            urlInput.addEventListener('input', updateThumbPreview);
+            });
 
             document.getElementById('streamForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const rawUrl = document.getElementById('streamUrl').value;
-                const urls = extractAllImageUrls(rawUrl);
-
+                const urls = extractAllImageUrls(document.getElementById('streamUrl').value);
                 if (urls.length === 0) return;
                 
                 urls.forEach(url => {
-                    const title = generateTitleFromUrl(url);
-
-                    const photoPayload = {
-                        title,
+                    ImageStorageDB.addPhotoStream({
+                        title: generateTitleFromUrl(url),
                         url,
                         thumbnail: url,
                         models: selectedModels,
                         folder: selectedFolders.length > 0 ? selectedFolders[0] : '',
                         folders: selectedFolders
-                    };
-
-                    if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.addPhotoStream === 'function') {
-                        ImageStorageDB.addPhotoStream(photoPayload);
-                    }
+                    });
                 });
 
                 document.getElementById('streamForm').reset();
@@ -423,55 +340,32 @@
                 folderLetterFilter = 'ALL';
                 renderModelTags();
                 renderFolderTags();
-                updateThumbPreview();
+                previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
             });
         });
 
-        // Pulls models exclusively from ImageStorageDB (populated via models.html)
         function renderModelTags() {
-            let models = [];
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getModels === 'function') {
-                models = ImageStorageDB.getModels() || [];
-            }
-
+            const models = (typeof ImageStorageDB !== 'undefined') ? (ImageStorageDB.getModels() || []) : [];
             const container = document.getElementById('modelTagsList');
 
-            if (!models || models.length === 0) {
+            if (models.length === 0) {
                 container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>`;
                 document.getElementById('modelAZBar').innerHTML = '';
                 return;
             }
 
             models.sort((a, b) => a.name.localeCompare(b.name));
+            buildAZBar('modelAZBar', models, modelLetterFilter, (l) => { modelLetterFilter = l; renderModelTags(); });
 
-            buildAZBar('modelAZBar', models, modelLetterFilter, (selectedLetter) => {
-                modelLetterFilter = selectedLetter;
-                renderModelTags();
-            });
+            const filtered = modelLetterFilter === 'ALL' ? models : models.filter(m => m.name.trim().charAt(0).toUpperCase() === modelLetterFilter);
+            container.innerHTML = filtered.length === 0 ? `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models starting with '${modelLetterFilter}'</span>` : '';
 
-            let filteredModels = models;
-            if (modelLetterFilter !== 'ALL') {
-                filteredModels = models.filter(m => m.name.trim().charAt(0).toUpperCase() === modelLetterFilter);
-            }
-
-            container.innerHTML = '';
-
-            if (filteredModels.length === 0) {
-                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models starting with '${modelLetterFilter}'</span>`;
-                return;
-            }
-
-            filteredModels.forEach(model => {
+            filtered.forEach(model => {
                 const tag = document.createElement('div');
                 tag.className = `tag-pill ${selectedModels.includes(model.name) ? 'selected' : ''}`;
                 tag.textContent = model.name;
-
                 tag.onclick = () => {
-                    if (selectedModels.includes(model.name)) {
-                        selectedModels = selectedModels.filter(m => m !== model.name);
-                    } else {
-                        selectedModels.push(model.name);
-                    }
+                    selectedModels = selectedModels.includes(model.name) ? selectedModels.filter(m => m !== model.name) : [...selectedModels, model.name];
                     renderModelTags();
                     renderFolderTags();
                 };
@@ -479,7 +373,6 @@
             });
         }
 
-        // Dynamically displays folders already created in model's albums when model is clicked
         function renderFolderTags() {
             const container = document.getElementById('folderTagsList');
             const azBar = document.getElementById('folderAZBar');
@@ -491,24 +384,16 @@
                 return;
             }
 
-            let foldersSet = new Set();
-            let allFoldersDB = [];
-            
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.getFolders === 'function') {
-                allFoldersDB = ImageStorageDB.getFolders() || [];
-            }
-
+            const allFoldersDB = (typeof ImageStorageDB !== 'undefined') ? (ImageStorageDB.getFolders() || []) : [];
+            const foldersSet = new Set();
             selectedModels.forEach(modelName => {
-                let dbFolders = allFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase());
-                dbFolders.getToken = true; // placeholder safeguard
-                dbFolders.forEach(f => {
+                allFoldersDB.filter(f => f.model && f.model.toLowerCase() === modelName.toLowerCase()).forEach(f => {
                     const fName = typeof f === 'string' ? f : (f.name || f.title);
                     if (fName) foldersSet.add(fName.trim());
                 });
             });
 
-            let folders = Array.from(foldersSet);
-
+            const folders = Array.from(foldersSet).sort((a, b) => a.localeCompare(b));
             if (folders.length === 0) {
                 container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No folders found for this model</span>`;
                 if (azBar) azBar.innerHTML = '';
@@ -516,38 +401,18 @@
                 return;
             }
 
-            folders.sort((a, b) => a.localeCompare(b));
-
             selectedFolders = selectedFolders.filter(f => folders.includes(f));
+            buildAZBar('folderAZBar', folders, folderLetterFilter, (l) => { folderLetterFilter = l; renderFolderTags(); });
 
-            buildAZBar('folderAZBar', folders, folderLetterFilter, (selectedLetter) => {
-                folderLetterFilter = selectedLetter;
-                renderFolderTags();
-            });
+            const filtered = folderLetterFilter === 'ALL' ? folders : folders.filter(f => f.trim().charAt(0).toUpperCase() === folderLetterFilter);
+            container.innerHTML = filtered.length === 0 ? `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No folders starting with '${folderLetterFilter}'</span>` : '';
 
-            let filteredFolders = folders;
-            if (folderLetterFilter !== 'ALL') {
-                filteredFolders = folders.filter(f => f.trim().charAt(0).toUpperCase() === folderLetterFilter);
-            }
-
-            container.innerHTML = '';
-
-            if (filteredFolders.length === 0) {
-                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No folders starting with '${folderLetterFilter}'</span>`;
-                return;
-            }
-
-            filteredFolders.forEach(folderName => {
+            filtered.forEach(folderName => {
                 const tag = document.createElement('div');
                 tag.className = `tag-pill ${selectedFolders.includes(folderName) ? 'selected' : ''}`;
                 tag.textContent = folderName;
-
                 tag.onclick = () => {
-                    if (selectedFolders.includes(folderName)) {
-                        selectedFolders = selectedFolders.filter(f => f !== folderName);
-                    } else {
-                        selectedFolders.push(folderName);
-                    }
+                    selectedFolders = selectedFolders.includes(folderName) ? selectedFolders.filter(f => f !== folderName) : [...selectedFolders, folderName];
                     renderFolderTags();
                 };
                 container.appendChild(tag);
