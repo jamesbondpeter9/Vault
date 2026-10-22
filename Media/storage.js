@@ -128,4 +128,13 @@ class StorageDB {
         });
         return await StorageDB.saveStreams(streams, true);
     }
+
+    static async deleteVideoStream(index) {
+        let streams = StorageDB.getStreams();
+        if (index >= 0 && index < streams.length) {
+            streams.splice(index, 1);
+            return await StorageDB.saveStreams(streams, true);
+        }
+        return false;
+    }
 }
