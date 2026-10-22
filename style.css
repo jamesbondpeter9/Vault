@@ -13,7 +13,19 @@
     --neon-glow: 0 0 30px rgba(255, 255, 255, 0.15), 0 0 15px var(--gold-glow), inset 0 0 15px rgba(255, 255, 255, 0.08);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Enable smooth scrolling portal-wide */
+html {
+    scroll-behavior: smooth;
+}
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -113,6 +125,7 @@ input[type="text"] {
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', sans-serif;
     outline: none;
+    transition: all 0.3s ease;
 }
 
 input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
@@ -129,3 +142,57 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0
     transition: all 0.3s ease;
 }
 .btn-primary:hover { background: #e0e0e0; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+
+/* --- Smoothness & Performance Extensions --- */
+
+/* Smooth image load animation to prevent jarring pop-ins */
+@keyframes imageFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+img, .lazy-thumb {
+    animation: imageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glassmorphic smooth modal animations */
+@keyframes modalScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+div[id$="Modal"], div[id*="Modal"] {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.85) !important;
+    transition: opacity 0.3s ease;
+}
+
+div[id$="Modal"] > .control-panel, 
+div[id*="Modal"] > .control-panel {
+    animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* GPU acceleration for interactive UI components */
+.mondrian-nav-box,
+.mondrian-card,
+.tag-pill,
+.filter-btn,
+.update-thumb-btn,
+.delete-btn {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
