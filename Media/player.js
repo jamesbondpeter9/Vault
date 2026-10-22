@@ -1,20 +1,30 @@
-const VideoPlayer = {
-    init(containerId, stream) {
+class StreamPlayer {
+    static renderPlayer(containerId, url) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        const rawInput = (stream.url || '').trim();
-        let embedHtml = `
-            <div id="playerLoader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 10; transition: opacity 0.4s ease;">
-                <div style="width: 45px; height: 45px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #fff; border-radius: 50%; animation: playerSpin 0.8s infinite linear;"></div>
-            </div>
-            <style>@keyframes playerSpin { to { transform: rotate(360deg); } }</style>`;
 
-        const ytMatch = rawInput.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-        if (ytMatch && ytMatch[1]) {
-            embedHtml += `<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1" style="width:100%;height:100%;border:0;border-radius:20px;" allow="autoplay; encrypted-media" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
-        } else {
-            embedHtml += `<iframe src="${rawInput}" style="width:100%;height:100%;border:0;border-radius:20px;" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
+        let embedHtml = '';
+
+        if (!url) {
+            container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No video source provided</div>`;
+            return;
         }
-        container.innerHTML = `<div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden;">${embedHtml}</div>`;
+
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            let ytId = '';
+            if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
+            else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
+            else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
+
+            if (ytId) {
+                embedHtml = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+            }
+        } else if (url.match(/\.(mp4|webm|ogg)$/i)) {
+            embedHtml = `<video src="${url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
+        } else {
+            embedHtml = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+        }
+
+        container.innerHTML = embedHtml;
     }
-};
+}
