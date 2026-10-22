@@ -338,21 +338,33 @@
 
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Syncing to GitHub...';
+                submitBtn.textContent = 'Saving Stream...';
 
-                const syncSuccess = await StorageDB.addVideoStream({
-                    title,
-                    url,
-                    thumbnail: thumbnail || '',
-                    models: selectedModels
-                });
+                try {
+                    // 1. Add locally
+                    const streams = StorageDB.getStreams();
+                    streams.push({
+                        title,
+                        url,
+                        thumbnail: thumbnail || '',
+                        models: selectedModels,
+                        type: 'stream',
+                        createdAt: Date.now()
+                    });
+                    localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
 
-                if (syncSuccess) {
+                    // 2. Trigger non-blocking GitHub sync with a 3s safety window against ERR_ABORTED
+                    if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                        const syncPromise = GitHubSync.triggerAutoSync(true, streams);
+                        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
+                        await Promise.race([syncPromise, timeoutPromise]);
+                    }
+
+                    // 3. Instant smooth redirect back home
                     window.location.href = '../index.html';
-                } else {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save Stream';
-                    alert('Stream saved locally, but GitHub sync failed! Please verify your token in localStorage.');
+                } catch (err) {
+                    console.error('Save stream error:', err);
+                    window.location.href = '../index.html';
                 }
             });
         });
