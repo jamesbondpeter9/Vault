@@ -39,12 +39,13 @@
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mondrian-nav-box:hover {
             background: #fff;
             color: #000;
             border-color: #fff;
+            transform: translateY(-1px);
         }
 
         .home-grid {
@@ -78,11 +79,12 @@
             background: #000;
             display: block;
             box-sizing: border-box;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform, box-shadow;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mondrian-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform: translateY(-4px) scale(1.002);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.7), var(--neon-glow, 0 0 20px rgba(255,255,255,0.05));
             z-index: 10;
         }
 
@@ -129,6 +131,11 @@
             object-position: center;
             display: block;
             border-radius: 12px;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mondrian-card:hover .mondrian-thumb img {
+            transform: scale(1.03);
         }
 
         .mondrian-overlay {
@@ -136,8 +143,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 22px 10px 8px 10px;
-            background: transparent;
+            padding: 26px 12px 10px 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
             font-weight: 700;
             font-size: 0.8rem;
             color: #ffffff;
@@ -147,6 +154,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: background 0.3s ease;
         }
     </style>
 </head>
@@ -164,7 +174,6 @@
     </div>
     
     <script src="config.js"></script>
-    <!-- Using Media/storage.js to load streams from Media/videos.json -->
     <script src="Media/storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
@@ -183,7 +192,8 @@
             allStreams.forEach((stream) => {
                 const card = document.createElement('a');
                 const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `watch.html?index=${globalIndex}`;
+                // Updated link path pointing to Media/watch.html
+                card.href = `Media/watch.html?index=${globalIndex}`;
                 card.className = `mondrian-card portrait`;
 
                 card.innerHTML = `
