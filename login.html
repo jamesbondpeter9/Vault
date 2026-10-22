@@ -90,7 +90,7 @@
             </div>
             <div>
                 <label>Password</label>
-                <input type="password" id="usernameInput" required placeholder="Enter password">
+                <input type="password" id="passwordInput" required placeholder="Enter password">
             </div>
             <button type="submit" class="login-btn">Log In</button>
             <div id="errorMsg" class="error-msg">Incorrect username or password. Please try again.</div>
@@ -102,7 +102,7 @@
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('usernameInput').value.trim();
-            const password = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
             
             // Set your desired credentials here or map them from PortalConfig
             const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
