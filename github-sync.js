@@ -36,22 +36,36 @@ class GitHubSync {
         const branch = PortalConfig.branch;
 
         const pathname = window.location.pathname.toLowerCase();
-        const isVideoPage = !pathname.includes('image') && !pathname.includes('photo') && !pathname.includes('album');
-
-        // Target Media/videos.json in the capitalized Media/ folder
-        let jsonFilename = isVideoPage ? 'Media/videos.json' : 'Media/images.json';
-
+        
+        let jsonFilename = 'Media/videos.json';
         let dbData = { streams: [] };
-        if (typeof StorageDB !== 'undefined') {
-            dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
+
+        // Determine target file and payload based on the active page path
+        if (pathname.includes('/model/') || pathname.includes('models.html')) {
+            jsonFilename = 'Model/Models.json';
+            dbData = { models: [] };
+            if (typeof ModelStorageDB !== 'undefined') {
+                dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
+            }
+        } else if (pathname.includes('image') || pathname.includes('photo') || pathname.includes('album')) {
+            jsonFilename = 'Media/images.json';
+            if (typeof ImageStorageDB !== 'undefined') {
+                dbData = typeof ImageStorageDB.getDatabase === 'function' ? await ImageStorageDB.getDatabase() || {} : { models: [], photostreams: [], folders: [] };
+            }
+        } else {
+            jsonFilename = 'Media/videos.json';
+            if (typeof StorageDB !== 'undefined') {
+                dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
+            }
         }
 
-        const hasLocalStreams = dbData.streams.length > 0;
-        if (!hasLocalStreams) {
+        // Safety fallback if local storage payload is empty
+        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || (dbData.models && dbData.models.length > 0) || (dbData.photostreams && dbData.photostreams.length > 0);
+        if (!hasLocalData) {
             try {
                 const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
-                if (remoteData && remoteData.streams && remoteData.streams.length > 0) {
-                    dbData.streams = remoteData.streams;
+                if (remoteData) {
+                    dbData = remoteData;
                 }
             } catch (e) {
                 console.warn('Could not verify remote JSON fallback:', e);
@@ -59,7 +73,7 @@ class GitHubSync {
         }
 
         const jsonContent = JSON.stringify(dbData, null, 4);
-        const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Stream sync: Updated ${jsonFilename} via portal`);
+        const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Sync: Updated ${jsonFilename} via portal`);
 
         return jsonSynced;
     }
