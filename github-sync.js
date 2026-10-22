@@ -1,25 +1,25 @@
 class GitHubSync {
     static debounceTimer = null;
 
-    static async triggerAutoSync(immediate = false) {
+static async triggerAutoSync(immediate = false, streamsOverride = null) {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
             this.debounceTimer = null;
         }
 
         if (immediate) {
-            return await this._executeSync();
+            return await this._executeSync(streamsOverride);
         }
 
         return new Promise((resolve) => {
             this.debounceTimer = setTimeout(async () => {
-                const success = await this._executeSync();
+                const success = await this._executeSync(streamsOverride);
                 resolve(success);
             }, 2000);
         });
     }
 
-    static async _executeSync() {
+static async _executeSync(streamsOverride = null) {
         if (typeof PortalConfig === 'undefined') {
             console.warn('PortalConfig is not defined. Skipping auto-sync.');
             return false;
@@ -37,11 +37,12 @@ class GitHubSync {
         const jsonFilePath = 'Media/videos.json';
 
         let dbData = { streams: [] };
-        if (typeof StorageDB !== 'undefined') {
+        if (streamsOverride) {
+            dbData.streams = streamsOverride;
+        } else if (typeof StorageDB !== 'undefined') {
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // Sync local state directly to GitHub without accidental remote overriding
         const jsonContent = JSON.stringify(dbData, null, 4);
         const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilePath, jsonContent, `Stream sync: Updated ${jsonFilePath} via portal`);
 
