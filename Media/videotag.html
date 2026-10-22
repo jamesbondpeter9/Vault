@@ -5,20 +5,20 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Videos - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Model Streams - Portal</title>
+    <link rel="stylesheet" href="../../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
-            margin-bottom: 20px;
-            max-width: 1700px;
+            margin-bottom: 24px;
+            max-width: 1650px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -36,161 +36,96 @@
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            transition: all 0.2s ease;
         }
-        .mondrian-nav-box:hover {
-            background: #fff;
-            color: #000;
+        .streams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-width: 1650px;
+            margin: 0 auto;
+        }
+        .stream-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #fff;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .stream-card:hover {
+            transform: translateY(-4px);
             border-color: #fff;
         }
-        .tag-header {
-            background: var(--card-bg);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
-        }
-        .tag-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 140px;
-            grid-auto-flow: dense;
-            gap: 4px;
-            align-items: stretch;
-        }
-        @media(max-width: 1400px) { .tag-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 900px) { .tag-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; } }
-        @media(max-width: 500px) { .tag-grid { grid-template-columns: 1fr; grid-auto-rows: 190px; } }
-
-        .mondrian-card {
-            position: relative;
+        .stream-thumb {
             width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            text-decoration: none;
-            background: #000;
-            display: block;
-            box-sizing: border-box;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .mondrian-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 10;
-        }
-        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
-        .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
-
-        .mondrian-thumb {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
             background: #000;
         }
-        .mondrian-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-            object-position: center;
-            display: block;
-            border-radius: 12px;
-        }
-        .mondrian-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 22px 10px 8px 10px;
-            background: transparent;
+        .stream-card-title {
+            padding: 12px 16px;
+            font-size: 0.9rem;
             font-weight: 700;
-            font-size: 0.8rem;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            z-index: 5;
-            box-sizing: border-box;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
     </style>
 </head>
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
-        <div class="tag-header">
-            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Tagged Videos</h1>
-            <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Videos featuring this model</p>
+        <h1 id="tagHeaderTitle" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; text-align: center;">Model Streams</h1>
+        
+        <div class="streams-grid" id="streamsGrid">
+            <div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">Loading streams...</div>
         </div>
-
-        <div class="tag-grid" id="tagGrid"></div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="config.js"></script>
+    <!-- Script imports relative to root -->
+    <script src="../../config.js"></script>
     <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
             const params = new URLSearchParams(window.location.search);
-            const modelName = decodeURIComponent(params.get('name') ?? '');
+            const modelName = params.get('model');
 
-            if (modelName) {
-                document.getElementById('tagTitle').textContent = `${modelName} - Videos`;
-                document.title = `${modelName} Videos - Portal`;
-            }
+            const header = document.getElementById('tagHeaderTitle');
+            const grid = document.getElementById('streamsGrid');
 
-            const allStreams = StorageDB.getVideoStreams();
-            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
-
-            const grid = document.getElementById('tagGrid');
-            if (matchedStreams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No tagged videos found for this model.</div>`;
+            if (!modelName) {
+                header.textContent = 'All Streams';
+                renderStreams(StorageDB.getStreams());
                 return;
             }
 
-            grid.innerHTML = '';
-            matchedStreams.forEach((stream) => {
-                const card = document.createElement('a');
-                const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `watch.html?index=${globalIndex}`;
-                card.className = 'mondrian-card portrait';
+            header.textContent = `Streams tagged with "${modelName}"`;
+            const allStreams = StorageDB.getStreams();
+            const filteredStreams = allStreams.filter(s => 
+                s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())
+            );
 
-                card.innerHTML = `
-                    <div class="mondrian-thumb">
-                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.8rem;">No Thumbnail</div>'}
-                        <div class="mondrian-overlay">${stream.title}</div>
-                    </div>`;
-                grid.appendChild(card);
-
-                if (stream.thumbnail) {
-                    const img = card.querySelector('.lazy-thumb');
-                    img.onload = () => {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        if (ratio < 0.85) {
-                            card.className = 'mondrian-card portrait';
-                        } else if (ratio > 1.25) {
-                            card.className = 'mondrian-card landscape';
-                        } else {
-                            card.className = 'mondrian-card square';
-                        }
-                    };
-                }
-            });
+            renderStreams(filteredStreams);
         });
+
+        function renderStreams(streams) {
+            const grid = document.getElementById('streamsGrid');
+            if (!streams || streams.length === 0) {
+                grid.innerHTML = `<div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No streams found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = streams.map((stream, idx) => `
+                <a href="watch.html?index=${idx}" class="stream-card">
+                    <img src="${stream.thumbnail || 'placeholder.jpg'}" class="stream-thumb" alt="${stream.title}" onerror="this.src='placeholder.jpg'">
+                    <div class="stream-card-title">${stream.title}</div>
+                </a>
+            `).join('');
+        }
     </script>
 </body>
 </html>
