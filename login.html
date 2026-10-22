@@ -1,189 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Authentication Guard Removed -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Portal - Home</title>
+    <title>Login - Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .nav-bar-compact {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 2px;
-            margin-bottom: 20px;
-        }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-        .mondrian-nav-box {
-            height: 52px !important;
-            font-size: 0.85rem !important;
-            border-radius: 12px !important;
-        }
-
-        .home-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 140px;
-            grid-auto-flow: dense;
-            gap: 4px;
-            align-items: stretch;
-        }
-        @media(max-width: 900px) { 
-            .home-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)); 
-                grid-auto-rows: 150px;
-            } 
-        }
-        @media(max-width: 500px) { 
-            .home-grid { 
-                grid-template-columns: 1fr; 
-                grid-auto-rows: 190px;
-            } 
-        }
-
-        .mondrian-card {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            text-decoration: none;
-            background: #000;
-            display: block;
-            box-sizing: border-box;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .mondrian-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 10;
-        }
-
-        .mondrian-card.portrait {
-            grid-column: span 1; 
-            grid-row: span 2;
-            aspect-ratio: 9 / 16;
-        }
-
-        .mondrian-card.landscape {
-            grid-column: span 2; 
-            grid-row: span 4;
-        }
-
-        @media(max-width: 900px) {
-            .mondrian-card.portrait,
-            .mondrian-card.landscape {
-                grid-column: span 1;
-            }
-        }
-
-        .mondrian-card.square {
-            grid-column: span 1;
-            grid-row: span 1;
-            aspect-ratio: 1 / 1;
-        }
-
-        .mondrian-thumb {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
+        body {
             display: flex;
             align-items: center;
             justify-content: center;
+            height: 100vh;
             background: #000;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-        .mondrian-thumb img {
+        .login-card {
             width: 100%;
-            height: 100%;
-            object-fit: fill;
-            object-position: center;
-            display: block;
-            border-radius: 12px;
-        }
-
-        .mondrian-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 22px 10px 8px 10px;
-            background: transparent;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            z-index: 5;
+            max-width: 380px;
+            padding: 30px;
+            background: var(--card-bg, #111);
+            border: 1px solid var(--card-border, #333);
+            border-radius: 16px;
             box-sizing: border-box;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .login-card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .login-card label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted, #888);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #000;
+            border: 1px solid var(--card-border, #333);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: #fff;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+        .error-msg {
+            color: #ff4d4d;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="site-container">
-        <!-- Compact Top Nav Bar -->
-        <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
-            <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="image-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
-            <!-- Updated "+" navigation link pointing to Media/stream.html -->
-            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
-            <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
-        </div>
-        
-        <div class="home-grid" id="streamsGrid"></div>
+    <div class="login-card">
+        <h2>Portal Login</h2>
+        <form id="loginForm">
+            <div>
+                <label>Password</label>
+                <input type="password" id="passwordInput" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="login-btn">Log In</button>
+            <div id="errorMsg" class="error-msg">Incorrect password. Please try again.</div>
+        </form>
     </div>
-    
+
     <script src="config.js"></script>
-    <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
-            const streams = StorageDB.getVideoStreams();
-            const grid = document.getElementById('streamsGrid');
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pwd = document.getElementById('passwordInput').value;
             
-            if (streams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
-                return;
+            // Set your desired portal password here or check against config
+            const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'admin';
+
+            if (pwd === correctPassword) {
+                sessionStorage.setItem('portal_authenticated', 'true');
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
             }
-            
-            grid.innerHTML = '';
-            
-            streams.forEach((stream, index) => {
-                const card = document.createElement('a');
-                card.href = `watch.html?index=${index}`;
-                card.className = `mondrian-card portrait`;
-
-                card.innerHTML = `
-                    <div class="mondrian-thumb">
-                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
-                        <div class="mondrian-overlay">${stream.title}</div>
-                    </div>`;
-            
-                grid.appendChild(card);
-
-                if (stream.thumbnail) {
-                    const img = card.querySelector('.lazy-thumb');
-                    img.onload = () => {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        if (ratio < 0.85) {
-                            card.className = 'mondrian-card portrait';
-                        } else if (ratio > 1.25) {
-                            card.className = 'mondrian-card landscape';
-                        } else {
-                            card.className = 'mondrian-card square';
-                        }
-                    };
-                }
-            });
         });
     </script>
 </body>
