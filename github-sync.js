@@ -40,27 +40,26 @@ class GitHubSync {
 
         let jsonFilename = isVideoPage ? 'videos.json' : 'images.json';
 
-        // Gather live data from storage
-        let dbData = { models: [], streams: [] };
+        // Gather ONLY streams for videos.json (ignoring models completely)
+        let dbData = { streams: [] };
         if (typeof StorageDB !== 'undefined') {
-            dbData.models = typeof StorageDB.getModels === 'function' ? await StorageDB.getModels() || [] : [];
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // Safety fallback if local storage is empty
-        const hasLocalData = dbData.models.length > 0 || dbData.streams.length > 0;
-        if (!hasLocalData) {
+        // Safety fallback if local streams storage is empty
+        const hasLocalStreams = dbData.streams.length > 0;
+        if (!hasLocalStreams) {
             try {
                 const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
-                if (remoteData && ((remoteData.models && remoteData.models.length > 0) || (remoteData.streams && remoteData.streams.length > 0))) {
-                    dbData = remoteData;
+                if (remoteData && remoteData.streams && remoteData.streams.length > 0) {
+                    dbData.streams = remoteData.streams;
                 }
             } catch (e) {
                 console.warn('Could not verify remote JSON fallback:', e);
             }
         }
 
-        // Sync target JSON file (videos.json) containing the updated streams/models
+        // Sync videos.json containing strictly the streams payload
         const jsonContent = JSON.stringify(dbData, null, 4);
         const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Stream sync: Updated ${jsonFilename} via portal`);
 
