@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Stream - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -42,11 +42,6 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.95), var(--neon-glow);
             margin-bottom: 20px;
         }
-        .player-wrapper iframe, .player-wrapper video {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
         .stream-info-panel {
             background: var(--card-bg);
             backdrop-filter: blur(40px);
@@ -63,7 +58,7 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <div class="mondrian-nav-card" onclick="openDeleteStreamModal()" style="cursor: pointer;">
                 <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">&times;</div>
             </div>
@@ -93,10 +88,11 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="config.js"></script>
+    <!-- Script imports relative to root -->
+    <script src="../../config.js"></script>
     <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="player.js"></script>
+    <script src="../../github-sync.js"></script>
     <script>
         let streamIndex = 0;
         let currentStreamItem = null;
@@ -129,26 +125,7 @@
                 tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
             }
 
-            const playerContainer = document.getElementById('playerContainer');
-            let embedHtml = '';
-            const url = currentStreamItem.url;
-
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                let ytId = '';
-                if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
-                else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
-                else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                
-                if (ytId) {
-                    embedHtml = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-                }
-            } else if (url.match(/\.(mp4|webm|ogg)$/i)) {
-                embedHtml = `<video src="${url}" controls autoplay style="width:100%;height:100%;"></video>`;
-            } else {
-                embedHtml = `<iframe src="${url}" allowfullscreen></iframe>`;
-            }
-
-            playerContainer.innerHTML = embedHtml;
+            StreamPlayer.renderPlayer('playerContainer', currentStreamItem.url);
         });
 
         function openDeleteStreamModal() {
@@ -162,22 +139,21 @@
         async function confirmDeleteStream() {
             if (!currentStreamItem) return;
             
-            // Smooth UI Feedback: Update button text & disable during deletion sync
             const deleteBtn = document.getElementById('confirmDeleteBtn');
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
+            let rawStreams = StorageDB.getStreams();
             rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
             
             const syncSuccess = await StorageDB.saveStreams(rawStreams, true);
 
             if (syncSuccess) {
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             } else {
                 deleteBtn.disabled = false;
                 deleteBtn.textContent = 'Delete';
-                alert('Stream removed locally, but GitHub sync failed! Please check your connection or token.');
+                alert('Stream removed locally, but GitHub sync failed!');
             }
         }
     </script>
