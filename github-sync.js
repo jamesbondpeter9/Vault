@@ -1,25 +1,25 @@
 class GitHubSync {
     static debounceTimer = null;
 
-    static async triggerAutoSync(immediate = false, streamsOverride = null) {
+    static async triggerAutoSync(immediate = false) {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
             this.debounceTimer = null;
         }
 
         if (immediate) {
-            return await this._executeSync(streamsOverride);
+            return await this._executeSync();
         }
 
         return new Promise((resolve) => {
             this.debounceTimer = setTimeout(async () => {
-                const success = await this._executeSync(streamsOverride);
+                const success = await this._executeSync();
                 resolve(success);
             }, 2000);
         });
     }
 
-    static async _executeSync(streamsOverride = null) {
+    static async _executeSync() {
         if (typeof PortalConfig === 'undefined') {
             console.warn('PortalConfig is not defined. Skipping auto-sync.');
             return false;
@@ -34,17 +34,34 @@ class GitHubSync {
         const owner = PortalConfig.owner;
         const repo = PortalConfig.repo;
         const branch = PortalConfig.branch;
-        const jsonFilePath = 'Media/videos.json';
 
+        const path = window.location.pathname.split('/').pop() || 'index.html';
+        const isVideoPage = !path.includes('image') && !path.includes('photo') && !path.includes('album');
+
+        let jsonFilename = isVideoPage ? 'videos.json' : 'images.json';
+
+        // Gather ONLY streams for videos.json (ignoring models completely)
         let dbData = { streams: [] };
-        if (streamsOverride) {
-            dbData.streams = streamsOverride;
-        } else if (typeof StorageDB !== 'undefined') {
+        if (typeof StorageDB !== 'undefined') {
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
+        // Safety fallback if local streams storage is empty
+        const hasLocalStreams = dbData.streams.length > 0;
+        if (!hasLocalStreams) {
+            try {
+                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
+                if (remoteData && remoteData.streams && remoteData.streams.length > 0) {
+                    dbData.streams = remoteData.streams;
+                }
+            } catch (e) {
+                console.warn('Could not verify remote JSON fallback:', e);
+            }
+        }
+
+        // Sync videos.json containing strictly the streams payload
         const jsonContent = JSON.stringify(dbData, null, 4);
-        const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilePath, jsonContent, `Stream sync: Updated ${jsonFilePath} via portal`);
+        const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Stream sync: Updated ${jsonFilename} via portal`);
 
         return jsonSynced;
     }
@@ -74,7 +91,6 @@ class GitHubSync {
                 sha = getData.sha;
             }
 
-            // Safe UTF-8 Base64 encoding
             const base64Content = btoa(unescape(encodeURIComponent(fileContent)));
 
             const putRes = await fetch(apiUrl, {
@@ -96,11 +112,11 @@ class GitHubSync {
                 return true;
             } else {
                 const errData = await putRes.json();
-                console.error(`🔴 GitHub API commit error for ${filePath}:`, errData);
+                console.error(`GitHub API commit error for ${filePath}:`, errData.message);
                 return false;
             }
         } catch (err) {
-            console.error(`🔴 GitHub Sync Exception for ${filePath}:`, err);
+            console.error(`GitHub Sync Exception for ${filePath}:`, err);
             return false;
         }
     }
