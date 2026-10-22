@@ -45,7 +45,6 @@
             border-color: #fff;
         }
 
-        /* Layout Container with 2px gap matching photostream.html */
         .stream-layout-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -79,7 +78,6 @@
             box-sizing: border-box;
         }
 
-        /* Tag Section Wrapper */
         .tag-section-wrapper {
             margin-bottom: 16px;
         }
@@ -97,7 +95,6 @@
             color: var(--text-muted);
         }
 
-        /* A-Z Alphabet Quick-Jump / Filter Bar */
         .az-bar {
             display: flex;
             gap: 4px;
@@ -141,7 +138,6 @@
             pointer-events: none;
         }
 
-        /* Scrollable Tags Container */
         .tags-container {
             display: flex;
             flex-wrap: wrap;
@@ -198,7 +194,6 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar with Home and Models matching index.html -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
@@ -222,7 +217,6 @@
                             <input type="text" id="streamThumbnail" placeholder="Leave blank for auto YouTube thumb">
                         </div>
 
-                        <!-- Models Tagging Section (Advanced Photostream A-Z Bar Feature) -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -245,10 +239,10 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts (pointing 1 level up for github-sync.js) -->
     <script src="config.js"></script>
     <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let selectedModels = [];
         let modelLetterFilter = 'ALL';
@@ -336,7 +330,6 @@
 
                 if (!title || !url) return;
 
-                // Smooth UI Feedback: Update button text & disable during sync
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Syncing to GitHub...';
