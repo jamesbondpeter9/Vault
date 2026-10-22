@@ -19,7 +19,7 @@ class StorageDB {
             if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/media/videos.json`;
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
                     const res = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${token}` }
                     });
@@ -35,12 +35,12 @@ class StorageDB {
                             });
                             localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                         }
-                        console.log('Successfully bootstrapped streams from media/videos.json!');
+                        console.log('Successfully bootstrapped streams from Media/videos.json!');
                     }
                 }
             }
         } catch (e) {
-            console.log('Could not fetch remote media/videos.json during init:', e);
+            console.log('Could not fetch remote Media/videos.json during init:', e);
         }
     }
 
