@@ -35,19 +35,17 @@ class GitHubSync {
         const repo = PortalConfig.repo;
         const branch = PortalConfig.branch;
 
-        // Robust pathname inspection supporting nested folders (e.g., /Media/stream.html)
         const pathname = window.location.pathname.toLowerCase();
         const isVideoPage = !pathname.includes('image') && !pathname.includes('photo') && !pathname.includes('album');
 
-        let jsonFilename = isVideoPage ? 'videos.json' : 'images.json';
+        // Target media/videos.json for video streams
+        let jsonFilename = isVideoPage ? 'media/videos.json' : 'media/images.json';
 
-        // Gather ONLY streams for videos.json (ignoring models completely)
         let dbData = { streams: [] };
         if (typeof StorageDB !== 'undefined') {
             dbData.streams = typeof StorageDB.getStreams === 'function' ? await StorageDB.getStreams() || [] : [];
         }
 
-        // Safety fallback if local streams storage is empty
         const hasLocalStreams = dbData.streams.length > 0;
         if (!hasLocalStreams) {
             try {
@@ -60,7 +58,6 @@ class GitHubSync {
             }
         }
 
-        // Sync videos.json containing strictly the streams payload to the repository root
         const jsonContent = JSON.stringify(dbData, null, 4);
         const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Stream sync: Updated ${jsonFilename} via portal`);
 
