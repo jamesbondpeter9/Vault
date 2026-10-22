@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = '../login.html';
+            window.location.href = 'login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Stream - Portal</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -198,10 +198,10 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar with Home and Models -->
+        <!-- Compact Top Nav Bar with Home and Models matching index.html -->
         <div class="nav-bar-compact">
-            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
         <div class="stream-layout-container">
@@ -222,7 +222,7 @@
                             <input type="text" id="streamThumbnail" placeholder="Leave blank for auto YouTube thumb">
                         </div>
 
-                        <!-- Models Tagging Section (A-Z Bar Feature) -->
+                        <!-- Models Tagging Section (Advanced Photostream A-Z Bar Feature) -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -245,10 +245,10 @@
         </div>
     </div>
 
-    <!-- Integrated Root Config, Storage & GitHub Sync Scripts -->
-    <script src="../config.js"></script>
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="config.js"></script>
     <script src="storage.js"></script>
-    <script src="../github-sync.js"></script>
+    <script src="github-sync.js"></script>
     <script>
         let selectedModels = [];
         let modelLetterFilter = 'ALL';
@@ -336,35 +336,29 @@
 
                 if (!title || !url) return;
 
+                // Smooth UI Feedback: Update button text & disable during sync
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Saving Stream...';
+                submitBtn.textContent = 'Syncing to GitHub...';
+                
+                const streams = StorageDB.getStreams();
+                streams.push({
+                    title,
+                    url,
+                    thumbnail: thumbnail || '',
+                    models: selectedModels,
+                    type: 'stream',
+                    createdAt: Date.now()
+                });
 
-                try {
-                    // 1. Add locally
-                    const streams = StorageDB.getStreams();
-                    streams.push({
-                        title,
-                        url,
-                        thumbnail: thumbnail || '',
-                        models: selectedModels,
-                        type: 'stream',
-                        createdAt: Date.now()
-                    });
-                    localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
+                const syncSuccess = await StorageDB.saveStreams(streams, true);
 
-                    // 2. Trigger non-blocking GitHub sync with a 3s safety window against ERR_ABORTED
-                    if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                        const syncPromise = GitHubSync.triggerAutoSync(true, streams);
-                        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
-                        await Promise.race([syncPromise, timeoutPromise]);
-                    }
-
-                    // 3. Instant smooth redirect back home
-                    window.location.href = '../index.html';
-                } catch (err) {
-                    console.error('Save stream error:', err);
-                    window.location.href = '../index.html';
+                if (syncSuccess) {
+                    window.location.href = 'index.html';
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Stream';
+                    alert('Stream saved locally, but GitHub sync failed! Please verify your token in localStorage.');
                 }
             });
         });
