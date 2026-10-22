@@ -143,12 +143,12 @@ class StorageDB {
         return await StorageDB.saveStreams(streams, true);
     }
 
-    static async deleteVideoStream(index) {
+static async deleteVideoStream(index) {
         let streams = StorageDB.getStreams();
         if (index >= 0 && index < streams.length) {
             streams.splice(index, 1);
+            // Pass the modified streams array directly so GitHubSync receives the exact new state
             return await StorageDB.saveStreams(streams, true);
         }
         return false;
     }
-}
