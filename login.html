@@ -48,7 +48,7 @@
             color: #fff;
             font-size: 0.9rem;
             box-sizing: border-box;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             font-family: inherit;
         }
         .login-card input:focus {
@@ -66,6 +66,7 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: opacity 0.2s ease;
+            margin-top: 4px;
         }
         .login-btn:hover {
             opacity: 0.9;
@@ -74,7 +75,7 @@
             color: #ff4d4d;
             font-size: 0.8rem;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 12px;
             display: none;
         }
     </style>
@@ -84,11 +85,15 @@
         <h2>Portal Login</h2>
         <form id="loginForm">
             <div>
+                <label>Username</label>
+                <input type="text" id="usernameInput" required placeholder="Janice">
+            </div>
+            <div>
                 <label>Password</label>
-                <input type="password" id="passwordInput" required placeholder="Enter password">
+                <input type="password" id="usernameInput" required placeholder="James@123">
             </div>
             <button type="submit" class="login-btn">Log In</button>
-            <div id="errorMsg" class="error-msg">Incorrect password. Please try again.</div>
+            <div id="errorMsg" class="error-msg">Incorrect username or password. Please try again.</div>
         </form>
     </div>
 
@@ -96,12 +101,14 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const pwd = document.getElementById('passwordInput').value;
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('usernameInput').value;
             
-            // Set your desired portal password here or check against config
+            // Set your desired credentials here or map them from PortalConfig
+            const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'admin';
             const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'admin';
 
-            if (pwd === correctPassword) {
+            if (username === correctUsername && password === correctPassword) {
                 sessionStorage.setItem('portal_authenticated', 'true');
                 window.location.href = 'index.html';
             } else {
