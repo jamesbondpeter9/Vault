@@ -19,7 +19,7 @@ class StorageDB {
             if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/videos.json`;
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/vault/Media/videos.json`;
                     const res = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${token}` }
                     });
@@ -35,7 +35,7 @@ class StorageDB {
                             });
                             localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                         }
-                        console.log('Successfully bootstrapped streams from remote videos.json!');
+                        console.log('Successfully bootstrapped streams from vault/Media/videos.json!');
                     }
                 }
             }
@@ -52,7 +52,6 @@ class StorageDB {
         }
     }
 
-    // Models are kept purely local in browser storage and do NOT trigger GitHub sync
     static saveModels(models) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
     }
@@ -81,7 +80,6 @@ class StorageDB {
         const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
         StorageDB.saveModels(filteredModels);
 
-        // Cascade remove model tag from local streams
         const streams = StorageDB.getStreams();
         streams.forEach(s => {
             if (s.models) {
