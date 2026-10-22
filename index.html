@@ -149,9 +149,9 @@
         <div class="home-grid" id="streamsGrid"></div>
     </div>
     
-    <script src="config.js"></script>
-    <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+   <script src="config.js"></script>
+    <script src="Media/storage.js"></script>
+    <script src="Media/github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
@@ -168,9 +168,8 @@
             streams.forEach((stream, index) => {
                 const card = document.createElement('a');
                 card.href = `Media/watch.html?index=${index}`;
-                card.className = `mondrian-card portrait`; // Default fallback
+                card.className = `mondrian-card portrait`;
 
-                // Auto-generate YouTube thumbnail if missing
                 let thumbUrl = stream.thumbnail;
                 if (!thumbUrl && stream.url) {
                     if (stream.url.includes('youtube.com') || stream.url.includes('youtu.be')) {
@@ -190,7 +189,6 @@
                 
                 grid.appendChild(card);
 
-                // Immediate and event-driven aspect ratio detection
                 if (thumbUrl) {
                     const img = card.querySelector('.lazy-thumb');
                     const adjustShape = () => {
@@ -214,5 +212,3 @@
             });
         });
     </script>
-</body>
-</html>
