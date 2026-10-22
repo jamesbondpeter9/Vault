@@ -343,7 +343,7 @@
         }
 
         function openAlbums(name) {
-            window.location.href = `albums.html?name=${name}`;
+            window.location.href = `vault.html?name=${name}`;
         }
 
         function openUpdateThumbModal(index) {
@@ -373,7 +373,6 @@
                 const targetModel = models[modelIndexToDelete];
                 
                 if (targetModel) {
-                    // Uses ModelStorageDB.deleteModel to properly remove from localStorage and sync to GitHub
                     await ModelStorageDB.deleteModel(targetModel.name);
                 }
                 renderModels();
