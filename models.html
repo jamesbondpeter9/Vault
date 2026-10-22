@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -105,7 +106,7 @@
 
         <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
 
-        <div class="filter-bar" id="filterBar"><button class="filter-btn active">ALL</button><button class="filter-btn ">A</button><button class="filter-btn ">B</button><button class="filter-btn ">C</button><button class="filter-btn ">D</button><button class="filter-btn ">E</button><button class="filter-btn ">F</button><button class="filter-btn ">G</button><button class="filter-btn ">H</button><button class="filter-btn ">I</button><button class="filter-btn ">J</button><button class="filter-btn ">K</button><button class="filter-btn ">L</button><button class="filter-btn ">M</button><button class="filter-btn ">N</button><button class="filter-btn ">O</button><button class="filter-btn ">P</button><button class="filter-btn ">Q</button><button class="filter-btn ">R</button><button class="filter-btn ">S</button><button class="filter-btn ">T</button><button class="filter-btn ">U</button><button class="filter-btn ">V</button><button class="filter-btn ">W</button><button class="filter-btn ">X</button><button class="filter-btn ">Y</button><button class="filter-btn ">Z</button></div>
+        <div class="filter-bar" id="filterBar"></div>
         <div class="models-grid" id="modelsGrid"><div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div></div>
 
         <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
@@ -146,7 +147,7 @@
             </div>
         </div>
 
-        <div id="deleteModal" style="display: flex; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
+        <div id="deleteModal" style="display:none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
             <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Model</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this model from the directory?</p>
@@ -156,21 +157,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Embedded Databases for Cross-Gallery Sync & Self-Hydration -->
-        <script type="application/json" id="embedded-images-database">
-        {
-            "models": [],
-            "photostreams": [],
-            "folders": []
-        }
-        </script>
-        <script type="application/json" id="embedded-video-database">
-        {
-            "models": [],
-            "streams": []
-        }
-        </script>
     </div>
 
     <script src="config.js"></script>
@@ -185,36 +171,8 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
-            await ImageStorageDB.initDB();
-
-            // Sync from image-gallery.html embedded database if available
-            try {
-                const imgEmb = document.getElementById('embedded-images-database');
-                if (imgEmb) {
-                    const imgData = JSON.parse(imgEmb.textContent);
-                    if (imgData && imgData.models && imgData.models.length > 0) {
-                        const curImgModels = ImageStorageDB.getModels() || [];
-                        if (curImgModels.length === 0) {
-                            ImageStorageDB.saveModels(imgData.models);
-                        }
-                    }
-                }
-            } catch (e) {}
-
-            // Sync from video-gallery.html embedded database if available
-            try {
-                const vidEmb = document.getElementById('embedded-video-database');
-                if (vidEmb) {
-                    const vidData = JSON.parse(vidEmb.textContent);
-                    if (vidData && vidData.models && vidData.models.length > 0) {
-                        const curVidModels = StorageDB.getModels() || [];
-                        if (curVidModels.length === 0) {
-                            StorageDB.saveModels(vidData.models);
-                        }
-                    }
-                }
-            } catch (e) {}
+            if (typeof StorageDB !== 'undefined') await StorageDB.initDB();
+            if (typeof ImageStorageDB !== 'undefined') await ImageStorageDB.initDB();
 
             buildFilterBar();
             renderModels();
@@ -259,15 +217,19 @@
         async function saveModelToBoth(name, thumbnail, shape) {
             const modelData = { name, thumbnail, shape, createdAt: Date.now() };
 
-            StorageDB.initDB();
-            const videoModels = StorageDB.getModels() || [];
-            videoModels.push(modelData);
-            StorageDB.saveModels(videoModels);
+            if (typeof StorageDB !== 'undefined') {
+                StorageDB.initDB();
+                const videoModels = StorageDB.getModels() || [];
+                videoModels.push(modelData);
+                StorageDB.saveModels(videoModels);
+            }
 
-            ImageStorageDB.initDB();
-            const imageModels = ImageStorageDB.getModels() || [];
-            imageModels.push(modelData);
-            ImageStorageDB.saveModels(imageModels);
+            if (typeof ImageStorageDB !== 'undefined') {
+                ImageStorageDB.initDB();
+                const imageModels = ImageStorageDB.getModels() || [];
+                imageModels.push(modelData);
+                ImageStorageDB.saveModels(imageModels);
+            }
 
             document.getElementById('modelName').value = '';
             document.getElementById('modelThumb').value = '';
@@ -275,31 +237,37 @@
             currentPage = 1;
             renderModels();
 
-            // Trigger GitHub auto-sync
-            await GitHubSync.triggerAutoSync();
+            if (typeof GitHubSync !== 'undefined') {
+                await GitHubSync.triggerAutoSync();
+            }
         }
 
         async function updateModelThumbInBoth(index, newUrl, shape) {
-            StorageDB.initDB();
-            const videoModels = StorageDB.getModels() || [];
-            if (videoModels[index]) {
-                videoModels[index].thumbnail = newUrl;
-                videoModels[index].shape = shape;
-                StorageDB.saveModels(videoModels);
+            if (typeof StorageDB !== 'undefined') {
+                StorageDB.initDB();
+                const videoModels = StorageDB.getModels() || [];
+                if (videoModels[index]) {
+                    videoModels[index].thumbnail = newUrl;
+                    videoModels[index].shape = shape;
+                    StorageDB.saveModels(videoModels);
+                }
             }
 
-            ImageStorageDB.initDB();
-            const imageModels = ImageStorageDB.getModels() || [];
-            if (imageModels[index]) {
-                imageModels[index].thumbnail = newUrl;
-                imageModels[index].shape = shape;
-                ImageStorageDB.saveModels(imageModels);
+            if (typeof ImageStorageDB !== 'undefined') {
+                ImageStorageDB.initDB();
+                const imageModels = ImageStorageDB.getModels() || [];
+                if (imageModels[index]) {
+                    imageModels[index].thumbnail = newUrl;
+                    imageModels[index].shape = shape;
+                    ImageStorageDB.saveModels(imageModels);
+                }
             }
 
             renderModels();
 
-            // Trigger GitHub auto-sync
-            await GitHubSync.triggerAutoSync();
+            if (typeof GitHubSync !== 'undefined') {
+                await GitHubSync.triggerAutoSync();
+            }
         }
 
         function buildFilterBar() {
@@ -322,6 +290,7 @@
         }
 
         function renderModels() {
+            if (typeof ImageStorageDB === 'undefined') return;
             ImageStorageDB.initDB();
             const models = ImageStorageDB.getModels() || [];
             const grid = document.getElementById('modelsGrid');
@@ -429,34 +398,42 @@
 
         async function confirmDeleteModel() {
             if (modelIndexToDelete !== null) {
-                ImageStorageDB.initDB();
-                const models = ImageStorageDB.getModels() || [];
-                const targetModel = models[modelIndexToDelete];
-                
-                if (targetModel) {
-                    const modelName = targetModel.name;
+                if (typeof ImageStorageDB !== 'undefined') {
+                    ImageStorageDB.initDB();
+                    const models = ImageStorageDB.getModels() || [];
+                    const targetModel = models[modelIndexToDelete];
+                    
+                    if (targetModel) {
+                        const modelName = targetModel.name;
 
-                    // 1. Delete model & cascade clean from ImageStorageDB
-                    models.splice(modelIndexToDelete, 1);
-                    ImageStorageDB.saveModels(models);
+                        models.splice(modelIndexToDelete, 1);
+                        ImageStorageDB.saveModels(models);
 
-                    let allFolders = ImageStorageDB.getFolders() || [];
-                    allFolders = allFolders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
-                    ImageStorageDB.saveFolders(allFolders);
+                        let allFolders = ImageStorageDB.getFolders() || [];
+                        allFolders = allFolders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
+                        ImageStorageDB.saveFolders(allFolders);
 
-                    let allStreams = ImageStorageDB.getPhotoStreams() || [];
-                    allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
-                    ImageStorageDB.savePhotoStreams(allStreams);
+                        let allStreams = ImageStorageDB.getPhotoStreams() || [];
+                        allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
+                        ImageStorageDB.savePhotoStreams(allStreams);
+                    }
+                }
 
-                    // 2. Delete model & cascade clean from StorageDB using deleteModel helper
+                if (typeof StorageDB !== 'undefined') {
                     StorageDB.initDB();
-                    StorageDB.deleteModel(modelName);
+                    const models = ImageStorageDB.getModels() || [];
+                    // Fallback name acquisition if needed
+                    const targetModel = (ImageStorageDB.getModels() || [])[modelIndexToDelete];
+                    if (targetModel) {
+                        StorageDB.deleteModel(targetModel.name);
+                    }
                 }
 
                 renderModels();
 
-                // Trigger GitHub auto-sync
-                await GitHubSync.triggerAutoSync();
+                if (typeof GitHubSync !== 'undefined') {
+                    await GitHubSync.triggerAutoSync();
+                }
             }
             closeDeleteModal();
         }
@@ -464,6 +441,5 @@
         function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
         function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
-
-
-</body></html>
+</body>
+</html>
