@@ -93,7 +93,7 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts (All paths corrected to root ../) -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="../config.js"></script>
     <script src="../storage.js"></script>
     <script src="../github-sync.js"></script>
@@ -160,23 +160,19 @@
         }
 
         async function confirmDeleteStream() {
-            if (!currentStreamItem) return;
-            
             const deleteBtn = document.getElementById('confirmDeleteBtn');
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            let streams = StorageDB.getStreams();
-            streams = streams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
-            
-            const syncSuccess = await StorageDB.saveStreams(streams, true);
+            // Delete directly by index using the new StorageDB method
+            const syncSuccess = await StorageDB.deleteVideoStream(streamIndex);
 
             if (syncSuccess) {
                 window.location.href = '../index.html';
             } else {
                 deleteBtn.disabled = false;
                 deleteBtn.textContent = 'Delete';
-                alert('Stream removed locally, but GitHub sync failed! Please check your connection or token.');
+                alert('Stream removal failed to sync with GitHub! Please check your connection or token.');
             }
         }
     </script>
