@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Albums - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
         /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
@@ -116,8 +116,8 @@
     <div class="site-container">
         <!-- Top Nav Bar (Home, Models matching index.html & New Folder Action) -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New Folder</div></a>
         </div>
 
@@ -153,11 +153,11 @@
         </div>
     </div>
 
-    <!-- Config, Storage, Viewer & GitHub Sync Scripts -->
-    <script src="config.js"></script>
+    <!-- Config, Storage, Viewer & GitHub Sync Scripts with root path prefixing -->
+    <script src="../config.js"></script>
     <script src="images-storage.js"></script>
     <script src="photoviewer.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let currentModelName = '';
         let folderToRename = '';
@@ -166,7 +166,7 @@
             if (!input) return '';
             input = input.trim();
 
-            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            const bbcodeMatch = input.match(/\[img\](.*?)\[\/img\]/i);
             if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
 
             const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
