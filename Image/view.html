@@ -5,15 +5,14 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Folder View - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
-        /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -42,11 +41,7 @@
             font-weight: 700;
             transition: all 0.2s ease;
         }
-        .mondrian-nav-box:hover {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
+        .mondrian-nav-box:hover { background: #fff; color: #000; border-color: #fff; }
 
         .tag-header {
             background: var(--card-bg);
@@ -58,7 +53,6 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
         }
 
-        /* Mosaic Grid configured for 180px base row height matching index.html */
         .vault-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -84,15 +78,7 @@
             cursor: pointer;
         }
 
-        .mondrian-card.portrait .mondrian-thumb img {
-            object-fit: cover !important;
-            object-position: center center !important;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-        }
-
+        .mondrian-card.portrait .mondrian-thumb img,
         .mondrian-card.landscape .mondrian-thumb img {
             object-fit: cover !important;
             width: 100%;
@@ -104,9 +90,8 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Top Nav Bar (Home & Back to Albums) -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a id="backToAlbums" href="albums.html" class="mondrian-nav-card"><div class="mondrian-nav-box">← Back to Albums</div></a>
         </div>
 
@@ -118,11 +103,10 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script src="images-storage.js"></script>
     <script src="photoviewer.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let currentFolderName = '';
         let currentModelName = '';
@@ -130,25 +114,19 @@
         function extractImageUrl(input) {
             if (!input) return '';
             input = input.trim();
-
-            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            const bbcodeMatch = input.match(/\[img\](.*?)\[\/img\]/i);
             if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
-
             const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
             if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
-
             const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
             if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
-
             return input;
         }
 
         function getImageOrientation(url) {
             return new Promise((resolve) => {
                 const img = new Image();
-                img.onload = () => {
-                    resolve(img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape');
-                };
+                img.onload = () => resolve(img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape');
                 img.onerror = () => resolve('landscape');
                 img.src = url;
             });
@@ -179,10 +157,7 @@
             folderImages.sort((a, b) => {
                 const titleA = (a.title || '').toLowerCase();
                 const titleB = (b.title || '').toLowerCase();
-                if (titleA !== titleB) {
-                    return titleA.localeCompare(titleB);
-                }
-                return (a.createdAt || 0) - (b.createdAt || 0);
+                return titleA !== titleB ? titleA.localeCompare(titleB) : (a.createdAt || 0) - (b.createdAt || 0);
             });
 
             const grid = document.getElementById('vaultGrid');
@@ -195,15 +170,13 @@
 
             for (let idx = 0; idx < folderImages.length; idx++) {
                 const imgItem = folderImages[idx];
-                const rawUrl = imgItem.thumbnail || imgItem.url || '';
-                const imageUrl = extractImageUrl(rawUrl);
+                const imageUrl = extractImageUrl(imgItem.thumbnail || imgItem.url || '');
                 const orientation = await getImageOrientation(imageUrl);
 
                 const card = document.createElement('div');
                 card.className = `mondrian-card ${orientation}`;
                 card.innerHTML = `
                     <div class="mondrian-thumb" onclick="openPhotoModal(${idx})" style="background: var(--card-bg); border: 1px solid var(--card-border); width: 100%; height: 100%; position: relative;">
-                        <!-- Delete Photo Button -->
                         <button onclick="deletePhoto(${idx}, event)" title="Delete Photo" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); color: #ff4d4d; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20; padding: 0; line-height: 1;">&times;</button>
                         ${imageUrl ? `<img src="${imageUrl}" alt="${imgItem.title || 'Photo'}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Image</div>'}
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px 14px; font-weight: 700; font-size: 0.8rem; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${imgItem.title || 'Photo'}</div>
@@ -241,8 +214,6 @@
             });
 
             ImageStorageDB.savePhotoStreams(allPhotoStreams);
-            
-            // Trigger GitHub auto-sync before reloading
             if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
