@@ -15,11 +15,11 @@
     <style>
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
@@ -138,11 +138,9 @@
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
             <!-- Updated Models navigation link pointing to Model/models.html -->
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="image-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
+            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <!-- "+" navigation link pointing to Media/stream.html -->
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
-            <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
@@ -174,7 +172,7 @@
                         ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
                         <div class="mondrian-overlay">${stream.title}</div>
                     </div>`;
-                
+            
                 grid.appendChild(card);
 
                 if (stream.thumbnail) {
