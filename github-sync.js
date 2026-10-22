@@ -40,14 +40,20 @@ class GitHubSync {
         let jsonFilename = 'Media/videos.json';
         let dbData = {};
 
-        // Route sync payloads based on active directory / page
-        if (pathname.includes('/model/') || pathname.includes('models.html')) {
+        // ==========================================
+        // SECTION 1: MODEL SECTION (Model/)
+        // ==========================================
+        if (pathname.includes('/model/') || pathname.includes('models.html') || pathname.includes('vault.html')) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
             if (typeof ModelStorageDB !== 'undefined') {
                 dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
             }
-        } else if (pathname.includes('/image/') || pathname.includes('photostream') || pathname.includes('album') || pathname.includes('view.html')) {
+        } 
+        // ==========================================
+        // SECTION 2: IMAGE SECTION (Image/)
+        // ==========================================
+        else if (pathname.includes('/image/') || pathname.includes('photostream') || pathname.includes('album') || pathname.includes('view.html')) {
             jsonFilename = 'Image/images.json';
             dbData = { models: [], photostreams: [], folders: [] };
             if (typeof ImageStorageDB !== 'undefined') {
@@ -55,7 +61,11 @@ class GitHubSync {
                 dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
                 dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
             }
-        } else {
+        } 
+        // ==========================================
+        // SECTION 3: MEDIA SECTION (Media/)
+        // ==========================================
+        else {
             jsonFilename = 'Media/videos.json';
             dbData = { streams: [] };
             if (typeof StorageDB !== 'undefined') {
@@ -63,8 +73,12 @@ class GitHubSync {
             }
         }
 
-        // Safety fallback if local database payload is empty
-        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || (dbData.models && dbData.models.length > 0) || (dbData.photostreams && dbData.photostreams.length > 0) || (dbData.folders && dbData.folders.length > 0);
+        // Safety fallback if local database payload is empty during additions/updates/deletions
+        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || 
+                             (dbData.models && dbData.models.length > 0) || 
+                             (dbData.photostreams && dbData.photostreams.length > 0) || 
+                             (dbData.folders && dbData.folders.length > 0);
+                             
         if (!hasLocalData) {
             try {
                 const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
