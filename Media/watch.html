@@ -165,32 +165,25 @@
             deleteBtn.textContent = 'Deleting...';
 
             try {
-                // 1. Remove stream locally first
+                // 1. Remove stream locally immediately
                 let streams = StorageDB.getStreams();
                 if (streamIndex >= 0 && streamIndex < streams.length) {
                     streams.splice(streamIndex, 1);
                     localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
                 }
 
-                // 2. Attempt GitHub sync with an 8-second timeout safeguard so it never hangs
-                if (typeof GitHubSync !== 'undefined') {
-                    const syncPromise = GitHubSync.triggerAutoSync(true);
-                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Sync timeout')), 8000));
-                    
-                    try {
-                        await Promise.race([syncPromise, timeoutPromise]);
-                    } catch (netErr) {
-                        console.warn('GitHub sync timed out or failed, but local deletion succeeded.', netErr);
-                    }
+                // 2. Fire GitHub sync in the background without blocking the UI
+                if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                    GitHubSync.triggerAutoSync(true).catch(err => {
+                        console.warn('Background GitHub sync failed:', err);
+                    });
                 }
 
-                // 3. Redirect back home successfully
+                // 3. Instant redirection back home
                 window.location.href = '../index.html';
             } catch (err) {
                 console.error('Delete exception:', err);
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = 'Delete';
-                alert('An error occurred while deleting. Please check your connection.');
+                window.location.href = '../index.html';
             }
         }
     </script>
