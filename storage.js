@@ -14,67 +14,45 @@ class StorageDB {
 
     static async syncFromRemoteJSON() {
         try {
-            if (typeof PortalConfig !== 'undefined') {
+            const currentStreams = StorageDB.getStreams();
+            
+            if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
-                let remoteData = null;
-
-                // 1. Try authenticated fetch if token exists
                 if (token) {
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/videos.json`;
                     const res = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${token}` }
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        if (data && data.content) {
-                            const decodedString = decodeURIComponent(escape(atob(data.content)));
-                            if (decodedString && decodedString.trim() !== '') {
-                                remoteData = JSON.parse(decodedString);
-                            }
-                        }
-                    }
-                }
+                        const decodedString = decodeURIComponent(escape(atob(data.content)));
+                        const remoteData = JSON.parse(decodedString);
 
-                // 2. Fallback to public raw GitHub fetch if token is missing or authenticated fetch failed
-                if (!remoteData) {
-                    const rawUrl = `https://raw.githubusercontent.com/${PortalConfig.owner}/${PortalConfig.repo}/${PortalConfig.branch}/Media/videos.json?t=${Date.now()}`;
-                    const rawRes = await fetch(rawUrl);
-                    if (rawRes.ok) {
-                        const rawText = await rawRes.text();
-                        if (rawText && rawText.trim() !== '') {
-                            remoteData = JSON.parse(rawText);
+                        if (remoteData.streams && Array.isArray(remoteData.streams)) {
+                            const videoStreams = remoteData.streams.filter(s => {
+                                const t = (s.type || 'stream').toLowerCase();
+                                return t === 'stream' || t === 'video';
+                            });
+                            localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                         }
-                    }
-                }
-
-                // 3. Process and apply streams safely
-                if (remoteData) {
-                    const rawList = Array.isArray(remoteData) ? remoteData : (remoteData.streams || []);
-                    if (Array.isArray(rawList)) {
-                        const videoStreams = rawList.filter(s => {
-                            const t = (s.type || 'stream').toLowerCase();
-                            return t === 'stream' || t === 'video';
-                        });
-                        localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
-                        console.log('Successfully synced streams from Media/videos.json!');
+                        console.log('Successfully bootstrapped streams from remote videos.json!');
                     }
                 }
             }
         } catch (e) {
-            console.warn('Could not fetch remote videos.json during init (using local cache):', e);
+            console.log('Could not fetch remote videos.json during init:', e);
         }
     }
 
     static getModels() {
         try {
-            const item = localStorage.getItem('video_portal_models_db');
-            if (!item || !item.trim()) return [];
-            return JSON.parse(item) || [];
+            return JSON.parse(localStorage.getItem('video_portal_models_db')) || [];
         } catch (e) {
             return [];
         }
     }
 
+    // Models are kept purely local in browser storage and do NOT trigger GitHub sync
     static saveModels(models) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
     }
@@ -103,6 +81,7 @@ class StorageDB {
         const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
         StorageDB.saveModels(filteredModels);
 
+        // Cascade remove model tag from local streams
         const streams = StorageDB.getStreams();
         streams.forEach(s => {
             if (s.models) {
@@ -114,9 +93,7 @@ class StorageDB {
 
     static getStreams() {
         try {
-            const item = localStorage.getItem('video_portal_streams_db');
-            if (!item || !item.trim()) return [];
-            const streams = JSON.parse(item) || [];
+            const streams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || [];
             return streams.filter(s => {
                 const t = (s.type || 'stream').toLowerCase();
                 return t === 'stream' || t === 'video';
@@ -130,10 +107,10 @@ class StorageDB {
         return StorageDB.getStreams();
     }
 
-    static async saveStreams(streams, immediate = false, streamsOverride = null) {
+    static async saveStreams(streams, immediate = false) {
         localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            return await GitHubSync.triggerAutoSync(immediate, streamsOverride || streams).catch(err => {
+            return await GitHubSync.triggerAutoSync(immediate).catch(err => {
                 console.error('GitHub auto-sync error:', err);
                 return false;
             });
@@ -151,15 +128,6 @@ class StorageDB {
             type: 'stream',
             createdAt: Date.now()
         });
-        return await StorageDB.saveStreams(streams, true, streams);
-    }
-
-    static async deleteVideoStream(index) {
-        let streams = StorageDB.getStreams();
-        if (index >= 0 && index < streams.length) {
-            streams.splice(index, 1);
-            return await StorageDB.saveStreams(streams, true, streams);
-        }
-        return false;
+        return await StorageDB.saveStreams(streams, true);
     }
 }
