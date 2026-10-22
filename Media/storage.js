@@ -16,6 +16,9 @@ class StorageDB {
         try {
             if (typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
+                let remoteData = null;
+
+                // 1. Try authenticated fetch if token exists
                 if (token) {
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
                     const res = await fetch(apiUrl, {
@@ -24,18 +27,29 @@ class StorageDB {
                     if (res.ok) {
                         const data = await res.json();
                         const decodedString = decodeURIComponent(escape(atob(data.content)));
-                        const remoteData = JSON.parse(decodedString);
+                        remoteData = JSON.parse(decodedString);
+                    }
+                }
 
-                        const rawList = Array.isArray(remoteData) ? remoteData : (remoteData.streams || []);
+                // 2. Fallback to public raw GitHub fetch if token is missing or authenticated fetch failed
+                if (!remoteData) {
+                    const rawUrl = `https://raw.githubusercontent.com/${PortalConfig.owner}/${PortalConfig.repo}/${PortalConfig.branch}/Media/videos.json`;
+                    const rawRes = await fetch(rawUrl);
+                    if (rawRes.ok) {
+                        remoteData = await rawRes.json();
+                    }
+                }
 
-                        if (Array.isArray(rawList)) {
-                            const videoStreams = rawList.filter(s => {
-                                const t = (s.type || 'stream').toLowerCase();
-                                return t === 'stream' || t === 'video';
-                            });
-                            localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
-                            console.log('Successfully synced streams from Media/videos.json!');
-                        }
+                // 3. Process and apply streams if retrieved successfully
+                if (remoteData) {
+                    const rawList = Array.isArray(remoteData) ? remoteData : (remoteData.streams || []);
+                    if (Array.isArray(rawList)) {
+                        const videoStreams = rawList.filter(s => {
+                            const t = (s.type || 'stream').toLowerCase();
+                            return t === 'stream' || t === 'video';
+                        });
+                        localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                        console.log('Successfully synced streams from Media/videos.json!');
                     }
                 }
             }
