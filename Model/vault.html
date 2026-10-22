@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Vault - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
         /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
@@ -76,13 +76,13 @@
     <div class="site-container">
         <!-- Top Nav Bar (Home & Models matching index.html background) -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
         <!-- Two Large Curved Square Thumbnails -->
         <div class="featured-squares-grid" id="featuredSquares">
-            <!-- Left Square (Albums - connected to albums.html) -->
+            <!-- Left Square (Albums - connected to albums.html inside Image or root structure) -->
             <div class="featured-square-card">
                 <div id="featThumb1" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;">
                     <a id="albumsTagLink" href="#" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); z-index: 5; text-decoration: none;">Albums</a>
@@ -97,23 +97,26 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
-    <script src="config.js"></script>
-    <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <!-- Integrated Config, Storage & GitHub Sync Scripts with correct root relative prefixes -->
+    <script src="../config.js"></script>
+    <script src="../storage.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
+            }
             const params = new URLSearchParams(window.location.search);
             const modelName = decodeURIComponent(params.get('name') ?? '');
 
             if (modelName) {
                 document.title = `${modelName} - Vault`;
-                document.getElementById('albumsTagLink').href = `albums.html?name=${encodeURIComponent(modelName)}`;
+                // Pointing to albums.html inside the Image directory
+                document.getElementById('albumsTagLink').href = `../Image/albums.html?name=${encodeURIComponent(modelName)}`;
                 document.getElementById('videoTagLink').href = `videotag.html?name=${encodeURIComponent(modelName)}`;
             }
 
-            const allStreams = StorageDB.getStreams();
+            const allStreams = (typeof StorageDB !== 'undefined') ? (StorageDB.getStreams ? StorageDB.getStreams() : StorageDB.getVideoStreams()) : [];
             const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
 
             const feat2VideoLink = document.getElementById('videoTagLink');
