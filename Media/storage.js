@@ -19,6 +19,7 @@ class StorageDB {
             if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
+                    // Targets Media/videos.json directly from the repository root perspective
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
                     const res = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${token}` }
