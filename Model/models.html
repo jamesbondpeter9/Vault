@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Models Directory - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -100,7 +100,7 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
         </div>
 
@@ -159,10 +159,10 @@
         </div>
     </div>
 
-    <script src="config.js"></script>
-    <script src="storage.js"></script>
-    <script src="images-storage.js"></script>
-    <script src="github-sync.js"></script>
+    <!-- Script references with correct root prefixes and local Modelstrorage -->
+    <script src="../config.js"></script>
+    <script src="Modelstrorage.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let currentLetterFilter = 'ALL';
         let currentPage = 1;
@@ -171,8 +171,7 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof StorageDB !== 'undefined') await StorageDB.initDB();
-            if (typeof ImageStorageDB !== 'undefined') await ImageStorageDB.initDB();
+            if (typeof ModelStorageDB !== 'undefined') await ModelStorageDB.initDB();
 
             buildFilterBar();
             renderModels();
@@ -189,10 +188,10 @@
                 img.src = thumb;
                 img.onload = () => {
                     const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    saveModelToBoth(name, thumb, shape);
+                    saveModel(name, thumb, shape);
                 };
                 img.onerror = () => {
-                    saveModelToBoth(name, thumb, 'square');
+                    saveModel(name, thumb, 'square');
                 };
             });
 
@@ -204,31 +203,23 @@
                     img.src = newUrl;
                     img.onload = () => {
                         const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, shape);
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
                     };
                     img.onerror = () => {
-                        updateModelThumbInBoth(modelIndexToUpdateThumb, newUrl, 'square');
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
                     };
                 }
                 closeUpdateThumbModal();
             });
         });
 
-        async function saveModelToBoth(name, thumbnail, shape) {
+        async function saveModel(name, thumbnail, shape) {
             const modelData = { name, thumbnail, shape, createdAt: Date.now() };
 
-            if (typeof StorageDB !== 'undefined') {
-                StorageDB.initDB();
-                const videoModels = StorageDB.getModels() || [];
-                videoModels.push(modelData);
-                StorageDB.saveModels(videoModels);
-            }
-
-            if (typeof ImageStorageDB !== 'undefined') {
-                ImageStorageDB.initDB();
-                const imageModels = ImageStorageDB.getModels() || [];
-                imageModels.push(modelData);
-                ImageStorageDB.saveModels(imageModels);
+            if (typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                models.push(modelData);
+                await ModelStorageDB.saveAndSyncModels(models, true);
             }
 
             document.getElementById('modelName').value = '';
@@ -236,38 +227,19 @@
             closeAddModelModal();
             currentPage = 1;
             renderModels();
-
-            if (typeof GitHubSync !== 'undefined') {
-                await GitHubSync.triggerAutoSync();
-            }
         }
 
-        async function updateModelThumbInBoth(index, newUrl, shape) {
-            if (typeof StorageDB !== 'undefined') {
-                StorageDB.initDB();
-                const videoModels = StorageDB.getModels() || [];
-                if (videoModels[index]) {
-                    videoModels[index].thumbnail = newUrl;
-                    videoModels[index].shape = shape;
-                    StorageDB.saveModels(videoModels);
-                }
-            }
-
-            if (typeof ImageStorageDB !== 'undefined') {
-                ImageStorageDB.initDB();
-                const imageModels = ImageStorageDB.getModels() || [];
-                if (imageModels[index]) {
-                    imageModels[index].thumbnail = newUrl;
-                    imageModels[index].shape = shape;
-                    ImageStorageDB.saveModels(imageModels);
+        async function updateModelThumb(index, newUrl, shape) {
+            if (typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                if (models[index]) {
+                    models[index].thumbnail = newUrl;
+                    models[index].shape = shape;
+                    await ModelStorageDB.saveAndSyncModels(models, true);
                 }
             }
 
             renderModels();
-
-            if (typeof GitHubSync !== 'undefined') {
-                await GitHubSync.triggerAutoSync();
-            }
         }
 
         function buildFilterBar() {
@@ -290,9 +262,8 @@
         }
 
         function renderModels() {
-            if (typeof ImageStorageDB === 'undefined') return;
-            ImageStorageDB.initDB();
-            const models = ImageStorageDB.getModels() || [];
+            if (typeof ModelStorageDB === 'undefined') return;
+            const models = ModelStorageDB.getModels() || [];
             const grid = document.getElementById('modelsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
@@ -397,43 +368,11 @@
         }
 
         async function confirmDeleteModel() {
-            if (modelIndexToDelete !== null) {
-                if (typeof ImageStorageDB !== 'undefined') {
-                    ImageStorageDB.initDB();
-                    const models = ImageStorageDB.getModels() || [];
-                    const targetModel = models[modelIndexToDelete];
-                    
-                    if (targetModel) {
-                        const modelName = targetModel.name;
-
-                        models.splice(modelIndexToDelete, 1);
-                        ImageStorageDB.saveModels(models);
-
-                        let allFolders = ImageStorageDB.getFolders() || [];
-                        allFolders = allFolders.filter(f => !(f.model && f.model.toLowerCase() === modelName.toLowerCase()));
-                        ImageStorageDB.saveFolders(allFolders);
-
-                        let allStreams = ImageStorageDB.getPhotoStreams() || [];
-                        allStreams = allStreams.filter(s => !(s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())));
-                        ImageStorageDB.savePhotoStreams(allStreams);
-                    }
-                }
-
-                if (typeof StorageDB !== 'undefined') {
-                    StorageDB.initDB();
-                    const models = ImageStorageDB.getModels() || [];
-                    // Fallback name acquisition if needed
-                    const targetModel = (ImageStorageDB.getModels() || [])[modelIndexToDelete];
-                    if (targetModel) {
-                        StorageDB.deleteModel(targetModel.name);
-                    }
-                }
-
+            if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                models.splice(modelIndexToDelete, 1);
+                await ModelStorageDB.saveAndSyncModels(models, true);
                 renderModels();
-
-                if (typeof GitHubSync !== 'undefined') {
-                    await GitHubSync.triggerAutoSync();
-                }
             }
             closeDeleteModal();
         }
