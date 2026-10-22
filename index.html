@@ -15,33 +15,17 @@
     <style>
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
             height: 52px !important;
             font-size: 0.85rem !important;
             border-radius: 12px !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            color: #fff;
-            border: 1px solid var(--card-border);
-            text-decoration: none;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            transition: all 0.2s ease;
-        }
-        .mondrian-nav-box:hover {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
         }
 
         .home-grid {
@@ -152,63 +136,60 @@
         <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
+            <!-- Updated Models navigation link pointing to Model/models.html -->
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="Image/albums.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
+            <!-- "+" navigation link pointing to Media/stream.html -->
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
-            <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
     </div>
     
     <script src="config.js"></script>
-    <script src="storage.js"></script>
+    <!-- Updated storage reference to point to Model/storage.js -->
+    <script src="Model/storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof StorageDB !== 'undefined') {
-                await StorageDB.initDB();
-                const streams = StorageDB.getVideoStreams() || [];
-                const grid = document.getElementById('streamsGrid');
-                
-                if (streams.length === 0) {
-                    grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
-                    return;
-                }
-                
-                grid.innerHTML = '';
-                
-                streams.forEach((stream, index) => {
-                    const card = document.createElement('a');
-                    card.href = `watch.html?index=${index}`;
-                    card.className = `mondrian-card portrait`;
-
-                    card.innerHTML = `
-                        <div class="mondrian-thumb">
-                            ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
-                            <div class="mondrian-overlay">${stream.title}</div>
-                        </div>`;
-                
-                    grid.appendChild(card);
-
-                    if (stream.thumbnail) {
-                        const img = card.querySelector('.lazy-thumb');
-                        img.onload = () => {
-                            const ratio = img.naturalWidth / img.naturalHeight;
-                            if (ratio < 0.85) {
-                                card.className = 'mondrian-card portrait';
-                            } else if (ratio > 1.25) {
-                                card.className = 'mondrian-card landscape';
-                            } else {
-                                card.className = 'mondrian-card square';
-                            }
-                        };
-                    }
-                });
-            } else {
-                console.error('StorageDB failed to load. Please check if storage.js is in the root directory.');
+            await StorageDB.initDB();
+            const streams = StorageDB.getVideoStreams();
+            const grid = document.getElementById('streamsGrid');
+            
+            if (streams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
+                return;
             }
+            
+            grid.innerHTML = '';
+            
+            streams.forEach((stream, index) => {
+                const card = document.createElement('a');
+                card.href = `watch.html?index=${index}`;
+                card.className = `mondrian-card portrait`;
+
+                card.innerHTML = `
+                    <div class="mondrian-thumb">
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
+                        <div class="mondrian-overlay">${stream.title}</div>
+                    </div>`;
+            
+                grid.appendChild(card);
+
+                if (stream.thumbnail) {
+                    const img = card.querySelector('.lazy-thumb');
+                    img.onload = () => {
+                        const ratio = img.naturalWidth / img.naturalHeight;
+                        if (ratio < 0.85) {
+                            card.className = 'mondrian-card portrait';
+                        } else if (ratio > 1.25) {
+                            card.className = 'mondrian-card landscape';
+                        } else {
+                            card.className = 'mondrian-card square';
+                        }
+                    };
+                }
+            });
         });
     </script>
 </body>
