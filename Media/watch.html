@@ -93,10 +93,10 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts (pointing 1 level up for github-sync.js) -->
     <script src="config.js"></script>
     <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         let streamIndex = 0;
         let currentStreamItem = null;
@@ -162,7 +162,6 @@
         async function confirmDeleteStream() {
             if (!currentStreamItem) return;
             
-            // Smooth UI Feedback: Update button text & disable during deletion sync
             const deleteBtn = document.getElementById('confirmDeleteBtn');
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
