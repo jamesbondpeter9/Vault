@@ -1,7 +1,7 @@
 class GitHubSync {
     static debounceTimer = null;
 
-static async triggerAutoSync(immediate = false, streamsOverride = null) {
+    static async triggerAutoSync(immediate = false, streamsOverride = null) {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
             this.debounceTimer = null;
@@ -19,7 +19,7 @@ static async triggerAutoSync(immediate = false, streamsOverride = null) {
         });
     }
 
-static async _executeSync(streamsOverride = null) {
+    static async _executeSync(streamsOverride = null) {
         if (typeof PortalConfig === 'undefined') {
             console.warn('PortalConfig is not defined. Skipping auto-sync.');
             return false;
@@ -95,11 +95,11 @@ static async _executeSync(streamsOverride = null) {
                 return true;
             } else {
                 const errData = await putRes.json();
-                console.error(`GitHub API commit error for ${filePath}:`, errData.message);
+                console.error(`🔴 GitHub API commit error for ${filePath}:`, errData);
                 return false;
             }
         } catch (err) {
-            console.error(`GitHub Sync Exception for ${filePath}:`, err);
+            console.error(`🔴 GitHub Sync Exception for ${filePath}:`, err);
             return false;
         }
     }
