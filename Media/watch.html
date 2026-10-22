@@ -95,7 +95,7 @@
 
     <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="../config.js"></script>
-    <script src="../storage.js"></script>
+    <script src="storage.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         let streamIndex = 0;
@@ -165,21 +165,21 @@
             deleteBtn.textContent = 'Deleting...';
 
             try {
-                // 1. Remove stream locally immediately
-                let streams = StorageDB.getStreams();
-                if (streamIndex >= 0 && streamIndex < streams.length) {
-                    streams.splice(streamIndex, 1);
-                    localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
+                // Use StorageDB deletion mechanism with timeout safeguard against ERR_ABORTED
+                if (typeof StorageDB !== 'undefined' && typeof StorageDB.deleteVideoStream === 'function') {
+                    const deletePromise = StorageDB.deleteVideoStream(streamIndex);
+                    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
+                    await Promise.race([deletePromise, timeoutPromise]);
+                } else {
+                    // Fallback local splice if StorageDB method isn't reached
+                    let streams = StorageDB.getStreams();
+                    if (streamIndex >= 0 && streamIndex < streams.length) {
+                        streams.splice(streamIndex, 1);
+                        localStorage.setItem('video_portal_streams_db', JSON.stringify(streams));
+                    }
                 }
 
-                // 2. Fire GitHub sync in the background without blocking the UI
-                if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                    GitHubSync.triggerAutoSync(true).catch(err => {
-                        console.warn('Background GitHub sync failed:', err);
-                    });
-                }
-
-                // 3. Instant redirection back home
+                // Redirect back home smoothly
                 window.location.href = '../index.html';
             } catch (err) {
                 console.error('Delete exception:', err);
