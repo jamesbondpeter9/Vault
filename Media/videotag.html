@@ -138,10 +138,10 @@
         <div class="tag-grid" id="tagGrid"></div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts (pointing 1 level up for github-sync.js) -->
     <script src="config.js"></script>
     <script src="storage.js"></script>
-    <script src="github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
