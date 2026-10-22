@@ -13,7 +13,6 @@
     <title>Video Portal - Home</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Compact Navigation Header Sizing (6 columns to fit the new navigation item) */
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -29,7 +28,6 @@
             border-radius: 12px !important;
         }
 
-        /* 4-Column (2+2=4) Mosaic Grid System */
         .home-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -51,7 +49,6 @@
             } 
         }
 
-        /* Card Base Layout */
         .mondrian-card {
             position: relative;
             width: 100%;
@@ -70,34 +67,30 @@
             z-index: 10;
         }
 
-        /* Portrait: 1 Column out of 4 with 9:16 vertical ratio */
         .mondrian-card.portrait {
             grid-column: span 1; 
             grid-row: span 2;
             aspect-ratio: 9 / 16;
         }
 
-        /* Landscape: 2 Columns out of 4 (2+2=4) with further increased vertical height (span 4) */
         .mondrian-card.landscape {
             grid-column: span 2; 
-            grid-row: span 4; /* Increased vertical height */
+            grid-row: span 4;
         }
 
         @media(max-width: 900px) {
             .mondrian-card.portrait,
             .mondrian-card.landscape {
-                grid-column: span 1; /* Adapts cleanly to mobile layout */
+                grid-column: span 1;
             }
         }
 
-        /* Square Tile Variant */
         .mondrian-card.square {
             grid-column: span 1;
             grid-row: span 1;
             aspect-ratio: 1 / 1;
         }
 
-        /* Thumbnail Container */
         .mondrian-thumb {
             width: 100%;
             height: 100%;
@@ -110,7 +103,6 @@
             background: #000;
         }
 
-        /* Edge-to-Edge Fill without zooming or cropping distortion */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
@@ -120,7 +112,6 @@
             border-radius: 12px;
         }
 
-        /* Title Overlay */
         .mondrian-overlay {
             position: absolute;
             bottom: 0;
@@ -148,8 +139,8 @@
             <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="image-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
-            <!-- Updated "+" navigation link pointing to media/stream.html -->
-            <a href="media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <!-- Updated "+" navigation link pointing to Media/stream.html -->
+            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
             <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
         </div>
         
@@ -162,7 +153,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
-            // Fetch only video streams (loaded from media/videos.json)
             const streams = StorageDB.getVideoStreams();
             const grid = document.getElementById('streamsGrid');
             
@@ -176,7 +166,7 @@
             streams.forEach((stream, index) => {
                 const card = document.createElement('a');
                 card.href = `watch.html?index=${index}`;
-                card.className = `mondrian-card portrait`; // Default fallback
+                card.className = `mondrian-card portrait`;
 
                 card.innerHTML = `
                     <div class="mondrian-thumb">
@@ -186,15 +176,14 @@
                 
                 grid.appendChild(card);
 
-                // Auto-detect image aspect ratio to set precise class
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
                     img.onload = () => {
                         const ratio = img.naturalWidth / img.naturalHeight;
                         if (ratio < 0.85) {
-                            card.className = 'mondrian-card portrait'; // Spans 1 of 4 cols
+                            card.className = 'mondrian-card portrait';
                         } else if (ratio > 1.25) {
-                            card.className = 'mondrian-card landscape'; // Spans 2 of 4 cols with taller vertical height
+                            card.className = 'mondrian-card landscape';
                         } else {
                             card.className = 'mondrian-card square';
                         }
