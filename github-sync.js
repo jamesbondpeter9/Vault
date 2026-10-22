@@ -38,8 +38,8 @@ class GitHubSync {
         const pathname = window.location.pathname.toLowerCase();
         const isVideoPage = !pathname.includes('image') && !pathname.includes('photo') && !pathname.includes('album');
 
-        // Target media/videos.json for video streams
-        let jsonFilename = isVideoPage ? 'media/videos.json' : 'media/images.json';
+        // Target Media/videos.json in the capitalized Media/ folder
+        let jsonFilename = isVideoPage ? 'Media/videos.json' : 'Media/images.json';
 
         let dbData = { streams: [] };
         if (typeof StorageDB !== 'undefined') {
