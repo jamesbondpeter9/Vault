@@ -35,8 +35,9 @@ class GitHubSync {
         const repo = PortalConfig.repo;
         const branch = PortalConfig.branch;
 
-        const path = window.location.pathname.split('/').pop() || 'index.html';
-        const isVideoPage = !path.includes('image') && !path.includes('photo') && !path.includes('album');
+        // Robust pathname inspection supporting nested folders (e.g., /Media/stream.html)
+        const pathname = window.location.pathname.toLowerCase();
+        const isVideoPage = !pathname.includes('image') && !pathname.includes('photo') && !pathname.includes('album');
 
         let jsonFilename = isVideoPage ? 'videos.json' : 'images.json';
 
@@ -59,7 +60,7 @@ class GitHubSync {
             }
         }
 
-        // Sync videos.json containing strictly the streams payload
+        // Sync videos.json containing strictly the streams payload to the repository root
         const jsonContent = JSON.stringify(dbData, null, 4);
         const jsonSynced = await this.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Stream sync: Updated ${jsonFilename} via portal`);
 
