@@ -56,4 +56,11 @@ class ModelStorageDB {
         }
         return true;
     }
+
+    static async deleteModel(modelName) {
+        if (!modelName) return;
+        const models = ModelStorageDB.getModels();
+        const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
+        return await ModelStorageDB.saveAndSyncModels(filteredModels, true);
+    }
 }
