@@ -198,7 +198,7 @@
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar pointing to root index and models -->
+        <!-- Compact Top Nav Bar with Home and Models matching index.html -->
         <div class="nav-bar-compact">
             <a href="../../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="../../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
@@ -245,7 +245,7 @@
         </div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts with root-relative paths -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
     <script src="../../config.js"></script>
     <script src="storage.js"></script>
     <script src="../../github-sync.js"></script>
@@ -336,7 +336,6 @@
 
                 if (!title || !url) return;
 
-                // Smooth UI Feedback: Update button text & disable during sync
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Syncing to GitHub...';
