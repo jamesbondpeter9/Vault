@@ -47,10 +47,13 @@ class GitHubSync {
             if (typeof ModelStorageDB !== 'undefined') {
                 dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
             }
-        } else if (pathname.includes('image') || pathname.includes('photo') || pathname.includes('album')) {
-            jsonFilename = 'Media/images.json';
+        } else if (pathname.includes('/image/') || pathname.includes('photostream') || pathname.includes('album') || pathname.includes('view.html')) {
+            jsonFilename = 'Image/images.json';
+            dbData = { models: [], photostreams: [], folders: [] };
             if (typeof ImageStorageDB !== 'undefined') {
-                dbData = typeof ImageStorageDB.getDatabase === 'function' ? await ImageStorageDB.getDatabase() || {} : { models: [], photostreams: [], folders: [] };
+                dbData.models = typeof ImageStorageDB.getModels === 'function' ? await ImageStorageDB.getModels() || [] : [];
+                dbData.photostreams = typeof ImageStorageDB.getPhotoStreams === 'function' ? await ImageStorageDB.getPhotoStreams() || [] : [];
+                dbData.folders = typeof ImageStorageDB.getFolders === 'function' ? await ImageStorageDB.getFolders() || [] : [];
             }
         } else {
             jsonFilename = 'Media/videos.json';
@@ -61,7 +64,7 @@ class GitHubSync {
         }
 
         // Safety fallback if local database payload is empty
-        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || (dbData.models && dbData.models.length > 0) || (dbData.photostreams && dbData.photostreams.length > 0);
+        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || (dbData.models && dbData.models.length > 0) || (dbData.photostreams && dbData.photostreams.length > 0) || (dbData.folders && dbData.folders.length > 0);
         if (!hasLocalData) {
             try {
                 const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
