@@ -45,6 +45,7 @@
             border-color: #fff;
         }
 
+        /* Layout Container with 2px gap matching photostream.html */
         .stream-layout-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -78,6 +79,7 @@
             box-sizing: border-box;
         }
 
+        /* Tag Section Wrapper */
         .tag-section-wrapper {
             margin-bottom: 16px;
         }
@@ -95,6 +97,7 @@
             color: var(--text-muted);
         }
 
+        /* A-Z Alphabet Quick-Jump / Filter Bar */
         .az-bar {
             display: flex;
             gap: 4px;
@@ -138,6 +141,7 @@
             pointer-events: none;
         }
 
+        /* Scrollable Tags Container */
         .tags-container {
             display: flex;
             flex-wrap: wrap;
@@ -155,6 +159,16 @@
 
         .tags-container::-webkit-scrollbar {
             width: 6px;
+        }
+
+        .tags-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+        }
+
+        .tags-container::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 6px;
         }
 
         .tag-pill {
@@ -184,6 +198,7 @@
 </head>
 <body>
     <div class="site-container">
+        <!-- Compact Top Nav Bar pointing to root index and models -->
         <div class="nav-bar-compact">
             <a href="../../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="../../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
@@ -207,6 +222,7 @@
                             <input type="text" id="streamThumbnail" placeholder="Leave blank for auto YouTube thumb">
                         </div>
 
+                        <!-- Models Tagging Section (Advanced Photostream A-Z Bar Feature) -->
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -229,7 +245,7 @@
         </div>
     </div>
 
-    <!-- Script imports relative to root -->
+    <!-- Integrated Config, Storage & GitHub Sync Scripts with root-relative paths -->
     <script src="../../config.js"></script>
     <script src="storage.js"></script>
     <script src="../../github-sync.js"></script>
@@ -320,23 +336,29 @@
 
                 if (!title || !url) return;
 
+                // Smooth UI Feedback: Update button text & disable during sync
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Syncing to GitHub...';
-
-                const syncSuccess = await StorageDB.addVideoStream({
+                
+                const streams = StorageDB.getStreams();
+                streams.push({
                     title,
                     url,
                     thumbnail: thumbnail || '',
-                    models: selectedModels
+                    models: selectedModels,
+                    type: 'stream',
+                    createdAt: Date.now()
                 });
+
+                const syncSuccess = await StorageDB.saveStreams(streams, true);
 
                 if (syncSuccess) {
                     window.location.href = '../../index.html';
                 } else {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Save Stream';
-                    alert('Stream saved locally, but GitHub sync failed!');
+                    alert('Stream saved locally, but GitHub sync failed! Please verify your token in localStorage.');
                 }
             });
         });
