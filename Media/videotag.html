@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Videos - Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -126,8 +126,8 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
         <div class="tag-header">
@@ -138,9 +138,9 @@
         <div class="tag-grid" id="tagGrid"></div>
     </div>
 
-    <!-- Integrated Config, Storage & GitHub Sync Scripts (pointing 1 level up for github-sync.js) -->
-    <script src="config.js"></script>
-    <script src="storage.js"></script>
+    <!-- Integrated Config, Storage & GitHub Sync Scripts with correct root relative prefixes -->
+    <script src="../config.js"></script>
+    <script src="../storage.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -166,7 +166,7 @@
             matchedStreams.forEach((stream) => {
                 const card = document.createElement('a');
                 const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `watch.html?index=${globalIndex}`;
+                card.href = `../watch.html?index=${globalIndex}`;
                 card.className = 'mondrian-card portrait';
 
                 card.innerHTML = `
