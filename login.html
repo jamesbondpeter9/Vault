@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Authentication Guard -->
-    <script>
-        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
-            alert('Access Denied: Please log in first.');
-            window.location.href = 'login.html';
-        }
-    </script>
+    <!-- Authentication Guard Removed -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Portal - Home</title>
@@ -173,7 +167,7 @@
                         ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
                         <div class="mondrian-overlay">${stream.title}</div>
                     </div>`;
-                
+            
                 grid.appendChild(card);
 
                 if (stream.thumbnail) {
