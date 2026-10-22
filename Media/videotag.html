@@ -95,21 +95,25 @@
             const modelName = params.get('model');
 
             const header = document.getElementById('tagHeaderTitle');
-            const grid = document.getElementById('streamsGrid');
+            const allStreams = StorageDB.getStreams();
 
             if (!modelName) {
                 header.textContent = 'All Streams';
-                renderStreams(StorageDB.getStreams());
+                renderStreams(allStreams);
                 return;
             }
 
             header.textContent = `Streams tagged with "${modelName}"`;
-            const allStreams = StorageDB.getStreams();
-            const filteredStreams = allStreams.filter(s => 
-                s.models && s.models.some(m => m.toLowerCase() === modelName.toLowerCase())
+            
+            // Map streams along with their original global storage index
+            const taggedStreams = allStreams.map((stream, originalIndex) => ({
+                stream,
+                originalIndex
+            })).filter(item => 
+                item.stream.models && item.stream.models.some(m => m.toLowerCase() === modelName.toLowerCase())
             );
 
-            renderStreams(filteredStreams);
+            renderFilteredStreams(taggedStreams);
         });
 
         function renderStreams(streams) {
@@ -121,7 +125,22 @@
 
             grid.innerHTML = streams.map((stream, idx) => `
                 <a href="watch.html?index=${idx}" class="stream-card">
-                    <img src="${stream.thumbnail || 'placeholder.jpg'}" class="stream-thumb" alt="${stream.title}" onerror="this.src='placeholder.jpg'">
+                    <img src="${stream.thumbnail || ''}" class="stream-thumb" alt="${stream.title}" onerror="this.style.display='none'">
+                    <div class="stream-card-title">${stream.title}</div>
+                </a>
+            `).join('');
+        }
+
+        function renderFilteredStreams(taggedStreams) {
+            const grid = document.getElementById('streamsGrid');
+            if (!taggedStreams || taggedStreams.length === 0) {
+                grid.innerHTML = `<div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No streams found for this model.</div>`;
+                return;
+            }
+
+            grid.innerHTML = taggedStreams.map(({ stream, originalIndex }) => `
+                <a href="watch.html?index=${originalIndex}" class="stream-card">
+                    <img src="${stream.thumbnail || ''}" class="stream-thumb" alt="${stream.title}" onerror="this.style.display='none'">
                     <div class="stream-card-title">${stream.title}</div>
                 </a>
             `).join('');
