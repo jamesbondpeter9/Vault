@@ -93,7 +93,6 @@
         </div>
     </div>
 
-    <!-- Corrected prefixes: config.js & github-sync.js in root (../), storage.js in Media/ (./) -->
     <script src="../config.js"></script>
     <script src="storage.js"></script>
     <script src="../github-sync.js"></script>
@@ -159,6 +158,7 @@
             document.getElementById('deleteModal').style.display = 'none';
         }
 
+        // Implemented Model-style clean deletion pattern
         async function confirmDeleteStream() {
             if (!currentStreamItem) return;
             
@@ -166,23 +166,15 @@
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
 
-            let rawStreams = JSON.parse(localStorage.getItem('video_portal_streams_db')) || StorageDB.getStreams() || [];
-            rawStreams = rawStreams.filter(s => !(s.url === currentStreamItem.url && s.title === currentStreamItem.title));
-            
-            // Save and sync immediately to Media/videos.json and GitHub
-            const syncSuccess = await StorageDB.saveStreams(rawStreams, true);
+            // Clean delegation matching the Model section pattern
+            const success = await StorageDB.deleteStream(currentStreamItem.url, currentStreamItem.title);
 
-            // Double check GitHubSync trigger if defined
-            if (typeof GitHubSync !== 'undefined') {
-                await GitHubSync.triggerAutoSync(true);
-            }
-
-            if (syncSuccess) {
+            if (success) {
                 window.location.href = '../index.html';
             } else {
                 deleteBtn.disabled = false;
                 deleteBtn.textContent = 'Delete';
-                alert('Stream removed locally, but GitHub sync failed! Please check your connection or token.');
+                alert('Stream removed locally, but GitHub sync failed! Please verify your token.');
             }
         }
     </script>
