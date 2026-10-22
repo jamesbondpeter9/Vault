@@ -5,13 +5,13 @@
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
             alert('Access Denied: Please log in first.');
-            window.location.href = '../../login.html';
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Streams - Portal</title>
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
@@ -73,8 +73,8 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="../../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="../../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
         </div>
 
         <h1 id="tagHeaderTitle" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; text-align: center;">Model Streams</h1>
@@ -85,9 +85,9 @@
     </div>
 
     <!-- Script imports relative to root -->
-    <script src="../../config.js"></script>
+    <script src="../config.js"></script>
     <script src="storage.js"></script>
-    <script src="../../github-sync.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
