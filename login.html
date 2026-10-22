@@ -1,116 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Login</title>
+    <title>Video Portal - Home</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body {
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+        }
+
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 140px;
+            grid-auto-flow: dense;
+            gap: 4px;
+            align-items: stretch;
+        }
+        @media(max-width: 900px) { 
+            .home-grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 150px;
+            } 
+        }
+        @media(max-width: 500px) { 
+            .home-grid { 
+                grid-template-columns: 1fr; 
+                grid-auto-rows: 190px;
+            } 
+        }
+
+        .mondrian-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            text-decoration: none;
+            background: #000;
+            display: block;
+            box-sizing: border-box;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mondrian-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .mondrian-card.portrait {
+            grid-column: span 1; 
+            grid-row: span 2;
+            aspect-ratio: 9 / 16;
+        }
+
+        .mondrian-card.landscape {
+            grid-column: span 2; 
+            grid-row: span 4;
+        }
+
+        @media(max-width: 900px) {
+            .mondrian-card.portrait,
+            .mondrian-card.landscape {
+                grid-column: span 1;
+            }
+        }
+
+        .mondrian-card.square {
+            grid-column: span 1;
+            grid-row: span 1;
+            aspect-ratio: 1 / 1;
+        }
+
+        .mondrian-thumb {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             background: #000;
-            color: #fff;
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .login-card {
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 40px;
+
+        .mondrian-thumb img {
             width: 100%;
-            max-width: 380px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
+            height: 100%;
+            object-fit: fill;
+            object-position: center;
             display: block;
-            font-size: 0.8rem;
-            color: #888;
-            margin-bottom: 8px;
+            border-radius: 12px;
+        }
+
+        .mondrian-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 22px 10px 8px 10px;
+            background: transparent;
             font-weight: 700;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background: #111;
-            color: #fff;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            z-index: 5;
             box-sizing: border-box;
-            outline: none;
-        }
-        .form-group input:focus {
-            border-color: #fff;
-        }
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            background: #fff;
-            color: #000;
-            font-weight: 800;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-submit:hover {
-            background: #e6e6e6;
-        }
-        .error-msg {
-            color: #ff4d4d;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            display: none;
-            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 24px; text-align: center;">Portal Login</h2>
-        <div id="errorMsg" class="error-msg">Invalid username or password!</div>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required placeholder="Enter username">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="Enter password">
-            </div>
-            <button type="submit" class="btn-submit">Login</button>
-        </form>
+    <div class="site-container">
+        <!-- Compact Top Nav Bar -->
+        <div class="nav-bar-compact">
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
+            <a href="models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="image-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="display: flex; align-items: center; justify-content: center;" title="Image Gallery"><span style="width: 8px; height: 8px; background: #fff; border-radius: 50%; display: inline-block;"></span></div></a>
+            <!-- Updated "+" navigation link pointing to Media/stream.html -->
+            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="video-gallery.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;" title="Gallery Hub Sync">↓</div></a>
+        </div>
+        
+        <div class="home-grid" id="streamsGrid"></div>
     </div>
-
+    
     <script src="config.js"></script>
+    <script src="storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
-        // Set your login credentials here for verification
-        const VALID_USERNAME = "Janice";
-        const VALID_PASSWORD = "James@123";
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value;
-
-            if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
-                // Set login session flag
-                sessionStorage.setItem('portal_authenticated', 'true');
-                
-                // Redirect to main index directory
-                window.location.href = 'index.html';
-            } else {
-                document.getElementById('errorMsg').style.display = 'block';
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            const streams = StorageDB.getVideoStreams();
+            const grid = document.getElementById('streamsGrid');
+            
+            if (streams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
+                return;
             }
+            
+            grid.innerHTML = '';
+            
+            streams.forEach((stream, index) => {
+                const card = document.createElement('a');
+                card.href = `watch.html?index=${index}`;
+                card.className = `mondrian-card portrait`;
+
+                card.innerHTML = `
+                    <div class="mondrian-thumb">
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:0.8rem;">No Thumbnail</div>'}
+                        <div class="mondrian-overlay">${stream.title}</div>
+                    </div>`;
+                
+                grid.appendChild(card);
+
+                if (stream.thumbnail) {
+                    const img = card.querySelector('.lazy-thumb');
+                    img.onload = () => {
+                        const ratio = img.naturalWidth / img.naturalHeight;
+                        if (ratio < 0.85) {
+                            card.className = 'mondrian-card portrait';
+                        } else if (ratio > 1.25) {
+                            card.className = 'mondrian-card landscape';
+                        } else {
+                            card.className = 'mondrian-card square';
+                        }
+                    };
+                }
+            });
         });
     </script>
 </body>
