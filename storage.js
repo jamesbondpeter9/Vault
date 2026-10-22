@@ -14,10 +14,9 @@ class StorageDB {
 
     static async syncFromRemoteJSON() {
         try {
-            const currentModels = StorageDB.getModels();
             const currentStreams = StorageDB.getStreams();
             
-            if (currentModels.length === 0 && currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
+            if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/videos.json`;
@@ -29,9 +28,6 @@ class StorageDB {
                         const decodedString = decodeURIComponent(escape(atob(data.content)));
                         const remoteData = JSON.parse(decodedString);
 
-                        if (remoteData.models && Array.isArray(remoteData.models)) {
-                            localStorage.setItem('video_portal_models_db', JSON.stringify(remoteData.models));
-                        }
                         if (remoteData.streams && Array.isArray(remoteData.streams)) {
                             const videoStreams = remoteData.streams.filter(s => {
                                 const t = (s.type || 'stream').toLowerCase();
@@ -39,7 +35,7 @@ class StorageDB {
                             });
                             localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                         }
-                        console.log('Successfully bootstrapped storage from remote videos.json!');
+                        console.log('Successfully bootstrapped streams from remote videos.json!');
                     }
                 }
             }
@@ -56,15 +52,43 @@ class StorageDB {
         }
     }
 
-    static async saveModels(models, immediate = false) {
+    // Models are kept purely local in browser storage and do NOT trigger GitHub sync
+    static saveModels(models) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
-        if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-            return await GitHubSync.triggerAutoSync(immediate).catch(err => {
-                console.error('GitHub auto-sync error:', err);
-                return false;
+    }
+
+    static addModel(modelData) {
+        const models = StorageDB.getModels();
+        const existingIndex = models.findIndex(m => m.name.toLowerCase() === modelData.name.toLowerCase());
+        
+        if (existingIndex >= 0) {
+            models[existingIndex].thumbnail = modelData.thumbnail || models[existingIndex].thumbnail;
+            models[existingIndex].shape = modelData.shape || models[existingIndex].shape;
+        } else {
+            models.push({
+                name: modelData.name,
+                thumbnail: modelData.thumbnail || '',
+                shape: modelData.shape || 'portrait',
+                createdAt: Date.now()
             });
         }
-        return true;
+        StorageDB.saveModels(models);
+    }
+
+    static deleteModel(modelName) {
+        if (!modelName) return;
+        const models = StorageDB.getModels();
+        const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
+        StorageDB.saveModels(filteredModels);
+
+        // Cascade remove model tag from local streams
+        const streams = StorageDB.getStreams();
+        streams.forEach(s => {
+            if (s.models) {
+                s.models = s.models.filter(m => m.toLowerCase() !== modelName.toLowerCase());
+            }
+        });
+        StorageDB.saveStreams(streams, true);
     }
 
     static getStreams() {
