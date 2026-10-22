@@ -73,12 +73,12 @@ class GitHubSync {
             }
         }
 
-        // Safety fallback if local database payload is empty during additions/updates/deletions
-        const hasLocalData = (dbData.streams && dbData.streams.length > 0) || 
-                             (dbData.models && dbData.models.length > 0) || 
-                             (dbData.photostreams && dbData.photostreams.length > 0) || 
-                             (dbData.folders && dbData.folders.length > 0);
-                             
+        // Validate local data presence using Array check so deletions (even resulting in []) sync properly
+        const hasLocalData = Array.isArray(dbData.streams) || 
+                             Array.isArray(dbData.models) || 
+                             Array.isArray(dbData.photostreams) || 
+                             Array.isArray(dbData.folders);
+                           
         if (!hasLocalData) {
             try {
                 const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
