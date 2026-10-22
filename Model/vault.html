@@ -82,13 +82,13 @@
 
         <!-- Two Large Curved Square Thumbnails -->
         <div class="featured-squares-grid" id="featuredSquares">
-            <!-- Left Square (Albums - connected to albums.html inside Image or root structure) -->
+            <!-- Left Square (Albums - connected to Image/albums.html) -->
             <div class="featured-square-card">
                 <div id="featThumb1" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;">
                     <a id="albumsTagLink" href="#" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); z-index: 5; text-decoration: none;">Albums</a>
                 </div>
             </div>
-            <!-- Right Square (Videos - connected to videotag.html) -->
+            <!-- Right Square (Videos - connected to Media/videotag.html) -->
             <div class="featured-square-card">
                 <div id="featThumb2" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative;">
                     <a id="videoTagLink" href="#" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); z-index: 5; text-decoration: none;">Videos</a>
@@ -111,9 +111,9 @@
 
             if (modelName) {
                 document.title = `${modelName} - Vault`;
-                // Pointing to albums.html inside the Image directory
+                // Pointing albums to Image/albums.html and videos to Media/videotag.html
                 document.getElementById('albumsTagLink').href = `../Image/albums.html?name=${encodeURIComponent(modelName)}`;
-                document.getElementById('videoTagLink').href = `videotag.html?name=${encodeURIComponent(modelName)}`;
+                document.getElementById('videoTagLink').href = `../Media/videotag.html?name=${encodeURIComponent(modelName)}`;
             }
 
             const allStreams = (typeof StorageDB !== 'undefined') ? (StorageDB.getStreams ? StorageDB.getStreams() : StorageDB.getVideoStreams()) : [];
