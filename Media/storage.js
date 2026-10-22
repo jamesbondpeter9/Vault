@@ -151,7 +151,7 @@ class StorageDB {
             type: 'stream',
             createdAt: Date.now()
         });
-        return await StorageDB.saveStreams(streams, true);
+        return await StorageDB.saveStreams(streams, true, streams);
     }
 
     static async deleteVideoStream(index) {
