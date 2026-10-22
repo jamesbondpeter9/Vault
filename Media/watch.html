@@ -1,4 +1,165 @@
-async function confirmDeleteStream() {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Authentication Guard -->
+    <script>
+        if (sessionStorage.getItem('portal_authenticated') !== 'true') {
+            alert('Access Denied: Please log in first.');
+            window.location.href = '../login.html';
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Stream - Portal</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+            max-width: 1300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .mondrian-nav-box {
+            height: 50px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+        }
+        .watch-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.95), var(--neon-glow);
+            margin-bottom: 20px;
+        }
+        .player-wrapper iframe, .player-wrapper video {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .stream-info-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <div class="nav-bar-compact">
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <div class="mondrian-nav-card" onclick="openDeleteStreamModal()" style="cursor: pointer;">
+                <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">&times;</div>
+            </div>
+        </div>
+
+        <div class="watch-container">
+            <div class="player-wrapper" id="playerContainer">
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Loading player...</div>
+            </div>
+            <div class="stream-info-panel">
+                <div>
+                    <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">Loading stream...</h1>
+                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Stream</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this stream from your portal?</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="confirmDeleteStream()" id="confirmDeleteBtn" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
+                    <button onclick="closeDeleteModal()" class="btn-primary" style="flex:1; background:#333; color:#fff;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integrated Config, Storage & GitHub Sync Scripts -->
+    <script src="../config.js"></script>
+    <script src="../storage.js"></script>
+    <script src="../github-sync.js"></script>
+    <script>
+        let streamIndex = 0;
+        let currentStreamItem = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageDB.initDB();
+            const params = new URLSearchParams(window.location.search);
+            streamIndex = parseInt(params.get('index') ?? '0', 10);
+            const streams = StorageDB.getStreams();
+            
+            currentStreamItem = streams[streamIndex];
+            if (!currentStreamItem) {
+                document.getElementById('playerContainer').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Stream not found.</div>`;
+                document.getElementById('streamTitle').textContent = 'Stream Not Found';
+                return;
+            }
+
+            document.title = `${currentStreamItem.title} - Video Portal`;
+            document.getElementById('streamTitle').textContent = currentStreamItem.title;
+
+            const tagsContainer = document.getElementById('modelTags');
+            if (currentStreamItem.models && currentStreamItem.models.length > 0) {
+                currentStreamItem.models.forEach(modelName => {
+                    const tag = document.createElement('span');
+                    tag.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;';
+                    tag.textContent = modelName;
+                    tagsContainer.appendChild(tag);
+                });
+            } else {
+                tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
+            }
+
+            const playerContainer = document.getElementById('playerContainer');
+            let embedHtml = '';
+            const url = currentStreamItem.url;
+
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let ytId = '';
+                if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
+                else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
+                else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
+                
+                if (ytId) {
+                    embedHtml = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                }
+            } else if (url.match(/\.(mp4|webm|ogg)$/i)) {
+                embedHtml = `<video src="${url}" controls autoplay style="width:100%;height:100%;"></video>`;
+            } else {
+                embedHtml = `<iframe src="${url}" allowfullscreen></iframe>`;
+            }
+
+            playerContainer.innerHTML = embedHtml;
+        });
+
+        function openDeleteStreamModal() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function confirmDeleteStream() {
             const deleteBtn = document.getElementById('confirmDeleteBtn');
             deleteBtn.disabled = true;
             deleteBtn.textContent = 'Deleting...';
@@ -32,3 +193,6 @@ async function confirmDeleteStream() {
                 alert('An error occurred while deleting. Please check your connection.');
             }
         }
+    </script>
+</body>
+</html>
