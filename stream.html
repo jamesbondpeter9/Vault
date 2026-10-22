@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -210,11 +211,11 @@
                     <form id="streamForm">
                         <div style="margin-bottom: 16px;">
                             <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Stream Title</label>
-                            <input type="text" id="streamTitle" required="" placeholder="Enter stream title">
+                            <input type="text" id="streamTitle" required placeholder="Enter stream title">
                         </div>
                         <div style="margin-bottom: 16px;">
                             <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Stream URL</label>
-                            <input type="text" id="streamUrl" required="" placeholder="https://www.youtube.com/watch?v=...">
+                            <input type="text" id="streamUrl" required placeholder="https://www.youtube.com/watch?v=...">
                         </div>
                         <div style="margin-bottom: 16px;">
                             <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Thumbnail URL (Optional)</label>
@@ -226,16 +227,20 @@
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
                             </div>
-                            <div class="az-bar" id="modelAZBar"><span class="az-letter active">ALL</span><span class="az-letter">A</span><span class="az-letter disabled">B</span><span class="az-letter disabled">C</span><span class="az-letter disabled">D</span><span class="az-letter disabled">E</span><span class="az-letter disabled">F</span><span class="az-letter disabled">G</span><span class="az-letter disabled">H</span><span class="az-letter disabled">I</span><span class="az-letter disabled">J</span><span class="az-letter disabled">K</span><span class="az-letter disabled">L</span><span class="az-letter disabled">M</span><span class="az-letter disabled">N</span><span class="az-letter disabled">O</span><span class="az-letter disabled">P</span><span class="az-letter disabled">Q</span><span class="az-letter disabled">R</span><span class="az-letter disabled">S</span><span class="az-letter disabled">T</span><span class="az-letter disabled">U</span><span class="az-letter disabled">V</span><span class="az-letter disabled">W</span><span class="az-letter disabled">X</span><span class="az-letter disabled">Y</span><span class="az-letter disabled">Z</span></div>
-                            <div class="tags-container" id="modelTagsList"><div class="tag-pill selected">A</div><div class="tag-pill selected">A</div></div>
+                            <div class="az-bar" id="modelAZBar"></div>
+                            <div class="tags-container" id="modelTagsList">
+                                <span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px;">No models in directory</span>
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Stream</button>
+                        <button type="submit" id="saveStreamBtn" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Stream</button>
                     </form>
                 </div>
             </div>
             <div class="preview-wrapper">
-                <div class="live-thumb-preview-box" id="previewContainer"><img src="https://cdni.pornpics.com/1280/7/769/60131134/60131134_001_5d52.jpg" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;"></div>
+                <div class="live-thumb-preview-box" id="previewContainer">
+                    <span style="color: var(--text-muted);">Thumbnail Preview</span>
+                </div>
             </div>
         </div>
     </div>
@@ -330,20 +335,30 @@
                 }
 
                 if (!title || !url) return;
+
+                // Smooth UI Feedback: Update button text & disable during sync
+                const submitBtn = document.getElementById('saveStreamBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Syncing to GitHub...';
                 
-                // Await storage save and verify GitHub sync response
-                const syncSuccess = await StorageDB.addVideoStream({
+                const streams = StorageDB.getStreams();
+                streams.push({
                     title,
                     url,
                     thumbnail: thumbnail || '',
-                    models: selectedModels
+                    models: selectedModels,
+                    type: 'stream',
+                    createdAt: Date.now()
                 });
 
+                const syncSuccess = await StorageDB.saveStreams(streams, true);
+
                 if (syncSuccess) {
-                    alert('Stream saved and successfully updated in videos.json!');
                     window.location.href = 'index.html';
                 } else {
-                    alert('Stream saved locally, but GitHub sync failed! Please check your connection or PAT token.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Stream';
+                    alert('Stream saved locally, but GitHub sync failed! Please verify your token in localStorage.');
                 }
             });
         });
@@ -394,6 +409,5 @@
             });
         }
     </script>
-
-
-</body></html>
+</body>
+</html>
