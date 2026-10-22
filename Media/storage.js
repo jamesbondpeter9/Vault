@@ -14,9 +14,7 @@ class StorageDB {
 
     static async syncFromRemoteJSON() {
         try {
-            const currentStreams = StorageDB.getStreams();
-            
-            if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
+            if (typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
@@ -28,14 +26,16 @@ class StorageDB {
                         const decodedString = decodeURIComponent(escape(atob(data.content)));
                         const remoteData = JSON.parse(decodedString);
 
-                        if (remoteData.streams && Array.isArray(remoteData.streams)) {
-                            const videoStreams = remoteData.streams.filter(s => {
+                        const rawList = Array.isArray(remoteData) ? remoteData : (remoteData.streams || []);
+
+                        if (Array.isArray(rawList)) {
+                            const videoStreams = rawList.filter(s => {
                                 const t = (s.type || 'stream').toLowerCase();
                                 return t === 'stream' || t === 'video';
                             });
                             localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                            console.log('Successfully synced streams from Media/videos.json!');
                         }
-                        console.log('Successfully bootstrapped streams from Media/videos.json!');
                     }
                 }
             }
