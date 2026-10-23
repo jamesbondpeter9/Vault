@@ -40,7 +40,7 @@ class ModelStorageDB {
             if ((!remoteData || !remoteData.models || remoteData.models.length === 0) && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Model/Models.json${cacheBuster}`;
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Model/Models.json`;
                     const res = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${token}` },
                         cache: 'no-store'
