@@ -1,23 +1,5 @@
 {
     "models": [],
-    "photostreams": [
-        {
-            "title": "Gianna003",
-            "url": "https://i.ibb.co/hFQF8yzq/Gianna003.jpg",
-            "thumbnail": "https://i.ibb.co/hFQF8yzq/Gianna003.jpg",
-            "models": [
-                "Myers"
-            ],
-            "folder": "M1",
-            "folders": [
-                "M1"
-            ]
-        }
-    ],
-    "folders": [
-        {
-            "name": "M1",
-            "model": "Myers"
-        }
-    ]
+    "photostreams": [],
+    "folders": []
 }
