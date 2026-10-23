@@ -18,11 +18,11 @@ class StorageDB {
             let fetchedFromServer = false;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // 1. Try public static fetch first with cache-busting to prevent stale/cached empty responses
+            // Correct paths avoiding any accidental double prefixing
             const pathsToTry = [
-                `Media/videos.json${cacheBuster}`, 
                 `./videos.json${cacheBuster}`, 
-                `../Media/videos.json${cacheBuster}`
+                `/Vault/Media/videos.json${cacheBuster}`,
+                `videos.json${cacheBuster}`
             ];
 
             for (const path of pathsToTry) {
@@ -35,19 +35,16 @@ class StorageDB {
                             remoteData = json;
                             break;
                         } else if (!remoteData) {
-                            remoteData = json; // Keep as fallback even if empty, in case remote is intentionally empty
+                            remoteData = json;
                         }
                     } else if (res.status === 404) {
                         fetchedFromServer = true;
                         remoteData = { streams: [] };
                         break;
                     }
-                } catch (err) {
-                    // Try next path fallback
-                }
+                } catch (err) {}
             }
 
-            // 2. Fallback to GitHub API if token exists and public fetch returned nothing/empty
             if ((!remoteData || !remoteData.streams || remoteData.streams.length === 0) && !fetchedFromServer && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
@@ -68,14 +65,12 @@ class StorageDB {
                 }
             }
 
-            // 3. Sync into localStorage if valid remote data was found
             if (remoteData && remoteData.streams && Array.isArray(remoteData.streams)) {
                 const videoStreams = remoteData.streams.filter(s => {
                     const t = (s.type || 'stream').toLowerCase();
                     return t === 'stream' || t === 'video';
                 });
                 
-                // Overwrite local storage if successfully fetched from server (honoring empty/deleted states), or if local is completely empty
                 const localCurrent = JSON.parse(localStorage.getItem('video_portal_streams_db') || '[]');
                 if (fetchedFromServer || localCurrent.length === 0) {
                     localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
@@ -83,7 +78,7 @@ class StorageDB {
                 }
             }
         } catch (e) {
-            console.warn('Could not sync remote Media/videos.json during init:', e);
+            console.warn('Could not sync remote videos.json during init:', e);
         }
     }
 
