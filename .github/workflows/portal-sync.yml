@@ -47,69 +47,93 @@ jobs:
 
   auto-heal-failed:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled') }}
     steps:
-      - name: Intelligent Queue & Retry Handler
+      - name: Intelligent Queue, Cancellation & Retry Handler
         uses: actions/github-script@v6
         with:
           script: |
-            const runId = context.payload.workflow_run.id;
-            const runName = context.payload.workflow_run.name;
-            const attempt = context.payload.workflow_run.run_attempt || 1;
-            const conclusion = context.payload.workflow_run.conclusion;
-            
-            console.log(`[Auto-Heal] Detected completed workflow "${runName}" (ID: ${runId}) with status: ${conclusion}. Current attempt: ${attempt}`);
-            
-            if (attempt >= 5) {
-              console.log(`❌ Maximum retry limit of 5 reached for run ID ${runId}.`);
-              console.log(`⏳ Entering final 5-minute cool-down and inspecting queue for other pending workflows...`);
+            // Real-time scan for any previously cancelled or failed page build deployments
+            console.log(`🔍 Scanning repository for any recently cancelled or failed deployments to auto-heal...`);
+            try {
+              const recentRuns = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 5
+              });
+              
+              for (const run of recentRuns.data.workflow_runs) {
+                if ((run.name === 'pages-build-deployment' || run.name === 'Pages Build and Deployment') && 
+                    (run.conclusion === 'cancelled' || run.conclusion === 'failure')) {
+                  console.log(`📌 Found target workflow "${run.name}" (ID: ${run.id}) with status: ${run.conclusion}, attempt: ${run.run_attempt}`);
+                }
+              }
+            } catch (scanErr) {
+              console.log(`⚠️ Could not complete preliminary scan:`, scanErr.message);
+            }
+
+            // If triggered by a specific workflow_run event, apply core rules
+            if (context.eventName === 'workflow_run' && context.payload.workflow_run) {
+              const runId = context.payload.workflow_run.id;
+              const runName = context.payload.workflow_run.name;
+              const attempt = context.payload.workflow_run.run_attempt || 1;
+              const conclusion = context.payload.workflow_run.conclusion;
+              
+              if (conclusion !== 'failure' && conclusion !== 'cancelled') {
+                console.log(`ℹ️ Workflow finished with conclusion "${conclusion}". No auto-heal action required.`);
+                return;
+              }
+              
+              console.log(`[Auto-Heal] Detected completed workflow "${runName}" (ID: ${runId}) with status: ${conclusion}. Current attempt: ${attempt}`);
+              
+              if (attempt >= 5) {
+                console.log(`❌ Maximum retry limit of 5 reached for run ID ${runId}.`);
+                console.log(`⏳ Entering final 5-minute cool-down and inspecting queue for other pending workflows...`);
+                
+                try {
+                  const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    status: 'queued'
+                  });
+                  
+                  if (runs.data.total_count > 0) {
+                    console.log(`🔍 Found ${runs.data.total_count} other pending/queued workflow(s) in the queue. Yielding priority...`);
+                  } else {
+                    console.log(`🔍 No other pending workflows found in queue.`);
+                  }
+                } catch (err) {
+                  console.log(`⚠️ Could not query pending runs, proceeding with wait duration.`);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 300000));
+                console.log(`🛑 Stopping auto-heal for run ID ${runId} after exhausting 5 attempts and cool-down.`);
+                return;
+              }
+              
+              console.log(`⏳ Spacing out queue: Waiting 5 minutes (300 seconds) before re-running to respect priority and prevent rate-limiting...`);
               
               try {
-                // Fetch other recent workflow runs to check if any are queued or in progress
-                const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                const pendingRuns = await github.rest.actions.listWorkflowRunsForRepo({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   status: 'queued'
                 });
-                
-                if (runs.data.total_count > 0) {
-                  console.log(`🔍 Found ${runs.data.total_count} other pending/queued workflow(s) in the queue. Yielding priority...`);
-                } else {
-                  console.log(`🔍 No other pending workflows found in queue.`);
+                if (pendingRuns.data.total_count > 0) {
+                  console.log(`🔍 Queue status: ${pendingRuns.data.total_count} other workflow(s) detected waiting. Utilizing cool-down period to let them process.`);
                 }
-              } catch (err) {
-                console.log(`⚠️ Could not query pending runs, proceeding with wait duration.`);
-              }
+              } catch (e) {}
 
               await new Promise(resolve => setTimeout(resolve, 300000));
-              console.log(`🛑 Stopping auto-heal for run ID ${runId} after exhausting 5 attempts and cool-down.`);
-              return;
-            }
-            
-            console.log(`⏳ Spacing out queue: Waiting 5 minutes (300 seconds) before re-running to respect priority and prevent rate-limiting...`);
-            
-            // During this 5-minute wait, check if other workflows are queued to allow them processing priority
-            try {
-              const pendingRuns = await github.rest.actions.listWorkflowRunsForRepo({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                status: 'queued'
-              });
-              if (pendingRuns.data.total_count > 0) {
-                console.log(`🔍 Queue status: ${pendingRuns.data.total_count} other workflow(s) detected waiting. Utilizing cool-down period to let them process.`);
+              
+              console.log(`🔄 Sequentially re-running workflow (Attempt ${attempt + 1} of 5)...`);
+              try {
+                await github.rest.actions.reRunWorkflow({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: runId
+                });
+                console.log(`✅ Successfully triggered sequential re-run for run ID ${runId}.`);
+              } catch (error) {
+                console.error(`⚠️ Failed to trigger re-run for ID ${runId}:`, error.message);
               }
-            } catch (e) {}
-
-            await new Promise(resolve => setTimeout(resolve, 300000));
-            
-            console.log(`🔄 Sequentially re-running workflow (Attempt ${attempt + 1} of 5)...`);
-            try {
-              await github.rest.actions.reRunWorkflow({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: runId
-              });
-              console.log(`✅ Successfully triggered sequential re-run for run ID ${runId}.`);
-            } catch (error) {
-              console.error(`⚠️ Failed to trigger re-run for ID ${runId}:`, error.message);
             }
