@@ -11,12 +11,12 @@ class ModelStorageDB {
             let remoteData = null;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // 1. Try public static fetch first with cache-busting
+            // 1. Try correct relative paths first depending on whether viewed from root or Model folder
             const pathsToTry = [
+                `../Model/Models.json${cacheBuster}`,
                 `Models.json${cacheBuster}`,
-                `Model/Models.json${cacheBuster}`,
                 `./Models.json${cacheBuster}`,
-                `../Model/Models.json${cacheBuster}`
+                `/Model/Models.json${cacheBuster}`
             ];
 
             for (const path of pathsToTry) {
@@ -30,11 +30,11 @@ class ModelStorageDB {
                         }
                     }
                 } catch (err) {
-                    // Try next path fallback
+                    // Skip 404s silently
                 }
             }
 
-            // 2. Fallback to GitHub API if token exists and public fetch returned nothing
+            // 2. Fallback to GitHub API if token exists and public fetch didn't resolve
             if (!remoteData && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
@@ -51,7 +51,7 @@ class ModelStorageDB {
                 }
             }
 
-            // 3. Normalize and sync into localStorage (Handles both Array and {models: [...]} formats)
+            // 3. Normalize and sync into localStorage matching your { "models": [...] } structure
             let modelsArray = [];
             if (Array.isArray(remoteData)) {
                 modelsArray = remoteData;
