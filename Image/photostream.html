@@ -305,6 +305,29 @@
             renderModelTags();
             renderFolderTags();
 
+            // Real-time synchronization listeners for storage changes across tabs / pages
+            window.addEventListener('storage', (e) => {
+                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                    ImageStorageDB.initDB().then(() => {
+                        renderModelTags();
+                        renderFolderTags();
+                    });
+                } else {
+                    renderModelTags();
+                    renderFolderTags();
+                }
+            });
+
+            // Periodic background check to catch model additions/deletions instantly
+            setInterval(() => {
+                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                    ImageStorageDB.initDB().then(() => {
+                        renderModelTags();
+                        renderFolderTags();
+                    });
+                }
+            }, 1000);
+
             const urlInput = document.getElementById('streamUrl');
             const previewContainer = document.getElementById('previewContainer');
 
