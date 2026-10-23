@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <!-- Script references with correct root prefixes and corrected storage.js name -->
+    <!-- Script references with correct storage.js filename -->
     <script src="../config.js"></script>
     <script src="storage.js"></script>
     <script src="../github-sync.js"></script>
@@ -213,11 +213,10 @@
             });
         });
 
-async function saveModel(name, thumbnail, shape) {
+        async function saveModel(name, thumbnail, shape) {
             const modelData = { name, thumbnail, shape, createdAt: Date.now() };
 
             if (typeof ModelStorageDB !== 'undefined') {
-                // Use the dedicated addModel method which handles upsert and triggers immediate GitHub sync
                 await ModelStorageDB.addModel(modelData);
             }
 
