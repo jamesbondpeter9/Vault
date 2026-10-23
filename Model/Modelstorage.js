@@ -11,7 +11,7 @@ class ModelStorageDB {
             let remoteData = null;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // 1. Try public static fetch first with cache-busting to prevent stale/cached empty responses
+            // 1. Try public static fetch first with cache-busting
             const pathsToTry = [
                 `Models.json${cacheBuster}`,
                 `Model/Models.json${cacheBuster}`,
@@ -24,11 +24,9 @@ class ModelStorageDB {
                     const res = await fetch(path, { cache: 'no-store' });
                     if (res.ok) {
                         const json = await res.json();
-                        if (json && json.models && json.models.length > 0) {
+                        if (json) {
                             remoteData = json;
                             break;
-                        } else if (!remoteData) {
-                            remoteData = json; // Keep as fallback even if empty
                         }
                     }
                 } catch (err) {
@@ -36,8 +34,8 @@ class ModelStorageDB {
                 }
             }
 
-            // 2. Fallback to GitHub API if token exists and public fetch returned nothing/empty
-            if ((!remoteData || !remoteData.models || remoteData.models.length === 0) && typeof PortalConfig !== 'undefined') {
+            // 2. Fallback to GitHub API if token exists and public fetch returned nothing
+            if (!remoteData && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Model/Models.json`;
@@ -53,13 +51,17 @@ class ModelStorageDB {
                 }
             }
 
-            // 3. Sync into localStorage if valid remote data was found
-            if (remoteData && remoteData.models && Array.isArray(remoteData.models)) {
-                const localCurrent = JSON.parse(localStorage.getItem('video_portal_models_db') || '[]');
-                if (remoteData.models.length > 0 || localCurrent.length === 0) {
-                    localStorage.setItem('video_portal_models_db', JSON.stringify(remoteData.models));
-                    console.log('Successfully synchronized models from remote source!');
-                }
+            // 3. Normalize and sync into localStorage (Handles both Array and {models: [...]} formats)
+            let modelsArray = [];
+            if (Array.isArray(remoteData)) {
+                modelsArray = remoteData;
+            } else if (remoteData && Array.isArray(remoteData.models)) {
+                modelsArray = remoteData.models;
+            }
+
+            if (modelsArray.length > 0) {
+                localStorage.setItem('video_portal_models_db', JSON.stringify(modelsArray));
+                console.log('Successfully synchronized models from remote source!');
             }
         } catch (e) {
             console.warn('Could not fetch remote Model/Models.json during init:', e);
@@ -68,7 +70,10 @@ class ModelStorageDB {
 
     static getModels() {
         try {
-            return JSON.parse(localStorage.getItem('video_portal_models_db')) || [];
+            const data = JSON.parse(localStorage.getItem('video_portal_models_db'));
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.models)) return data.models;
+            return [];
         } catch (e) {
             return [];
         }
