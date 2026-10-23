@@ -171,7 +171,10 @@
         let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ModelStorageDB !== 'undefined') await ModelStorageDB.initDB();
+            // Ensure database initializes and remote sync completes BEFORE rendering elements
+            if (typeof ModelStorageDB !== 'undefined') {
+                await ModelStorageDB.initDB();
+            }
 
             buildFilterBar();
             renderModels();
