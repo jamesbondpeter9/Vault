@@ -102,21 +102,18 @@
         let currentStreamItem = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Initialize StorageDB to pull fresh state from videos.json
+            // Initialize storage DB (fetches videos.json directly from Media/ folder)
             if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
                 await StorageDB.initDB();
             }
 
-            // 2. Parse index from query parameter
             const params = new URLSearchParams(window.location.search);
             streamIndex = parseInt(params.get('index') ?? '0', 10);
             
-            // 3. Fetch streams list from storage.js
             let streams = (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') 
                 ? StorageDB.getVideoStreams() 
                 : ((typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') ? StorageDB.getStreams() : []);
             
-            // 4. Fallback check directly from local persistence if storage array is empty
             if (!streams || streams.length === 0) {
                 try {
                     const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos');
@@ -138,7 +135,6 @@
             document.title = `${currentStreamItem.title} - Video Portal`;
             document.getElementById('streamTitle').textContent = currentStreamItem.title;
 
-            // Render Model Tags
             const tagsContainer = document.getElementById('modelTags');
             if (currentStreamItem.models && currentStreamItem.models.length > 0) {
                 currentStreamItem.models.forEach(modelName => {
@@ -151,7 +147,7 @@
                 tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
             }
 
-            // 5. Initialize video stream player using player.js with fallback
+            // Initialize player using player.js inside Media/ folder
             if (typeof VideoPlayer !== 'undefined' && typeof VideoPlayer.init === 'function') {
                 VideoPlayer.init('playerContainer', currentStreamItem);
             } else {
