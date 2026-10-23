@@ -89,6 +89,24 @@ class ModelStorageDB {
         return true;
     }
 
+    static async addModel(modelData) {
+        const models = ModelStorageDB.getModels();
+        const existingIndex = models.findIndex(m => m.name.toLowerCase() === modelData.name.toLowerCase());
+        
+        if (existingIndex >= 0) {
+            models[existingIndex].thumbnail = modelData.thumbnail || models[existingIndex].thumbnail;
+            models[existingIndex].shape = modelData.shape || models[existingIndex].shape;
+        } else {
+            models.push({
+                name: modelData.name,
+                thumbnail: modelData.thumbnail || '',
+                shape: modelData.shape || 'portrait',
+                createdAt: Date.now()
+            });
+        }
+        return await ModelStorageDB.saveAndSyncModels(models, true);
+    }
+
     static async deleteModel(modelName) {
         if (!modelName) return;
         const models = ModelStorageDB.getModels();
