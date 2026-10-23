@@ -14,53 +14,66 @@ class StorageDB {
 
     static async syncFromRemoteJSON() {
         try {
-            const currentStreams = StorageDB.getStreams();
-            
-            if (currentStreams.length === 0) {
-                let remoteData = null;
+            let remoteData = null;
+            const cacheBuster = `?t=${Date.now()}`;
 
-                // 1. Try public static fetch first (Works instantly on phones & new sessions without needing a PAT)
-                const pathsToTry = ['Media/videos.json', './videos.json', '../Media/videos.json'];
-                for (const path of pathsToTry) {
-                    try {
-                        const res = await fetch(path);
-                        if (res.ok) {
-                            remoteData = await res.json();
+            // 1. Try public static fetch first with cache-busting to prevent stale/cached empty responses
+            const pathsToTry = [
+                `Media/videos.json${cacheBuster}`, 
+                `./videos.json${cacheBuster}`, 
+                `../Media/videos.json${cacheBuster}`
+            ];
+
+            for (const path of pathsToTry) {
+                try {
+                    const res = await fetch(path, { cache: 'no-store' });
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json && json.streams && json.streams.length > 0) {
+                            remoteData = json;
                             break;
-                        }
-                    } catch (err) {
-                        // Continue trying next path fallback
-                    }
-                }
-
-                // 2. If public fetch didn't resolve, fallback to GitHub API if token exists
-                if (!remoteData && typeof PortalConfig !== 'undefined') {
-                    const token = PortalConfig.getToken();
-                    if (token) {
-                        const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
-                        const res = await fetch(apiUrl, {
-                            headers: { 'Authorization': `token ${token}` }
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            const decodedString = decodeURIComponent(escape(atob(data.content)));
-                            remoteData = JSON.parse(decodedString);
+                        } else if (!remoteData) {
+                            remoteData = json; // Keep as fallback even if empty, in case remote is intentionally empty
                         }
                     }
+                } catch (err) {
+                    // Try next path fallback
                 }
+            }
 
-                // 3. Populate local database if data was successfully fetched
-                if (remoteData && remoteData.streams && Array.isArray(remoteData.streams)) {
-                    const videoStreams = remoteData.streams.filter(s => {
-                        const t = (s.type || 'stream').toLowerCase();
-                        return t === 'stream' || t === 'video';
+            // 2. Fallback to GitHub API if token exists and public fetch returned nothing/empty
+            if ((!remoteData || !remoteData.streams || remoteData.streams.length === 0) && typeof PortalConfig !== 'undefined') {
+                const token = PortalConfig.getToken();
+                if (token) {
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json${cacheBuster}`;
+                    const res = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${token}` },
+                        cache: 'no-store'
                     });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const decodedString = decodeURIComponent(escape(atob(data.content)));
+                        remoteData = JSON.parse(decodedString);
+                    }
+                }
+            }
+
+            // 3. Sync into localStorage if valid remote data was found
+            if (remoteData && remoteData.streams && Array.isArray(remoteData.streams)) {
+                const videoStreams = remoteData.streams.filter(s => {
+                    const t = (s.type || 'stream').toLowerCase();
+                    return t === 'stream' || t === 'video';
+                });
+                
+                // Only overwrite local storage if remote actually has items, or if local is completely empty
+                const localCurrent = JSON.parse(localStorage.getItem('video_portal_streams_db') || '[]');
+                if (videoStreams.length > 0 || localCurrent.length === 0) {
                     localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
-                    console.log('Successfully bootstrapped streams from remote JSON!');
+                    console.log('Successfully synchronized streams from remote source!');
                 }
             }
         } catch (e) {
-            console.log('Could not fetch remote Media/videos.json during init:', e);
+            console.warn('Could not sync remote Media/videos.json during init:', e);
         }
     }
 
