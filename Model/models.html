@@ -77,7 +77,7 @@
             transform: translateZ(0);
         }
 
-        /* Auto-optimized high-resolution thumbnail fitting */
+        /* Compact & optimized thumbnail image fitting */
         .mondrian-thumb img {
             object-fit: cover;
             width: 100%;
@@ -193,13 +193,13 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
-        // Auto Quality Optimization Helper for Thumbnail Dimensions
+        // Optimized Short Base64 Thumbnail Compression Helper (Max 400px dimension, 0.78 quality)
         function optimizeThumbnailImage(url, callback) {
             const img = new Image();
             img.crossOrigin = "anonymous";
             img.src = url;
             img.onload = () => {
-                const maxDim = 800; // Optimal max dimension for crisp high-density grid cells without bloat
+                const maxDim = 400; // Keeps base64 strings short and lightweight while preserving sharp detail
                 let width = img.width;
                 let height = img.height;
 
@@ -218,10 +218,10 @@
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
+                ctx.imageSmoothingQuality = 'medium';
                 ctx.drawImage(img, 0, 0, width, height);
 
-                const optimizedUrl = canvas.toDataURL('image/jpeg', 0.90);
+                const optimizedUrl = canvas.toDataURL('image/jpeg', 0.78);
                 const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
                 callback(optimizedUrl, shape);
             };
