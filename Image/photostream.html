@@ -220,6 +220,7 @@
         let selectedFolders = [];
         let modelLetterFilter = 'ALL';
         let folderLetterFilter = 'ALL';
+        let cachedModelsList = [];
 
         function extractAllImageUrls(input) {
             if (!input) return [];
@@ -297,35 +298,61 @@
             });
         }
 
+        // Robust multi-source model loader bridging root Model/Models.json and ImageStorageDB
+        async function fetchAllModelsUnified() {
+            let models = [];
+            
+            // 1. Try ImageStorageDB first
+            if (typeof ImageStorageDB !== 'undefined') {
+                try {
+                    if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
+                    if (typeof ImageStorageDB.getModels === 'function') {
+                        models = ImageStorageDB.getModels() || [];
+                    }
+                } catch (e) {}
+            }
+
+            // 2. Fallback: Check localStorage / portal storage keys
+            if (models.length === 0) {
+                try {
+                    const localData = localStorage.getItem('portal_models') || localStorage.getItem('models');
+                    if (localData) {
+                        const parsed = JSON.parse(localData);
+                        models = Array.isArray(parsed) ? parsed : (parsed.models || []);
+                    }
+                } catch (e) {}
+            }
+
+            // 3. Fallback: Direct fetch from root Model/Models.json
+            if (models.length === 0) {
+                try {
+                    const res = await fetch('../Model/Models.json');
+                    if (res.ok) {
+                        const data = await res.json();
+                        models = data.models || [];
+                    }
+                } catch (e) {}
+            }
+
+            // Normalize models to object array format { name: "..." }
+            return models.map(m => typeof m === 'string' ? { name: m } : m).filter(m => m && m.name);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
                 await ImageStorageDB.initDB();
             }
 
-            renderModelTags();
-            renderFolderTags();
+            await refreshModelsAndFolders();
 
             // Real-time synchronization listeners for storage changes across tabs / pages
-            window.addEventListener('storage', (e) => {
-                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                    ImageStorageDB.initDB().then(() => {
-                        renderModelTags();
-                        renderFolderTags();
-                    });
-                } else {
-                    renderModelTags();
-                    renderFolderTags();
-                }
+            window.addEventListener('storage', async () => {
+                await refreshModelsAndFolders();
             });
 
             // Periodic background check to catch model additions/deletions instantly
-            setInterval(() => {
-                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                    ImageStorageDB.initDB().then(() => {
-                        renderModelTags();
-                        renderFolderTags();
-                    });
-                }
+            setInterval(async () => {
+                await refreshModelsAndFolders();
             }, 1000);
 
             const urlInput = document.getElementById('streamUrl');
@@ -361,14 +388,19 @@
                 selectedFolders = [];
                 modelLetterFilter = 'ALL';
                 folderLetterFilter = 'ALL';
-                renderModelTags();
-                renderFolderTags();
+                await refreshModelsAndFolders();
                 previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
             });
         });
 
+        async function refreshModelsAndFolders() {
+            cachedModelsList = await fetchAllModelsUnified();
+            renderModelTags();
+            renderFolderTags();
+        }
+
         function renderModelTags() {
-            const models = (typeof ImageStorageDB !== 'undefined') ? (ImageStorageDB.getModels() || []) : [];
+            const models = cachedModelsList;
             const container = document.getElementById('modelTagsList');
 
             if (models.length === 0) {
