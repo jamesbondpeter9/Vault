@@ -45,7 +45,7 @@
         }
 
         .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
-        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.80rem; transition: all 0.2s ease; }
+        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
         .filter-btn:hover, .filter-btn.active { background: #fff; color: #000; border-color: #fff; }
         
         .models-grid {
@@ -74,29 +74,6 @@
             height: 100%;
             border-radius: 20px;
             cursor: pointer;
-            transform: translateZ(0);
-        }
-
-        /* Compact & optimized thumbnail image fitting */
-        .mondrian-thumb img {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-            image-rendering: auto;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            will-change: transform;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
-            filter: brightness(1.01) contrast(1.02);
-        }
-
-        .mondrian-thumb:hover img {
-            transform: scale(1.025) translateZ(0);
-            filter: brightness(1.04) contrast(1.03);
         }
 
         .update-thumb-btn { 
@@ -193,43 +170,6 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
-        // Optimized Short Base64 Thumbnail Compression Helper (Max 400px dimension, 0.78 quality)
-        function optimizeThumbnailImage(url, callback) {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = url;
-            img.onload = () => {
-                const maxDim = 400; // Keeps base64 strings short and lightweight while preserving sharp detail
-                let width = img.width;
-                let height = img.height;
-
-                if (width > maxDim || height > maxDim) {
-                    if (width > height) {
-                        height = Math.round((height * maxDim) / width);
-                        width = maxDim;
-                    } else {
-                        width = Math.round((width * maxDim) / height);
-                        height = maxDim;
-                    }
-                }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'medium';
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const optimizedUrl = canvas.toDataURL('image/jpeg', 0.78);
-                const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
-                callback(optimizedUrl, shape);
-            };
-            img.onerror = () => {
-                callback(url, 'square');
-            };
-        }
-
         document.addEventListener('DOMContentLoaded', async () => {
             // Ensure database initializes and remote sync completes BEFORE rendering elements
             if (typeof ModelStorageDB !== 'undefined') {
@@ -247,18 +187,30 @@
                 const thumb = thumbInput.value.trim();
                 if (!name || !thumb) return;
 
-                optimizeThumbnailImage(thumb, (optimizedThumb, shape) => {
-                    saveModel(name, optimizedThumb, shape);
-                });
+                const img = new Image();
+                img.src = thumb;
+                img.onload = () => {
+                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                    saveModel(name, thumb, shape);
+                };
+                img.onerror = () => {
+                    saveModel(name, thumb, 'square');
+                };
             });
 
             document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    optimizeThumbnailImage(newUrl, (optimizedThumb, shape) => {
-                        updateModelThumb(modelIndexToUpdateThumb, optimizedThumb, shape);
-                    });
+                    const img = new Image();
+                    img.src = newUrl;
+                    img.onload = () => {
+                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
+                    };
+                    img.onerror = () => {
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
+                    };
                 }
                 closeUpdateThumbModal();
             });
@@ -346,7 +298,7 @@
                     <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
                         <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
                         <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
-                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
+                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
                     </div>`;
                 grid.appendChild(card);
