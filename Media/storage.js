@@ -15,6 +15,7 @@ class StorageDB {
     static async syncFromRemoteJSON() {
         try {
             let remoteData = null;
+            let fetchedFromServer = false;
             const cacheBuster = `?t=${Date.now()}`;
 
             // 1. Try public static fetch first with cache-busting to prevent stale/cached empty responses
@@ -28,6 +29,7 @@ class StorageDB {
                 try {
                     const res = await fetch(path, { cache: 'no-store' });
                     if (res.ok) {
+                        fetchedFromServer = true;
                         const json = await res.json();
                         if (json && json.streams && json.streams.length > 0) {
                             remoteData = json;
@@ -35,6 +37,10 @@ class StorageDB {
                         } else if (!remoteData) {
                             remoteData = json; // Keep as fallback even if empty, in case remote is intentionally empty
                         }
+                    } else if (res.status === 404) {
+                        fetchedFromServer = true;
+                        remoteData = { streams: [] };
+                        break;
                     }
                 } catch (err) {
                     // Try next path fallback
@@ -42,7 +48,7 @@ class StorageDB {
             }
 
             // 2. Fallback to GitHub API if token exists and public fetch returned nothing/empty
-            if ((!remoteData || !remoteData.streams || remoteData.streams.length === 0) && typeof PortalConfig !== 'undefined') {
+            if ((!remoteData || !remoteData.streams || remoteData.streams.length === 0) && !fetchedFromServer && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
                     const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json${cacheBuster}`;
@@ -51,9 +57,13 @@ class StorageDB {
                         cache: 'no-store'
                     });
                     if (res.ok) {
+                        fetchedFromServer = true;
                         const data = await res.json();
                         const decodedString = decodeURIComponent(escape(atob(data.content)));
                         remoteData = JSON.parse(decodedString);
+                    } else if (res.status === 404) {
+                        fetchedFromServer = true;
+                        remoteData = { streams: [] };
                     }
                 }
             }
@@ -65,9 +75,9 @@ class StorageDB {
                     return t === 'stream' || t === 'video';
                 });
                 
-                // Only overwrite local storage if remote actually has items, or if local is completely empty
+                // Overwrite local storage if successfully fetched from server (honoring empty/deleted states), or if local is completely empty
                 const localCurrent = JSON.parse(localStorage.getItem('video_portal_streams_db') || '[]');
-                if (videoStreams.length > 0 || localCurrent.length === 0) {
+                if (fetchedFromServer || localCurrent.length === 0) {
                     localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
                     console.log('Successfully synchronized streams from remote source!');
                 }
