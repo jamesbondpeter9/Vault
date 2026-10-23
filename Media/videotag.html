@@ -204,7 +204,9 @@
             matchedStreams.forEach((stream) => {
                 const card = document.createElement('a');
                 const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `../watch.html?index=${globalIndex !== -1 ? globalIndex : 0}`;
+                
+                // Pointing stream cards directly to watch.html inside Media folder
+                card.href = `watch.html?index=${globalIndex !== -1 ? globalIndex : 0}`;
                 card.className = 'mondrian-card portrait';
 
                 card.innerHTML = `
