@@ -18,11 +18,12 @@ class StorageDB {
             let fetchedFromServer = false;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // Corrected pathing to prevent double prefixing like Media/Media/
+            // Prioritize Media/videos.json first whether called from root (index.html) or Media/ folder
             const pathsToTry = [
+                `Media/videos.json${cacheBuster}`, 
                 `./videos.json${cacheBuster}`, 
-                `/Vault/Media/videos.json${cacheBuster}`,
-                `videos.json${cacheBuster}`
+                `../Media/videos.json${cacheBuster}`,
+                `/Vault/Media/videos.json${cacheBuster}`
             ];
 
             for (const path of pathsToTry) {
@@ -78,7 +79,7 @@ class StorageDB {
                 }
             }
         } catch (e) {
-            console.warn('Could not sync remote videos.json during init:', e);
+            console.warn('Could not sync remote Media/videos.json during init:', e);
         }
     }
 
