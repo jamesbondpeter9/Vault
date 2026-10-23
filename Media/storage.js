@@ -16,28 +16,47 @@ class StorageDB {
         try {
             const currentStreams = StorageDB.getStreams();
             
-            if (currentStreams.length === 0 && typeof PortalConfig !== 'undefined') {
-                const token = PortalConfig.getToken();
-                if (token) {
-                    // Targets Media/videos.json directly from the repository root perspective
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
-                    const res = await fetch(apiUrl, {
-                        headers: { 'Authorization': `token ${token}` }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const decodedString = decodeURIComponent(escape(atob(data.content)));
-                        const remoteData = JSON.parse(decodedString);
+            if (currentStreams.length === 0) {
+                let remoteData = null;
 
-                        if (remoteData.streams && Array.isArray(remoteData.streams)) {
-                            const videoStreams = remoteData.streams.filter(s => {
-                                const t = (s.type || 'stream').toLowerCase();
-                                return t === 'stream' || t === 'video';
-                            });
-                            localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                // 1. Try public static fetch first (Works instantly on phones & new sessions without needing a PAT)
+                const pathsToTry = ['Media/videos.json', './videos.json', '../Media/videos.json'];
+                for (const path of pathsToTry) {
+                    try {
+                        const res = await fetch(path);
+                        if (res.ok) {
+                            remoteData = await res.json();
+                            break;
                         }
-                        console.log('Successfully bootstrapped streams from Media/videos.json!');
+                    } catch (err) {
+                        // Continue trying next path fallback
                     }
+                }
+
+                // 2. If public fetch didn't resolve, fallback to GitHub API if token exists
+                if (!remoteData && typeof PortalConfig !== 'undefined') {
+                    const token = PortalConfig.getToken();
+                    if (token) {
+                        const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Media/videos.json`;
+                        const res = await fetch(apiUrl, {
+                            headers: { 'Authorization': `token ${token}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            const decodedString = decodeURIComponent(escape(atob(data.content)));
+                            remoteData = JSON.parse(decodedString);
+                        }
+                    }
+                }
+
+                // 3. Populate local database if data was successfully fetched
+                if (remoteData && remoteData.streams && Array.isArray(remoteData.streams)) {
+                    const videoStreams = remoteData.streams.filter(s => {
+                        const t = (s.type || 'stream').toLowerCase();
+                        return t === 'stream' || t === 'video';
+                    });
+                    localStorage.setItem('video_portal_streams_db', JSON.stringify(videoStreams));
+                    console.log('Successfully bootstrapped streams from remote JSON!');
                 }
             }
         } catch (e) {
@@ -130,22 +149,18 @@ class StorageDB {
         return await StorageDB.saveStreams(streams, true);
     }
 
-// Hardened deleteStream supporting both index or property matching
     static async deleteStream(identifier) {
         const streams = StorageDB.getStreams();
         let filteredStreams = [];
 
         if (typeof identifier === 'number') {
-            // Delete by exact array index
             filteredStreams = streams.filter((_, index) => index !== identifier);
         } else if (typeof identifier === 'object' && identifier !== null) {
-            // Delete by matching url and title
             filteredStreams = streams.filter(s => !(s.url === identifier.url && s.title === identifier.title));
         } else {
             filteredStreams = streams;
         }
 
-        console.log('Deleting stream. Remaining count:', filteredStreams.length);
         return await StorageDB.saveStreams(filteredStreams, true);
     }
 }
