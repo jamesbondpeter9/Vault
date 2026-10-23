@@ -36,25 +36,26 @@ class GitHubSync {
         const branch = PortalConfig.branch;
 
         const pathname = window.location.pathname.toLowerCase();
+        const href = window.location.href.toLowerCase();
         
         let jsonFilename = 'Media/videos.json';
         let dbData = {};
 
         // ==========================================
         // SECTION 1: MODEL SECTION (Model/)
+        // Added explicit check for ModelStorageDB and model paths
         // ==========================================
         if (
             pathname.includes('/model/') || 
             pathname.includes('models.html') || 
-            pathname.includes('vault.html') ||
-            window.location.href.toLowerCase().includes('/model/')
+            pathname.includes('vault.html') || 
+            href.includes('/model/') ||
+            typeof ModelStorageDB !== 'undefined'
         ) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
-            if (typeof ModelStorageDB !== 'undefined') {
-                dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
-            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
-                dbData.models = await StorageDB.getModels() || [];
+            if (typeof ModelStorageDB !== 'undefined' && typeof ModelStorageDB.getModels === 'function') {
+                dbData.models = await ModelStorageDB.getModels() || [];
             }
         } 
         // ==========================================
@@ -95,6 +96,11 @@ class GitHubSync {
             } catch (e) {
                 console.warn('Could not verify remote JSON fallback:', e);
             }
+        }
+
+        // Ensure model payload matches exact { "models": [...] } structure required by Models.json
+        if (jsonFilename === 'Model/Models.json' && Array.isArray(dbData)) {
+            dbData = { models: dbData };
         }
 
         const jsonContent = JSON.stringify(dbData, null, 4);
