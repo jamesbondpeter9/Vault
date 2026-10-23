@@ -1,13 +1,5 @@
 <script src="config.js"></script>
 <script>
-    // Auto-fill token field if previously stored in normal mode
-    document.addEventListener('DOMContentLoaded', () => {
-        const storedToken = localStorage.getItem('github_token') || sessionStorage.getItem('github_token');
-        if (storedToken) {
-            document.getElementById('tokenInput').value = storedToken;
-        }
-    });
-
     document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const username = document.getElementById('usernameInput').value.trim();
