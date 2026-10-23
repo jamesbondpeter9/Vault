@@ -45,7 +45,7 @@
         }
 
         .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
-        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
+        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.80rem; transition: all 0.2s ease; }
         .filter-btn:hover, .filter-btn.active { background: #fff; color: #000; border-color: #fff; }
         
         .models-grid {
@@ -76,7 +76,7 @@
             cursor: pointer;
         }
 
-        /* Anti-pixelation and high-quality crisp rendering optimizations */
+        /* Enhanced softness and cinematic anti-aliasing optimizations */
         .mondrian-thumb img {
             object-fit: cover;
             width: 100%;
@@ -84,10 +84,16 @@
             position: absolute;
             inset: 0;
             image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             transform: translateZ(0);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+            filter: brightness(1.01) contrast(1.02);
+        }
+
+        .mondrian-thumb:hover img {
+            transform: scale(1.025) translateZ(0);
+            filter: brightness(1.04) contrast(1.03);
         }
 
         .update-thumb-btn { 
