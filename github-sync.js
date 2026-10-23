@@ -46,8 +46,11 @@ class GitHubSync {
         if (pathname.includes('/model/') || pathname.includes('models.html') || pathname.includes('vault.html') || pathname.includes('model')) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
+            // Check both ModelStorageDB and StorageDB fallback since Model/storage.js defines ModelStorageDB
             if (typeof ModelStorageDB !== 'undefined') {
                 dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
+                dbData.models = await StorageDB.getModels() || [];
             }
         } 
         // ==========================================
