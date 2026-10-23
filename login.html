@@ -92,6 +92,10 @@
                 <label>Password</label>
                 <input type="password" id="passwordInput" required placeholder="Enter password">
             </div>
+            <div>
+                <label>GitHub PAT Token</label>
+                <input type="password" id="tokenInput" placeholder="Paste PAT token (ghp_... or github_pat_...)">
+            </div>
             <button type="submit" class="login-btn">Log In</button>
             <div id="errorMsg" class="error-msg">Incorrect username or password. Please try again.</div>
         </form>
@@ -99,17 +103,40 @@
 
     <script src="config.js"></script>
     <script>
+        // Auto-fill token field if previously stored
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedToken = localStorage.getItem('github_token') || localStorage.getItem('github_pat') || sessionStorage.getItem('github_token');
+            if (storedToken) {
+                document.getElementById('tokenInput').value = storedToken;
+            }
+        });
+
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
+            const token = document.getElementById('tokenInput').value.trim();
             
-            // Set your desired credentials here or map them from PortalConfig
             const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
             const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
 
             if (username === correctUsername && password === correctPassword) {
+                // Save authentication status
                 sessionStorage.setItem('portal_authenticated', 'true');
+                localStorage.setItem('portal_authenticated', 'true');
+
+                // Save GitHub PAT token across all storage layers if provided
+                if (token) {
+                    localStorage.setItem('github_token', token);
+                    localStorage.setItem('github_pat', token);
+                    sessionStorage.setItem('github_token', token);
+                    sessionStorage.setItem('github_pat', token);
+
+                    if (typeof setGitHubToken === 'function') {
+                        setGitHubToken(token);
+                    }
+                }
+
                 window.location.href = 'index.html';
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
