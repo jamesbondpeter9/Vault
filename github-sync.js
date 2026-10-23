@@ -42,14 +42,12 @@ class GitHubSync {
 
         // ==========================================
         // SECTION 1: MODEL SECTION (Model/)
-        // Checked robustly via pathname or active ModelStorageDB instance
         // ==========================================
         if (
             pathname.includes('/model/') || 
             pathname.includes('models.html') || 
-            pathname.includes('vault.html') || 
-            pathname.includes('model') ||
-            typeof ModelStorageDB !== 'undefined'
+            pathname.includes('vault.html') ||
+            window.location.href.toLowerCase().includes('/model/')
         ) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
