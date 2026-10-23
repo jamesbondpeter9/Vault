@@ -85,6 +85,26 @@ class ModelStorageDB {
 
     static async saveAndSyncModels(models, immediate = false) {
         localStorage.setItem('video_portal_models_db', JSON.stringify(models));
+        
+        // Explicitly trigger GitHub sync targeting Model/Models.json
+        if (typeof PortalConfig !== 'undefined') {
+            const token = PortalConfig.getToken();
+            if (token && typeof GitHubSync !== 'undefined') {
+                const owner = PortalConfig.owner;
+                const repo = PortalConfig.repo;
+                const branch = PortalConfig.branch;
+                const jsonFilename = 'Model/Models.json';
+                const dbData = { models: models };
+                const jsonContent = JSON.stringify(dbData, null, 4);
+                
+                return await GitHubSync.pushToGitHub(owner, repo, branch, token, jsonFilename, jsonContent, `Sync: Updated ${jsonFilename} via portal`)
+                    .catch(err => {
+                        console.error('GitHub auto-sync error for models:', err);
+                        return false;
+                    });
+            }
+        }
+
         if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
             return await GitHubSync.triggerAutoSync(immediate).catch(err => {
                 console.error('GitHub auto-sync error for models:', err);
