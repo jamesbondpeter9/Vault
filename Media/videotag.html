@@ -144,17 +144,55 @@
     <script src="../github-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
+            let allStreams = [];
+
+            // 1. Try loading via StorageDB
+            if (typeof StorageDB !== 'undefined') {
+                try {
+                    await StorageDB.initDB();
+                    allStreams = StorageDB.getVideoStreams() || [];
+                } catch (e) {
+                    console.warn('StorageDB init error:', e);
+                }
+            }
+
+            // 2. Bridge Fallback: Check localStorage if StorageDB returned empty
+            if (allStreams.length === 0) {
+                try {
+                    const localData = localStorage.getItem('portal_streams') || localStorage.getItem('streams');
+                    if (localData) {
+                        const parsed = JSON.parse(localData);
+                        allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || []);
+                    }
+                } catch (e) {
+                    console.warn('LocalStorage stream fallback error:', e);
+                }
+            }
+
+            // 3. Direct Fetch Fallback: Load directly from root videos.json if needed
+            if (allStreams.length === 0) {
+                try {
+                    const res = await fetch('../Media/videos.json');
+                    if (res.ok) {
+                        const data = await res.json();
+                        allStreams = data.streams || [];
+                    }
+                } catch (e) {
+                    console.warn('Direct JSON fetch fallback error:', e);
+                }
+            }
+
             const params = new URLSearchParams(window.location.search);
-            const modelName = decodeURIComponent(params.get('name') ?? '');
+            const modelName = decodeURIComponent(params.get('name') ?? '').trim();
 
             if (modelName) {
                 document.getElementById('tagTitle').textContent = `${modelName} - Videos`;
                 document.title = `${modelName} Videos - Portal`;
             }
 
-            const allStreams = StorageDB.getVideoStreams();
-            const matchedStreams = allStreams.filter(stream => stream.models && stream.models.some(m => m.toLowerCase() === modelName.toLowerCase()));
+            const matchedStreams = allStreams.filter(stream => 
+                stream.models && stream.models.some(m => m.trim().toLowerCase() === modelName.toLowerCase())
+            );
 
             const grid = document.getElementById('tagGrid');
             if (matchedStreams.length === 0) {
@@ -166,7 +204,7 @@
             matchedStreams.forEach((stream) => {
                 const card = document.createElement('a');
                 const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                card.href = `../watch.html?index=${globalIndex}`;
+                card.href = `../watch.html?index=${globalIndex !== -1 ? globalIndex : 0}`;
                 card.className = 'mondrian-card portrait';
 
                 card.innerHTML = `
