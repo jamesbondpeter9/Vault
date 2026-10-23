@@ -1,6 +1,10 @@
 <script src="config.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Clear any old auth state when arriving at login page
+        sessionStorage.removeItem('portal_authenticated');
+        try { localStorage.removeItem('portal_authenticated'); } catch (e) {}
+
         const loginForm = document.getElementById('loginForm');
         if (!loginForm) return;
 
@@ -14,13 +18,13 @@
             const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
 
             if (username === correctUsername && password === correctPassword) {
-                // Save authentication status in both storages
+                // Save authentication status
                 sessionStorage.setItem('portal_authenticated', 'true');
                 try {
                     localStorage.setItem('portal_authenticated', 'true');
                 } catch (err) {}
 
-                // Save GitHub PAT token everywhere possible
+                // Save GitHub PAT token manually entered by user
                 if (token) {
                     const cleanToken = token.trim();
                     sessionStorage.setItem('github_token', cleanToken);
@@ -28,17 +32,14 @@
                     try {
                         localStorage.setItem('github_token', cleanToken);
                         localStorage.setItem('github_pat', cleanToken);
-                    } catch (err) {
-                        console.warn('localStorage restricted (likely Incognito mode). Using sessionStorage & memory cache.');
-                    }
+                    } catch (err) {}
                     
-                    // Also update via helper if available
                     if (typeof setGitHubToken === 'function') {
                         setGitHubToken(cleanToken);
                     }
                 }
 
-                // Redirect to portal
+                // Redirect to main portal home
                 window.location.href = 'index.html';
             } else {
                 const errorMsg = document.getElementById('errorMsg');
