@@ -208,13 +208,15 @@
                 await StorageDB.initDB();
             }
 
-            // Robust stream retrieval honoring empty states and clearing ghost caches
+            // Retrieve saved streams from StorageDB and videos.json state
             let allStreams = [];
             if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
                 allStreams = StorageDB.getVideoStreams() || [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') {
+                allStreams = StorageDB.getStreams() || [];
             } else {
                 try {
-                    const rawLocal = localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
+                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
                     if (rawLocal) {
                         const parsed = JSON.parse(rawLocal);
                         allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
@@ -231,11 +233,10 @@
             
             grid.innerHTML = '';
             
-            allStreams.forEach((stream) => {
+            allStreams.forEach((stream, index) => {
                 const card = document.createElement('a');
-                const globalIndex = allStreams.findIndex(s => s.url === stream.url && s.title === stream.title);
-                // Updated link path pointing to Media/watch.html
-                card.href = `Media/watch.html?index=${globalIndex}`;
+                // Link directly to Media/watch.html with correct array index parameter
+                card.href = `Media/watch.html?index=${index}`;
                 card.className = `mondrian-card portrait`;
 
                 card.innerHTML = `
@@ -248,16 +249,18 @@
 
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
-                    img.onload = () => {
-                        const ratio = img.naturalWidth / img.naturalHeight;
-                        if (ratio < 0.85) {
-                            card.className = 'mondrian-card portrait';
-                        } else if (ratio > 1.25) {
-                            card.className = 'mondrian-card landscape';
-                        } else {
-                            card.className = 'mondrian-card square';
-                        }
-                    };
+                    if (img) {
+                        img.onload = () => {
+                            const ratio = img.naturalWidth / img.naturalHeight;
+                            if (ratio < 0.85) {
+                                card.className = 'mondrian-card portrait';
+                            } else if (ratio > 1.25) {
+                                card.className = 'mondrian-card landscape';
+                            } else {
+                                card.className = 'mondrian-card square';
+                            }
+                        };
+                    }
                 }
             });
         });
