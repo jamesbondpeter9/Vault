@@ -1,0 +1,81 @@
+name: Portal Sync, Deploy & Auto-Heal
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'Model/models.html'
+      - 'Image/photostream.html'
+      - 'Media/stream.html'
+      - 'Media/watch.html'
+      - 'Media/view.html'
+      - 'Media/videotag.html'
+      - 'Media/videos.json'
+      - 'Media/storage.js'
+      - 'index.html'
+      - 'style.css'
+      
+  workflow_dispatch: # Allows manual triggers anytime from the Actions tab
+
+  workflow_run:
+    workflows: 
+      - "pages-build-deployment"
+      - "Portal Sync, Deploy & Auto-Heal"
+    types:
+      - completed
+
+concurrency:
+  group: portal-sync-heal-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  sync-and-deploy:
+    if: ${{ github.event_name != 'workflow_run' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Portal Files
+        run: |
+          echo "Changes detected in core portal files. Running deployment..."
+          git status
+
+  auto-heal-failed:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled') }}
+    steps:
+      - name: Intelligent Queue & Retry Handler
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const runName = context.payload.workflow_run.name;
+            const attempt = context.payload.workflow_run.run_attempt || 1;
+            const conclusion = context.payload.workflow_run.conclusion;
+            
+            console.log(`[Auto-Heal] Detected completed workflow "${runName}" (ID: ${runId}) with status: ${conclusion}. Current attempt: ${attempt}`);
+            
+            if (attempt >= 5) {
+              console.log(`❌ Maximum retry limit of 5 reached for run ID ${runId}. Stopping auto-heal for this specific run instance to prevent infinite loops, but keeping workflow active for future events.`);
+              return;
+            }
+            
+            console.log(`⏳ Spacing out queue: Waiting 5 minutes (300 seconds) before re-running to respect priority and prevent rate-limiting...`);
+            await new Promise(resolve => setTimeout(resolve, 300000));
+            
+            console.log(`🔄 Sequentially re-running workflow (Attempt ${attempt + 1} of 5)...`);
+            try {
+              await github.rest.actions.reRunWorkflow({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId
+              });
+              console.log(`✅ Successfully triggered sequential re-run for run ID ${runId}.`);
+            } catch (error) {
+              console.error(`⚠️ Failed to trigger re-run for ID ${runId}:`, error.message);
+            }
