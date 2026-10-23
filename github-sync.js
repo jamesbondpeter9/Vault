@@ -107,23 +107,6 @@ class GitHubSync {
             }
         }
 
-        // Validate local data presence using Array check so deletions (even resulting in []) sync properly
-        const hasLocalData = Array.isArray(dbData.streams) || 
-                             Array.isArray(dbData.models) || 
-                             Array.isArray(dbData.photostreams) || 
-                             Array.isArray(dbData.folders);
-                           
-        if (!hasLocalData) {
-            try {
-                const remoteData = await this.fetchRemoteJSON(owner, repo, jsonFilename, token);
-                if (remoteData) {
-                    dbData = remoteData;
-                }
-            } catch (e) {
-                console.warn('Could not verify remote JSON fallback:', e);
-            }
-        }
-
         // Ensure model payload matches exact { "models": [...] } structure required by Models.json
         if (jsonFilename === 'Model/Models.json' && Array.isArray(dbData)) {
             dbData = { models: dbData };
