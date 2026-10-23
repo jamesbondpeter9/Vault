@@ -189,27 +189,73 @@
             });
         }
 
+        // Multi-source bridge loader for Image/images.json data
+        async function fetchImagesJsonUnified() {
+            let data = { models: [], photostreams: [], folders: [] };
+
+            // 1. Try ImageStorageDB
+            if (typeof ImageStorageDB !== 'undefined') {
+                try {
+                    if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
+                    data.photostreams = (typeof ImageStorageDB.getPhotoStreams === 'function') ? ImageStorageDB.getPhotoStreams() || [] : [];
+                    data.folders = (typeof ImageStorageDB.getFolders === 'function') ? ImageStorageDB.getFolders() || [] : [];
+                } catch (e) {}
+            }
+
+            // 2. Fallback: Check localStorage keys
+            if (data.photostreams.length === 0 && data.folders.length === 0) {
+                try {
+                    const localImages = localStorage.getItem('portal_images') || localStorage.getItem('images_db');
+                    if (localImages) {
+                        const parsed = JSON.parse(localImages);
+                        data.photostreams = parsed.photostreams || parsed.streams || [];
+                        data.folders = parsed.folders || [];
+                    }
+                } catch (e) {}
+            }
+
+            // 3. Fallback: Direct fetch from Image/images.json
+            if (data.photostreams.length === 0 && data.folders.length === 0) {
+                try {
+                    const res = await fetch('images.json');
+                    if (res.ok) {
+                        const json = await res.json();
+                        data.photostreams = json.photostreams || [];
+                        data.folders = json.folders || [];
+                    }
+                } catch (e) {}
+            }
+
+            return data;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize ImageStorageDB to read strictly from the isolated image database
-            await ImageStorageDB.initDB();
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                await ImageStorageDB.initDB();
+            }
+
             const params = new URLSearchParams(window.location.search);
-            currentModelName = decodeURIComponent(params.get('name') ?? '');
+            currentModelName = decodeURIComponent(params.get('name') ?? '').trim();
 
             if (currentModelName) {
                 document.getElementById('tagTitle').textContent = `${currentModelName} - Albums`;
                 document.title = `${currentModelName} Albums - Portal`;
             }
 
-            // Fetch photo streams exclusively from ImageStorageDB
-            const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
+            const dbData = await fetchImagesJsonUnified();
+            const allPhotoStreams = dbData.photostreams || [];
             const matchedItems = allPhotoStreams.filter(item => item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
 
-            // Fetch folders exclusively from ImageStorageDB
-            let allFolders = ImageStorageDB.getFolders() || [];
+            let allFolders = dbData.folders || [];
             allFolders = allFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
 
             const grid = document.getElementById('albumGrid');
             grid.innerHTML = '';
+
+            if (allFolders.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No albums found for this model. Click '+ New Folder' above to create one.</div>`;
+                return;
+            }
 
             for (const folder of allFolders) {
                 const folderImages = matchedItems.filter(item => {
