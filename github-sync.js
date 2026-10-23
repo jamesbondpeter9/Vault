@@ -1,5 +1,6 @@
 class GitHubSync {
     static debounceTimer = null;
+    static _cachedToken = null;
 
     static async triggerAutoSync(immediate = false) {
         if (this.debounceTimer) {
@@ -25,7 +26,32 @@ class GitHubSync {
             return false;
         }
 
-        const token = PortalConfig.getToken();
+        // Bulletproof multi-layer token retrieval supporting all keys and memory cache
+        let token = null;
+        if (typeof PortalConfig.getToken === 'function') {
+            token = PortalConfig.getToken();
+        }
+
+        if (!token) {
+            token = localStorage.getItem('github_token') || 
+                    localStorage.getItem('github_pat') || 
+                    localStorage.getItem('PAT') ||
+                    sessionStorage.getItem('github_token') || 
+                    sessionStorage.getItem('github_pat') ||
+                    GitHubSync._cachedToken;
+        }
+
+        // Self-healing persistence: mirror found token across layers
+        if (token) {
+            GitHubSync._cachedToken = token;
+            try {
+                localStorage.setItem('github_token', token);
+                sessionStorage.setItem('github_token', token);
+            } catch (e) {
+                // Handles private browsing storage restrictions
+            }
+        }
+
         if (!token) {
             console.warn('GitHub PAT token not found in localStorage. Please run setGitHubToken("your_token").');
             return false;
