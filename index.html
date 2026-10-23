@@ -14,15 +14,15 @@
     <style>
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
             max-width: 1700px;
             margin-left: auto;
             margin-right: auto;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
             height: 52px !important;
@@ -63,8 +63,9 @@
         }
         @media(max-width: 500px) { 
             .home-grid { 
-                grid-template-columns: 1fr; 
-                grid-auto-rows: 190px;
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 140px;
+                gap: 6px;
             } 
         }
 
@@ -102,6 +103,23 @@
             .mondrian-card.portrait,
             .mondrian-card.landscape {
                 grid-column: span 1;
+            }
+        }
+
+        /* Mobile specific thumbnail dimension overrides */
+        @media(max-width: 500px) {
+            .mondrian-card.portrait {
+                grid-column: span 1;
+                grid-row: span 2;
+                aspect-ratio: 9 / 16;
+            }
+            .mondrian-card.landscape {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+            .mondrian-overlay {
+                padding: 18px 8px 6px 8px !important;
+                font-size: 0.7rem !important;
             }
         }
 
@@ -167,6 +185,7 @@
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.75rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
@@ -176,6 +195,14 @@
     <script src="Media/storage.js"></script>
     <script src="github-sync.js"></script>
     <script>
+        function portalLogout() {
+            sessionStorage.removeItem('portal_authenticated');
+            try {
+                localStorage.removeItem('portal_authenticated');
+            } catch (e) {}
+            window.location.href = 'login.html';
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             await StorageDB.initDB();
             const allStreams = StorageDB.getVideoStreams();
