@@ -109,9 +109,20 @@
             const params = new URLSearchParams(window.location.search);
             streamIndex = parseInt(params.get('index') ?? '0', 10);
             
-            const streams = (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') 
+            let streams = (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') 
                 ? StorageDB.getStreams() 
                 : [];
+            
+            // Robust fallback to direct localStorage keys if streams array is empty during async initialization
+            if (!streams || streams.length === 0) {
+                try {
+                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos');
+                    if (rawLocal) {
+                        const parsed = JSON.parse(rawLocal);
+                        streams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
+                    }
+                } catch (e) {}
+            }
             
             currentStreamItem = streams[streamIndex];
             
