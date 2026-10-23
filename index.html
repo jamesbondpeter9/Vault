@@ -204,11 +204,27 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await StorageDB.initDB();
-            const allStreams = StorageDB.getVideoStreams();
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
+            }
+
+            // Robust stream retrieval honoring empty states and clearing ghost caches
+            let allStreams = [];
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
+                allStreams = StorageDB.getVideoStreams() || [];
+            } else {
+                try {
+                    const rawLocal = localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
+                    if (rawLocal) {
+                        const parsed = JSON.parse(rawLocal);
+                        allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
+                    }
+                } catch (e) {}
+            }
+
             const grid = document.getElementById('streamsGrid');
             
-            if (allStreams.length === 0) {
+            if (!Array.isArray(allStreams) || allStreams.length === 0) {
                 grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
                 return;
             }
