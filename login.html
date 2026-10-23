@@ -1,46 +1,49 @@
 <script src="config.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    // Clear previous auth state when visiting login page
-    sessionStorage.removeItem('portal_authenticated');
-    try { localStorage.removeItem('portal_authenticated'); } catch (e) {}
+        const loginForm = document.getElementById('loginForm');
+        if (!loginForm) return;
 
-    const loginForm = document.getElementById('loginForm');
-    if (!loginForm) return;
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const token = document.getElementById('tokenInput').value.trim();
+            
+            const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
+            const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
 
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = document.getElementById('usernameInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        const token = document.getElementById('tokenInput').value.trim();
-        
-        const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
-        const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
-
-        if (username === correctUsername && password === correctPassword) {
-            sessionStorage.setItem('portal_authenticated', 'true');
-            try {
-                localStorage.setItem('portal_authenticated', 'true');
-            } catch (err) {}
-
-            if (token) {
-                const cleanToken = token.trim();
-                sessionStorage.setItem('github_token', cleanToken);
-                sessionStorage.setItem('github_pat', cleanToken);
+            if (username === correctUsername && password === correctPassword) {
+                // Save authentication status in both storages
+                sessionStorage.setItem('portal_authenticated', 'true');
                 try {
-                    localStorage.setItem('github_token', cleanToken);
-                    localStorage.setItem('github_pat', cleanToken);
+                    localStorage.setItem('portal_authenticated', 'true');
                 } catch (err) {}
-                
-                if (typeof setGitHubToken === 'function') {
-                    setGitHubToken(cleanToken);
-                }
-            }
 
-            window.location.href = 'index.html';
-        } else {
-            const errorMsg = document.getElementById('errorMsg');
-            if (errorMsg) errorMsg.style.display = 'block';
-        }
+                // Save GitHub PAT token everywhere possible
+                if (token) {
+                    const cleanToken = token.trim();
+                    sessionStorage.setItem('github_token', cleanToken);
+                    sessionStorage.setItem('github_pat', cleanToken);
+                    try {
+                        localStorage.setItem('github_token', cleanToken);
+                        localStorage.setItem('github_pat', cleanToken);
+                    } catch (err) {
+                        console.warn('localStorage restricted (likely Incognito mode). Using sessionStorage & memory cache.');
+                    }
+                    
+                    // Also update via helper if available
+                    if (typeof setGitHubToken === 'function') {
+                        setGitHubToken(cleanToken);
+                    }
+                }
+
+                // Redirect to portal
+                window.location.href = 'index.html';
+            } else {
+                const errorMsg = document.getElementById('errorMsg');
+                if (errorMsg) errorMsg.style.display = 'block';
+            }
+        });
     });
-});
+</script>
