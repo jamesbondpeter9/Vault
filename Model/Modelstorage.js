@@ -108,7 +108,7 @@ class ModelStorageDB {
     }
 
     static async deleteModel(modelName) {
-        if (!modelName) return;
+        if (!modelName) return false;
         const models = ModelStorageDB.getModels();
         const filteredModels = models.filter(m => m.name.toLowerCase() !== modelName.toLowerCase());
         return await ModelStorageDB.saveAndSyncModels(filteredModels, true);
