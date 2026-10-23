@@ -11,11 +11,11 @@ class ModelStorageDB {
             let remoteData = null;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // 1. Try correct relative paths first depending on whether viewed from root or Model folder
+            // 1. Try correct relative paths first for the Model/ folder context
             const pathsToTry = [
-                `../Model/Models.json${cacheBuster}`,
                 `Models.json${cacheBuster}`,
                 `./Models.json${cacheBuster}`,
+                `../Model/Models.json${cacheBuster}`,
                 `/Model/Models.json${cacheBuster}`
             ];
 
