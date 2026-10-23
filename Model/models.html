@@ -74,18 +74,20 @@
             height: 100%;
             border-radius: 20px;
             cursor: pointer;
+            transform: translateZ(0); /* Prevents sub-pixel overflow during layout scaling */
         }
 
-        /* High-Resolution Image Handling & Softness Optimization */
+        /* Anti-overlap and high-resolution fitting optimization */
         .mondrian-thumb img {
             object-fit: cover;
             width: 100%;
             height: 100%;
             position: absolute;
             inset: 0;
-            image-rendering: auto; /* Ensures browser uses high-quality smooth interpolation for high-res photos */
+            image-rendering: auto;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
             transform: translateZ(0);
             will-change: transform;
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
