@@ -213,13 +213,12 @@
             });
         });
 
-        async function saveModel(name, thumbnail, shape) {
+async function saveModel(name, thumbnail, shape) {
             const modelData = { name, thumbnail, shape, createdAt: Date.now() };
 
             if (typeof ModelStorageDB !== 'undefined') {
-                const models = ModelStorageDB.getModels() || [];
-                models.push(modelData);
-                await ModelStorageDB.saveAndSyncModels(models, true);
+                // Use the dedicated addModel method which handles upsert and triggers immediate GitHub sync
+                await ModelStorageDB.addModel(modelData);
             }
 
             document.getElementById('modelName').value = '';
