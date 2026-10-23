@@ -18,13 +18,16 @@ class StorageDB {
             let fetchedFromServer = false;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // Updated pathing starting with ./videos.json to prevent Media/Media/ duplication inside the Media folder
-            const pathsToTry = [
-                `./videos.json${cacheBuster}`, 
-                `videos.json${cacheBuster}`, 
-                `Media/videos.json${cacheBuster}`, 
-                `/Vault/Media/videos.json${cacheBuster}`,
-                `../Media/videos.json${cacheBuster}`
+            // Dynamically detect location to pick correct path without ever causing 404 or Media/Media/ duplication
+            const isInsideMedia = window.location.pathname.includes('/Media/');
+            const pathsToTry = isInsideMedia ? [
+                `./videos.json${cacheBuster}`,
+                `videos.json${cacheBuster}`,
+                `/Vault/Media/videos.json${cacheBuster}`
+            ] : [
+                `Media/videos.json${cacheBuster}`,
+                `./Media/videos.json${cacheBuster}`,
+                `/Vault/Media/videos.json${cacheBuster}`
             ];
 
             for (const path of pathsToTry) {
