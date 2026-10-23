@@ -2,27 +2,16 @@ const PortalConfig = {
     owner: 'jamesbondpeter9', 
     repo: 'Vault',  
     branch: 'main', 
+    username: 'Janice',    // Default login username
+    password: 'James@123', // Default login password
     getToken: function() {
-        // 1. Check browser storages first
+        // Quietly checks all browser storage layers for the token
         let token = localStorage.getItem('github_token') || 
                     localStorage.getItem('github_pat') || 
                     sessionStorage.getItem('github_token') || 
                     sessionStorage.getItem('github_pat');
 
-        // 2. Fallback: If missing (like in Incognito mode), ask the user once
-        if (!token) {
-            token = prompt('GitHub PAT Token missing. Please enter your token to enable sync:');
-            if (token && token.trim()) {
-                token = token.trim();
-                try {
-                    localStorage.setItem('github_token', token);
-                    sessionStorage.setItem('github_token', token);
-                } catch (e) {
-                    // Handles private tab restrictions
-                }
-            }
-        }
-        return token || null;
+        return token ? token.trim() : null;
     }
 };
 
@@ -32,7 +21,10 @@ function setGitHubToken(token) {
         console.warn('Warning: No token provided.');
         return;
     }
-    localStorage.setItem('github_token', token.trim());
-    sessionStorage.setItem('github_token', token.trim());
+    const cleanToken = token.trim();
+    localStorage.setItem('github_token', cleanToken);
+    localStorage.setItem('github_pat', cleanToken);
+    sessionStorage.setItem('github_token', cleanToken);
+    sessionStorage.setItem('github_pat', cleanToken);
     console.log('GitHub PAT token successfully saved!');
 }
