@@ -74,10 +74,10 @@
             height: 100%;
             border-radius: 20px;
             cursor: pointer;
-            transform: translateZ(0); /* Prevents sub-pixel overflow during layout scaling */
+            transform: translateZ(0);
         }
 
-        /* Anti-overlap and high-resolution fitting optimization */
+        /* Auto-optimized high-resolution thumbnail fitting */
         .mondrian-thumb img {
             object-fit: cover;
             width: 100%;
@@ -193,6 +193,43 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
+        // Auto Quality Optimization Helper for Thumbnail Dimensions
+        function optimizeThumbnailImage(url, callback) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = url;
+            img.onload = () => {
+                const maxDim = 800; // Optimal max dimension for crisp high-density grid cells without bloat
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const optimizedUrl = canvas.toDataURL('image/jpeg', 0.90);
+                const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
+                callback(optimizedUrl, shape);
+            };
+            img.onerror = () => {
+                callback(url, 'square');
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Ensure database initializes and remote sync completes BEFORE rendering elements
             if (typeof ModelStorageDB !== 'undefined') {
@@ -210,30 +247,18 @@
                 const thumb = thumbInput.value.trim();
                 if (!name || !thumb) return;
 
-                const img = new Image();
-                img.src = thumb;
-                img.onload = () => {
-                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    saveModel(name, thumb, shape);
-                };
-                img.onerror = () => {
-                    saveModel(name, thumb, 'square');
-                };
+                optimizeThumbnailImage(thumb, (optimizedThumb, shape) => {
+                    saveModel(name, optimizedThumb, shape);
+                });
             });
 
             document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = () => {
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
-                    };
+                    optimizeThumbnailImage(newUrl, (optimizedThumb, shape) => {
+                        updateModelThumb(modelIndexToUpdateThumb, optimizedThumb, shape);
+                    });
                 }
                 closeUpdateThumbModal();
             });
