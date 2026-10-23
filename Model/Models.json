@@ -1,3 +1,10 @@
 {
-    "models": []
+    "models": [
+        {
+            "name": "Aaliyah Hadid",
+            "thumbnail": "https://i.ibb.co/QvC45cCS/Aaliyah-Hadid.jpg",
+            "shape": "portrait",
+            "createdAt": 1792777723894
+        }
+    ]
 }
