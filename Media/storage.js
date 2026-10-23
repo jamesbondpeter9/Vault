@@ -18,7 +18,7 @@ class StorageDB {
             let fetchedFromServer = false;
             const cacheBuster = `?t=${Date.now()}`;
 
-            // Correct paths avoiding any accidental double prefixing
+            // Corrected pathing to prevent double prefixing like Media/Media/
             const pathsToTry = [
                 `./videos.json${cacheBuster}`, 
                 `/Vault/Media/videos.json${cacheBuster}`,
