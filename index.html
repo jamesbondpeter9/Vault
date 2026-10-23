@@ -208,7 +208,7 @@
                 await StorageDB.initDB();
             }
 
-            // Retrieve saved streams from StorageDB and videos.json state
+            // Retrieve saved streams from StorageDB and Media/videos.json state
             let allStreams = [];
             if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
                 allStreams = StorageDB.getVideoStreams() || [];
