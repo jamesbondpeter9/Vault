@@ -87,6 +87,10 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" required placeholder="Enter password">
             </div>
+            <div class="form-group">
+                <label for="tokenInput">GitHub PAT Token</label>
+                <input type="password" id="tokenInput" placeholder="Enter GitHub Token (Manual Entry)">
+            </div>
             <button type="submit" class="btn-submit">Login</button>
         </form>
     </div>
@@ -94,18 +98,40 @@
     <script src="config.js"></script>
     <script>
         // Set your login credentials here for verification
-        const VALID_USERNAME = "Janice";
-        const VALID_PASSWORD = "James@123";
+        const VALID_USERNAME = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : "Janice";
+        const VALID_PASSWORD = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : "James@123";
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
+            const tokenElement = document.getElementById('tokenInput');
+            const token = tokenElement ? tokenElement.value.trim() : '';
 
             if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
                 // Set login session flag
                 sessionStorage.setItem('portal_authenticated', 'true');
-                
+                try {
+                    localStorage.setItem('portal_authenticated', 'true');
+                } catch (err) {}
+
+                // Save GitHub PAT token manually entered by user
+                if (token) {
+                    const cleanToken = token.trim();
+                    sessionStorage.setItem('github_token', cleanToken);
+                    sessionStorage.setItem('github_pat', cleanToken);
+                    try {
+                        localStorage.setItem('github_token', cleanToken);
+                        localStorage.setItem('github_pat', cleanToken);
+                    } catch (err) {
+                        console.warn('localStorage restricted (likely Incognito mode).');
+                    }
+                    
+                    if (typeof setGitHubToken === 'function') {
+                        setGitHubToken(cleanToken);
+                    }
+                }
+
                 // Redirect to main index directory
                 window.location.href = 'index.html';
             } else {
