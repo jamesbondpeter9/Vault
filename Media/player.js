@@ -12,14 +12,14 @@ const VideoPlayer = {
         const ytMatch = rawInput.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
         
         if (ytMatch && ytMatch[1]) {
-            embedHtml += `<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1" style="width:100%;height:100%;border:0;border-radius:20px;" allow="autoplay; encrypted-media" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
+            embedHtml += `<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&playsinline=1" style="width:100%;height:100%;border:0;border-radius:20px;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
         } else if (rawInput.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) || rawInput.includes('.m3u8')) {
-            // Robust direct video stream & HLS player support
-            embedHtml += `<video src="${rawInput}" controls autoplay playsinline style="width:100%;height:100%;border-radius:20px;object-fit:contain;" onloadeddata="document.getElementById('playerLoader').style.display='none';"></video>`;
+            // Robust direct video stream & HLS player with full mobile support (playsinline, webkit-playsinline)
+            embedHtml += `<video src="${rawInput}" controls autoplay playsinline webkit-playsinline muted style="width:100%;height:100%;border-radius:20px;object-fit:contain;touch-action:manipulation;" onloadeddata="document.getElementById('playerLoader').style.display='none';"></video>`;
         } else {
-            embedHtml += `<iframe src="${rawInput}" style="width:100%;height:100%;border:0;border-radius:20px;" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
+            embedHtml += `<iframe src="${rawInput}" style="width:100%;height:100%;border:0;border-radius:20px;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen onload="document.getElementById('playerLoader').style.display='none';"></iframe>`;
         }
         
-        container.innerHTML = `<div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden;">${embedHtml}</div>`;
+        container.innerHTML = `<div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; -webkit-overflow-scrolling: touch;">${embedHtml}</div>`;
     }
 };
