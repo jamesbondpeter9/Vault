@@ -20,6 +20,7 @@ on:
   workflow_run:
     workflows: 
       - "pages-build-deployment"
+      - "Pages Build and Deployment"
     types:
       - completed
 
