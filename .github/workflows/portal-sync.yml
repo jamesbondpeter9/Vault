@@ -20,7 +20,6 @@ on:
   workflow_run:
     workflows: 
       - "pages-build-deployment"
-      - "Portal Sync, Deploy & Auto-Heal"
     types:
       - completed
 
