@@ -1,53 +1,117 @@
-<script src="config.js"></script>
-<script>
-    // Execute immediately without waiting for DOMContentLoaded if elements might load later,
-    // but wrap element bindings safely.
-    window.addEventListener('DOMContentLoaded', () => {
-        // Clear previous state on login page to prevent loops
-        sessionStorage.removeItem('portal_authenticated');
-        try { localStorage.removeItem('portal_authenticated'); } catch (e) {}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .login-card {
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #111;
+            color: #fff;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #fff;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: #fff;
+            color: #000;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-submit:hover {
+            background: #e6e6e6;
+        }
+        .error-msg {
+            color: #ff4d4d;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
 
-        const loginForm = document.getElementById('loginForm');
-        if (!loginForm) return;
+    <div class="login-card">
+        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 24px; text-align: center;">Portal Login</h2>
+        <div id="errorMsg" class="error-msg">Invalid username or password!</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn-submit">Login</button>
+        </form>
+    </div>
 
-        loginForm.addEventListener('submit', (e) => {
+    <script src="config.js"></script>
+    <script>
+        // Set your login credentials here for verification
+        const VALID_USERNAME = "Janice";
+        const VALID_PASSWORD = "James@123";
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const usernameElem = document.getElementById('usernameInput');
-            const passwordElem = document.getElementById('passwordInput');
-            const tokenElem = document.getElementById('tokenInput');
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
 
-            const username = usernameElem ? usernameElem.value.trim() : '';
-            const password = passwordElem ? passwordElem.value : '';
-            const token = tokenElem ? tokenElem.value.trim() : '';
-            
-            const correctUsername = (typeof PortalConfig !== 'undefined' && PortalConfig.username) ? PortalConfig.username : 'Janice';
-            const correctPassword = (typeof PortalConfig !== 'undefined' && PortalConfig.password) ? PortalConfig.password : 'James@123';
-
-            if (username === correctUsername && password === correctPassword) {
+            if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+                // Set login session flag
                 sessionStorage.setItem('portal_authenticated', 'true');
-                try {
-                    localStorage.setItem('portal_authenticated', 'true');
-                } catch (err) {}
-
-                if (token) {
-                    const cleanToken = token.trim();
-                    sessionStorage.setItem('github_token', cleanToken);
-                    sessionStorage.setItem('github_pat', cleanToken);
-                    try {
-                        localStorage.setItem('github_token', cleanToken);
-                        localStorage.setItem('github_pat', cleanToken);
-                    } catch (err) {}
-                    
-                    if (typeof setGitHubToken === 'function') {
-                        setGitHubToken(cleanToken);
-                    }
-                }
-
+                
+                // Redirect to main index directory
                 window.location.href = 'index.html';
             } else {
-                const errorMsg = document.getElementById('errorMsg');
-                if (errorMsg) errorMsg.style.display = 'block';
+                document.getElementById('errorMsg').style.display = 'block';
             }
         });
-    });
-</script>
+    </script>
+</body>
+</html>
