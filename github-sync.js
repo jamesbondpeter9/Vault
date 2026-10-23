@@ -42,11 +42,17 @@ class GitHubSync {
 
         // ==========================================
         // SECTION 1: MODEL SECTION (Model/)
+        // Checked robustly via pathname or active ModelStorageDB instance
         // ==========================================
-        if (pathname.includes('/model/') || pathname.includes('models.html') || pathname.includes('vault.html') || pathname.includes('model')) {
+        if (
+            pathname.includes('/model/') || 
+            pathname.includes('models.html') || 
+            pathname.includes('vault.html') || 
+            pathname.includes('model') ||
+            typeof ModelStorageDB !== 'undefined'
+        ) {
             jsonFilename = 'Model/Models.json';
             dbData = { models: [] };
-            // Check both ModelStorageDB and StorageDB fallback since Model/storage.js defines ModelStorageDB
             if (typeof ModelStorageDB !== 'undefined') {
                 dbData.models = typeof ModelStorageDB.getModels === 'function' ? await ModelStorageDB.getModels() || [] : [];
             } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getModels === 'function') {
