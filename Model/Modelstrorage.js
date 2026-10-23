@@ -8,29 +8,61 @@ class ModelStorageDB {
 
     static async syncFromRemoteJSON() {
         try {
-            const currentModels = ModelStorageDB.getModels();
-            
-            if (currentModels.length === 0 && typeof PortalConfig !== 'undefined') {
+            let remoteData = null;
+            const cacheBuster = `?t=${Date.now()}`;
+
+            // 1. Try public static fetch first with cache-busting to prevent stale/cached empty responses
+            const pathsToTry = [
+                `Models.json${cacheBuster}`,
+                `Model/Models.json${cacheBuster}`,
+                `./Models.json${cacheBuster}`,
+                `../Model/Models.json${cacheBuster}`
+            ];
+
+            for (const path of pathsToTry) {
+                try {
+                    const res = await fetch(path, { cache: 'no-store' });
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json && json.models && json.models.length > 0) {
+                            remoteData = json;
+                            break;
+                        } else if (!remoteData) {
+                            remoteData = json; // Keep as fallback even if empty
+                        }
+                    }
+                } catch (err) {
+                    // Try next path fallback
+                }
+            }
+
+            // 2. Fallback to GitHub API if token exists and public fetch returned nothing/empty
+            if ((!remoteData || !remoteData.models || remoteData.models.length === 0) && typeof PortalConfig !== 'undefined') {
                 const token = PortalConfig.getToken();
                 if (token) {
-                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Model/Models.json`;
+                    const apiUrl = `https://api.github.com/repos/${PortalConfig.owner}/${PortalConfig.repo}/contents/Model/Models.json${cacheBuster}`;
                     const res = await fetch(apiUrl, {
-                        headers: { 'Authorization': `token ${token}` }
+                        headers: { 'Authorization': `token ${token}` },
+                        cache: 'no-store'
                     });
                     if (res.ok) {
                         const data = await res.json();
                         const decodedString = decodeURIComponent(escape(atob(data.content)));
-                        const remoteData = JSON.parse(decodedString);
-
-                        if (remoteData.models && Array.isArray(remoteData.models)) {
-                            localStorage.setItem('video_portal_models_db', JSON.stringify(remoteData.models));
-                        }
-                        console.log('Successfully bootstrapped models from Model/Models.json!');
+                        remoteData = JSON.parse(decodedString);
                     }
                 }
             }
+
+            // 3. Sync into localStorage if valid remote data was found
+            if (remoteData && remoteData.models && Array.isArray(remoteData.models)) {
+                const localCurrent = JSON.parse(localStorage.getItem('video_portal_models_db') || '[]');
+                if (remoteData.models.length > 0 || localCurrent.length === 0) {
+                    localStorage.setItem('video_portal_models_db', JSON.stringify(remoteData.models));
+                    console.log('Successfully synchronized models from remote source!');
+                }
+            }
         } catch (e) {
-            console.log('Could not fetch remote Model/Models.json during init:', e);
+            console.warn('Could not fetch remote Model/Models.json during init:', e);
         }
     }
 
