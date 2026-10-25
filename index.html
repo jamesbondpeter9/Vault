@@ -289,6 +289,8 @@
                 return;
             }
 
+            // Keep a reference to the original database array length for correct index mapping
+            const originalStreams = allStreams;
             // Show latest streams added first
             allStreams = allStreams.slice().reverse();
 
@@ -303,7 +305,8 @@
             grid.innerHTML = '';
             
             paginatedItems.forEach((stream, paginatedIdx) => {
-                const actualIndex = startIndex + paginatedIdx;
+                // Map back to the exact correct index in the original database array
+                const actualIndex = originalStreams.indexOf(stream);
                 const card = document.createElement('a');
                 card.href = `Media/watch.html?index=${actualIndex}`;
                 card.className = `mondrian-card portrait`;
