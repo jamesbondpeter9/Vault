@@ -75,12 +75,19 @@
                 aspect-ratio: auto !important;
             }
             .mondrian-thumb {
-                aspect-ratio: 4 / 5;
+                aspect-ratio: auto;
+                height: auto;
                 will-change: transform;
             }
             .mondrian-thumb img {
-                object-fit: contain !important;
-                object-position: center center !important;
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                object-fit: initial !important;
+                display: block;
+                image-rendering: high-quality;
+                image-rendering: -webkit-optimize-contrast;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
                 will-change: transform;
