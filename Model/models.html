@@ -58,7 +58,20 @@
         }
         @media(max-width: 1400px) { .models-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media(max-width: 900px) { .models-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .models-grid { grid-template-columns: 1fr; } }
+        @media(max-width: 500px) { 
+            .models-grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 210px;
+                gap: 6px;
+            } 
+            .mondrian-card.landscape,
+            .mondrian-card.portrait,
+            .mondrian-card.square {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+                aspect-ratio: 9 / 14 !important;
+            }
+        }
 
         .mondrian-card.landscape { grid-column: span 2; grid-row: span 1; }
         .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
@@ -74,6 +87,23 @@
             height: 100%;
             border-radius: 20px;
             cursor: pointer;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        /* High quality mobile rendering compatibility without compression */
+        .mondrian-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            inset: 0;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
 
         .update-thumb-btn { 
@@ -85,6 +115,7 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
+        @media(max-width: 500px) { .update-thumb-btn { opacity: 0.8; } }
 
         .delete-btn { 
             position: absolute; top: 10px; right: 10px; 
@@ -95,6 +126,7 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .delete-btn { opacity: 1; }
+        @media(max-width: 500px) { .delete-btn { opacity: 0.8; } }
     </style>
 </head>
 <body>
@@ -178,6 +210,28 @@
 
             buildFilterBar();
             renderModels();
+
+            // Auto-generate name from thumbnail URL as user types/pastes
+            const thumbField = document.getElementById('modelThumb');
+            if (thumbField) {
+                thumbField.addEventListener('input', () => {
+                    const urlVal = thumbField.value.trim();
+                    if (!urlVal) return;
+                    try {
+                        const cleanUrl = urlVal.split('?')[0].split('#')[0];
+                        const segments = cleanUrl.split('/');
+                        let filename = segments[segments.length - 1];
+                        if (filename.includes('.')) {
+                            filename = filename.substring(0, filename.lastIndexOf('.'));
+                        }
+                        if (filename) {
+                            // Replace hyphens and underscores with spaces (supports First-Name, First-Middle-Last, etc.)
+                            const formattedName = filename.replace(/[-_]/g, ' ');
+                            document.getElementById('modelName').value = formattedName;
+                        }
+                    } catch (err) {}
+                });
+            }
 
             document.getElementById('modelForm').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -298,7 +352,7 @@
                     <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
                         <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
                         <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
-                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}" style="object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
+                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
                     </div>`;
                 grid.appendChild(card);
