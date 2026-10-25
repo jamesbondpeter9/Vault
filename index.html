@@ -178,9 +178,11 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            /* Completely stripped out all blur filters */
+            /* Completely removed blur filters and backdrop effects */
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
+            filter: none;
+            -webkit-filter: none;
             transition: background 0.3s ease;
         }
 
