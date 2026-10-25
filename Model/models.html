@@ -61,7 +61,7 @@
         @media(max-width: 500px) { 
             .models-grid { 
                 grid-template-columns: 1fr; 
-                grid-auto-rows: 210px;
+                grid-auto-rows: auto;
                 gap: 2px;
             } 
             .mondrian-card.landscape,
@@ -69,6 +69,11 @@
             .mondrian-card.square {
                 grid-column: span 1 !important;
                 grid-row: span 1 !important;
+                height: auto !important;
+                aspect-ratio: auto !important;
+            }
+            .mondrian-thumb {
+                aspect-ratio: 4 / 5;
             }
             .mondrian-thumb img {
                 object-fit: cover !important;
