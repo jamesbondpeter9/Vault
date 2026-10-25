@@ -170,7 +170,7 @@
             left: 0;
             right: 0;
             padding: 26px 12px 10px 12px;
-            background: transparent; /* Completely removed black gradient and blur background */
+            background: transparent;
             font-weight: 700;
             font-size: 0.8rem;
             color: #ffffff;
@@ -286,6 +286,9 @@
                 paginationBar.innerHTML = '';
                 return;
             }
+
+            // Show latest streams added first
+            allStreams = allStreams.slice().reverse();
 
             const totalPages = Math.ceil(allStreams.length / pageSize);
             if (currentPage > totalPages) currentPage = totalPages;
