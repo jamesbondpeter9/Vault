@@ -317,18 +317,8 @@
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
                     if (img) {
-                        // Check if already cached/loaded to prevent post-render layout shifts
-                        if (img.complete && img.naturalWidth) {
-                            const ratio = img.naturalWidth / img.naturalHeight;
-                            if (ratio < 0.85) {
-                                card.className = 'mondrian-card portrait';
-                            } else if (ratio > 1.25) {
-                                card.className = 'mondrian-card landscape';
-                            } else {
-                                card.className = 'mondrian-card square';
-                            }
-                        } else {
-                            img.onload = () => {
+                        const updateRatio = () => {
+                            if (img.naturalWidth && img.naturalHeight) {
                                 const ratio = img.naturalWidth / img.naturalHeight;
                                 if (ratio < 0.85) {
                                     card.className = 'mondrian-card portrait';
@@ -337,7 +327,13 @@
                                 } else {
                                     card.className = 'mondrian-card square';
                                 }
-                            };
+                            }
+                        };
+                        
+                        if (img.complete) {
+                            updateRatio();
+                        } else {
+                            img.onload = updateRatio;
                         }
                     }
                 }
