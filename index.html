@@ -80,10 +80,11 @@
             display: block;
             box-sizing: border-box;
             will-change: transform, box-shadow;
+            transform: translateZ(0);
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mondrian-card:hover {
-            transform: translateY(-4px) scale(1.002);
+            transform: translateY(-4px) scale(1.002) translateZ(0);
             box-shadow: 0 16px 32px rgba(0,0,0,0.7), var(--neon-glow, 0 0 20px rgba(255,255,255,0.05));
             z-index: 10;
         }
@@ -142,7 +143,7 @@
             transform: translateZ(0);
         }
 
-        /* Original resolution high-quality image rendering with no pixel scattering */
+        /* Original resolution high-quality image rendering with smoothness & no scattering */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
@@ -155,6 +156,7 @@
             backface-visibility: hidden;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
+            will-change: transform;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -168,22 +170,20 @@
             left: 0;
             right: 0;
             padding: 26px 12px 10px 12px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%);
+            background: transparent; /* Completely removed black gradient and blur background */
             font-weight: 700;
             font-size: 0.8rem;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.8);
             z-index: 5;
             box-sizing: border-box;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            /* Completely removed blur filters and backdrop effects */
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             filter: none;
             -webkit-filter: none;
-            transition: background 0.3s ease;
         }
 
         /* Pagination Controls Styling */
