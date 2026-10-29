@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abby Lee Brazil",
-            "thumbnail": "https://i.ibb.co/jvgxRFv4/Abby-Lee-Brazil.jpg",
-            "shape": "portrait",
-            "createdAt": 1792926823538
-        },
-        {
             "name": "Abby Mc Coy",
             "thumbnail": "https://i.ibb.co/bRdjVHch/Abby-Mc-Coy.jpg",
             "shape": "portrait",
