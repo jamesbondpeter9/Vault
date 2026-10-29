@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Anissa Kate1",
-            "thumbnail": "https://i.ibb.co/VpcJbTBr/Anissa-Kate1.jpg",
-            "shape": "portrait",
-            "createdAt": 1793253830488
-        },
-        {
             "name": "Anissa Kate2",
             "thumbnail": "https://i.ibb.co/kVr7g2PH/Anissa-Kate2.jpg",
             "shape": "portrait",
