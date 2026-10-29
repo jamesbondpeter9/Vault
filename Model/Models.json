@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abella Anderson",
-            "thumbnail": "https://i.ibb.co/pByHg0yt/Abella-Anderson.jpg",
-            "shape": "portrait",
-            "createdAt": 1792927405125
-        },
-        {
             "name": "Abella Danger",
             "thumbnail": "https://i.ibb.co/pr9Xb4Cp/Abella-Danger.jpg",
             "shape": "portrait",
