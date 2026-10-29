@@ -65,6 +65,12 @@
             "thumbnail": "https://i.ibb.co/d0nxpqWH/Addis-Fouche.jpg",
             "shape": "portrait",
             "createdAt": 1793268616396
+        },
+        {
+            "name": "Addison Lee",
+            "thumbnail": "https://i.ibb.co/Z18dNxqt/Addison-Lee.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268637669
         }
     ]
 }
