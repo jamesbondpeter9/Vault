@@ -86,7 +86,8 @@
                 max-height: none !important;
                 object-fit: initial !important;
                 display: block;
-                image-rendering: auto;
+                image-rendering: high-quality;
+                image-rendering: -webkit-optimize-contrast;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
                 will-change: transform;
@@ -109,11 +110,9 @@
             cursor: pointer;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-            mask-image: radial-gradient(white, black);
         }
 
-        /* High quality browser smoothness and antialiasing without compression */
+        /* High quality mobile rendering compatibility without compression */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
@@ -121,12 +120,11 @@
             object-position: center;
             position: absolute;
             inset: 0;
-            image-rendering: auto;
-            -webkit-font-smoothing: antialiased;
+            image-rendering: -webkit-optimize-contrast;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            -webkit-transform: translateZ(0) scale(1.001);
-            transform: translateZ(0) scale(1.001);
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
 
         .update-thumb-btn { 
@@ -225,33 +223,6 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
-        // Aspect-ratio-aware algorithm preserving full native resolution without limits
-        function processImageMaxResolution(url, callback) {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => {
-                let width = img.width;
-                let height = img.height;
-                const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
-
-                // Retain native dimensions without any resolution caps or limits
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const nativeDataUrl = canvas.toDataURL('image/jpeg', 0.98);
-                callback(nativeDataUrl, shape);
-            };
-            img.onerror = () => {
-                callback(url, 'square');
-            };
-            img.src = url;
-        }
-
         document.addEventListener('DOMContentLoaded', async () => {
             // Ensure database initializes and remote sync completes BEFORE rendering elements
             if (typeof ModelStorageDB !== 'undefined') {
@@ -291,18 +262,30 @@
                 const thumb = thumbInput.value.trim();
                 if (!name || !thumb) return;
 
-                processImageMaxResolution(thumb, (processedThumb, shape) => {
-                    saveModel(name, processedThumb, shape);
-                });
+                const img = new Image();
+                img.src = thumb;
+                img.onload = () => {
+                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                    saveModel(name, thumb, shape);
+                };
+                img.onerror = () => {
+                    saveModel(name, thumb, 'square');
+                };
             });
 
             document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    processImageMaxResolution(newUrl, (processedThumb, shape) => {
-                        updateModelThumb(modelIndexToUpdateThumb, processedThumb, shape);
-                    });
+                    const img = new Image();
+                    img.src = newUrl;
+                    img.onload = () => {
+                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
+                    };
+                    img.onerror = () => {
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
+                    };
                 }
                 closeUpdateThumbModal();
             });
