@@ -95,6 +95,12 @@
             "thumbnail": "https://i.ibb.co/gFd5YtrC/Abigail-Mac.jpg",
             "shape": "portrait",
             "createdAt": 1793268521248
+        },
+        {
+            "name": "Ada Lapiedra",
+            "thumbnail": "https://i.ibb.co/Q7KKHbNg/Ada-Lapiedra.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268545031
         }
     ]
 }
