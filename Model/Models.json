@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abigaiil Morris",
-            "thumbnail": "https://i.ibb.co/DHZjpTYy/Abigaiil-Morris.jpg",
-            "shape": "portrait",
-            "createdAt": 1792927491179
-        },
-        {
             "name": "Abigail Mac",
             "thumbnail": "https://i.ibb.co/cc9xv45w/Abigail-Mac.jpg",
             "shape": "portrait",
