@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abby Rode",
-            "thumbnail": "https://i.ibb.co/vFRgs4s/Abby-Rode.jpg",
-            "shape": "portrait",
-            "createdAt": 1792926938419
-        },
-        {
             "name": "Abby Rose",
             "thumbnail": "https://i.ibb.co/WQs9HHv/Abby-Rose.jpg",
             "shape": "portrait",
