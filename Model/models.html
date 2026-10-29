@@ -223,6 +223,42 @@
         let modelIndexToDelete = null;
         let modelIndexToUpdateThumb = null;
 
+        // Helper function to cap image quality at maximum 720p (1280x720) via canvas downscaling
+        function processImageMaxResolution(url, callback) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 1280;
+                const maxHeight = 720;
+
+                // Check if dimensions exceed 720p
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const scaledDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
+                    callback(scaledDataUrl, shape);
+                } else {
+                    const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
+                    callback(url, shape);
+                }
+            };
+            img.onerror = () => {
+                callback(url, 'square');
+            };
+            img.src = url;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Ensure database initializes and remote sync completes BEFORE rendering elements
             if (typeof ModelStorageDB !== 'undefined') {
@@ -262,30 +298,18 @@
                 const thumb = thumbInput.value.trim();
                 if (!name || !thumb) return;
 
-                const img = new Image();
-                img.src = thumb;
-                img.onload = () => {
-                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    saveModel(name, thumb, shape);
-                };
-                img.onerror = () => {
-                    saveModel(name, thumb, 'square');
-                };
+                processImageMaxResolution(thumb, (processedThumb, shape) => {
+                    saveModel(name, processedThumb, shape);
+                });
             });
 
             document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newUrl = document.getElementById('newThumbUrl').value.trim();
                 if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = () => {
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
-                    };
+                    processImageMaxResolution(newUrl, (processedThumb, shape) => {
+                        updateModelThumb(modelIndexToUpdateThumb, processedThumb, shape);
+                    });
                 }
                 closeUpdateThumbModal();
             });
