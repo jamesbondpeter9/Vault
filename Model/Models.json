@@ -53,6 +53,12 @@
             "thumbnail": "https://i.ibb.co/0RzH9Q6d/Addison-Ryder.jpg",
             "shape": "portrait",
             "createdAt": 1793268665127
+        },
+        {
+            "name": "Addison Vodka",
+            "thumbnail": "https://i.ibb.co/hRXWTJLx/Addison-Vodka.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268688872
         }
     ]
 }
