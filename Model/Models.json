@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abbey Rain",
-            "thumbnail": "https://i.ibb.co/bjBvQPV1/Abbey-Rain.jpg",
-            "shape": "portrait",
-            "createdAt": 1792926578757
-        },
-        {
             "name": "Abbie Cat",
             "thumbnail": "https://i.ibb.co/5J4SwSy/Abbie-Cat.jpg",
             "shape": "portrait",
