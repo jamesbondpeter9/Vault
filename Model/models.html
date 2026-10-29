@@ -86,8 +86,7 @@
                 max-height: none !important;
                 object-fit: initial !important;
                 display: block;
-                image-rendering: high-quality;
-                image-rendering: -webkit-optimize-contrast;
+                image-rendering: auto;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
                 will-change: transform;
@@ -110,9 +109,12 @@
             cursor: pointer;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
+            /* Web browser sub-pixel overlap and gap elimination */
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
         }
 
-        /* High quality mobile rendering compatibility without compression */
+        /* High quality browser smoothness and antialiasing without compression */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
@@ -120,11 +122,12 @@
             object-position: center;
             position: absolute;
             inset: 0;
-            image-rendering: -webkit-optimize-contrast;
+            image-rendering: auto;
+            -webkit-font-smoothing: antialiased;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
+            -webkit-transform: translateZ(0) scale(1.001);
+            transform: translateZ(0) scale(1.001);
         }
 
         .update-thumb-btn { 
@@ -243,9 +246,11 @@
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    const scaledDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    const scaledDataUrl = canvas.toDataURL('image/jpeg', 0.95);
                     const shape = height > width ? 'portrait' : (width > height ? 'landscape' : 'square');
                     callback(scaledDataUrl, shape);
                 } else {
