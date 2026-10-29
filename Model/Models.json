@@ -1,12 +1,6 @@
 {
     "models": [
         {
-            "name": "Abby Rose",
-            "thumbnail": "https://i.ibb.co/WQs9HHv/Abby-Rose.jpg",
-            "shape": "portrait",
-            "createdAt": 1792927190389
-        },
-        {
             "name": "Abella Anderson",
             "thumbnail": "https://i.ibb.co/pByHg0yt/Abella-Anderson.jpg",
             "shape": "portrait",
