@@ -65,6 +65,12 @@
             "thumbnail": "https://i.ibb.co/Md1FRZw/Adessa-Winters.jpg",
             "shape": "portrait",
             "createdAt": 1793268711239
+        },
+        {
+            "name": "Adira Allure",
+            "thumbnail": "https://i.ibb.co/d0K4fpJb/Adira-Allure.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268731881
         }
     ]
 }
