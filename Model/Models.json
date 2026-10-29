@@ -59,6 +59,12 @@
             "thumbnail": "https://i.ibb.co/hRXWTJLx/Addison-Vodka.jpg",
             "shape": "portrait",
             "createdAt": 1793268688872
+        },
+        {
+            "name": "Adessa Winters",
+            "thumbnail": "https://i.ibb.co/Md1FRZw/Adessa-Winters.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268711239
         }
     ]
 }
