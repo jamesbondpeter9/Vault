@@ -49,28 +49,10 @@
             "createdAt": 1793268278265
         },
         {
-            "name": "Ada Sanchez",
-            "thumbnail": "https://i.ibb.co/WbsKNWv/Ada-Sanchez.jpg",
+            "name": "Addison Ryder",
+            "thumbnail": "https://i.ibb.co/0RzH9Q6d/Addison-Ryder.jpg",
             "shape": "portrait",
-            "createdAt": 1793268571232
-        },
-        {
-            "name": "Addie Andrews",
-            "thumbnail": "https://i.ibb.co/7x694vhT/Addie-Andrews.jpg",
-            "shape": "portrait",
-            "createdAt": 1793268592455
-        },
-        {
-            "name": "Addis Fouche",
-            "thumbnail": "https://i.ibb.co/d0nxpqWH/Addis-Fouche.jpg",
-            "shape": "portrait",
-            "createdAt": 1793268616396
-        },
-        {
-            "name": "Addison Lee",
-            "thumbnail": "https://i.ibb.co/Z18dNxqt/Addison-Lee.jpg",
-            "shape": "portrait",
-            "createdAt": 1793268637669
+            "createdAt": 1793268665127
         }
     ]
 }
