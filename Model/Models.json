@@ -59,6 +59,12 @@
             "thumbnail": "https://i.ibb.co/7x694vhT/Addie-Andrews.jpg",
             "shape": "portrait",
             "createdAt": 1793268592455
+        },
+        {
+            "name": "Addis Fouche",
+            "thumbnail": "https://i.ibb.co/d0nxpqWH/Addis-Fouche.jpg",
+            "shape": "portrait",
+            "createdAt": 1793268616396
         }
     ]
 }
