@@ -240,12 +240,26 @@
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
-            <a href="Media/search.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Search">🔍</div></a>
+            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Search">🔍</div></a>
             <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.75rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
         <div class="pagination-bar" id="paginationBar"></div>
+
+        <!-- Search Modal Popup -->
+        <div id="searchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative; background:#111; border:1px solid var(--card-border, #333); padding:24px; border-radius:16px; box-sizing:border-box;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color:#fff; font-family:'Plus Jakarta Sans', sans-serif;">Search Streams</h3>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="Type to filter streams..." style="width:100%; padding:10px 14px; background:#000; border:1px solid var(--card-border, #333); color:#fff; border-radius:8px; font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; box-sizing:border-box;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="clearSearchFilter()" class="page-btn" style="flex:1; background:#333; color:#fff; border-color:#444;">Clear</button>
+                    <button type="button" onclick="closeSearchModal()" class="page-btn" style="flex:1; background:#fff; color:#000; border-color:#fff;">Done</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script src="config.js"></script>
@@ -254,6 +268,7 @@
     <script>
         let currentPage = 1;
         const pageSize = 20;
+        let currentSearchQuery = '';
 
         function portalLogout() {
             sessionStorage.removeItem('portal_authenticated');
@@ -263,9 +278,37 @@
             window.location.href = 'login.html';
         }
 
+        function openSearchModal() {
+            document.getElementById('searchModal').style.display = 'flex';
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = currentSearchQuery;
+            searchInput.focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').style.display = 'none';
+        }
+
+        function clearSearchFilter() {
+            currentSearchQuery = '';
+            document.getElementById('searchInput').value = '';
+            currentPage = 1;
+            renderPortalStreams();
+            closeSearchModal();
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
                 await StorageDB.initDB();
+            }
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchQuery = e.target.value.trim().toLowerCase();
+                    currentPage = 1;
+                    renderPortalStreams();
+                });
             }
 
             renderPortalStreams();
@@ -301,13 +344,26 @@
             // Show latest streams added first
             allStreams = allStreams.slice().reverse();
 
-            const totalPages = Math.ceil(allStreams.length / pageSize);
+            // Apply search query filter if active
+            const filteredStreams = allStreams.filter(stream => {
+                if (!currentSearchQuery) return true;
+                const titleMatch = stream.title && stream.title.toLowerCase().includes(currentSearchQuery);
+                return titleMatch;
+            });
+
+            if (filteredStreams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
+                paginationBar.innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredStreams.length / pageSize);
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = startIndex + pageSize;
-            const paginatedItems = allStreams.slice(startIndex, endIndex);
+            const paginatedItems = filteredStreams.slice(startIndex, endIndex);
 
             grid.innerHTML = '';
             
