@@ -14,7 +14,7 @@
     <style>
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
             max-width: 1700px;
@@ -66,6 +66,8 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr)); 
                 grid-auto-rows: 140px;
                 gap: 6px;
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
             } 
         }
 
@@ -91,8 +93,8 @@
 
         .mondrian-card.portrait {
             grid-column: span 1; 
-            grid-row: span 2;
-            aspect-ratio: 9 / 16;
+            grid-row: span 4;
+            aspect-ratio: auto;
         }
 
         .mondrian-card.landscape {
@@ -104,15 +106,16 @@
             .mondrian-card.portrait,
             .mondrian-card.landscape {
                 grid-column: span 1;
+                grid-row: span 2;
             }
         }
 
-        /* Mobile specific thumbnail dimension overrides */
+        /* Mobile specific thumbnail dimension overrides & touch compatibility */
         @media(max-width: 500px) {
             .mondrian-card.portrait {
                 grid-column: span 1;
-                grid-row: span 2;
-                aspect-ratio: 9 / 16;
+                grid-row: span 3;
+                aspect-ratio: auto;
             }
             .mondrian-card.landscape {
                 grid-column: span 2;
@@ -126,8 +129,8 @@
 
         .mondrian-card.square {
             grid-column: span 1;
-            grid-row: span 1;
-            aspect-ratio: 1 / 1;
+            grid-row: span 2;
+            aspect-ratio: auto;
         }
 
         .mondrian-thumb {
@@ -143,6 +146,8 @@
             transform: translate3d(0,0,0);
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
         }
 
         /* Crystal clear native resolution image rendering locked against hover reduction */
@@ -153,17 +158,18 @@
             object-position: center;
             display: block;
             border-radius: 12px;
-            image-rendering: -webkit-optimize-contrast;
+            image-rendering: auto;
+            -webkit-font-smoothing: antialiased;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            -webkit-transform: translate3d(0,0,0);
-            transform: translate3d(0,0,0);
+            -webkit-transform: translate3d(0,0,0) scale(1.001);
+            transform: translate3d(0,0,0) scale(1.001);
             will-change: auto;
             transition: none;
         }
 
         .mondrian-card:hover .mondrian-thumb img {
-            transform: translate3d(0,0,0);
+            transform: translate3d(0,0,0) scale(1.001);
         }
 
         .mondrian-overlay {
@@ -234,6 +240,7 @@
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="Media/search.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Search">🔍</div></a>
             <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.75rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
         </div>
         
