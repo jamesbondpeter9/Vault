@@ -1,3 +1,10 @@
 {
-    "models": []
+    "models": [
+        {
+            "name": "A J Applegate",
+            "thumbnail": "https://i.postimg.cc/MG8cg1vD/A-J-Applegate.jpg",
+            "shape": "portrait",
+            "createdAt": 1793526287170
+        }
+    ]
 }
