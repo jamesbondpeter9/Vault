@@ -8,7 +8,7 @@
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video Portal - Home</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -124,6 +124,7 @@
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
                 border-radius: 0px !important;
+                transform: scale(0.95) !important; /* Little bit zoom out inner image without disturbing card size */
             }
 
             .mondrian-card.landscape {
@@ -144,7 +145,7 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                transform: scale(1.02) !important;
+                transform: scale(0.95) !important; /* Little bit zoom out inner image without disturbing card size */
                 border-radius: 0px !important;
             }
 
@@ -157,6 +158,7 @@
                 object-fit: contain !important;
                 width: 100% !important;
                 height: 100% !important;
+                transform: scale(0.95) !important; /* Little bit zoom out inner image for square/general items */
             }
             .mondrian-overlay {
                 padding: 14px 6px 4px 6px !important;
