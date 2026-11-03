@@ -114,6 +114,8 @@
         @media(max-width: 500px) {
             .mondrian-card {
                 border-radius: 6px !important;
+                border: none !important; /* Remove thin boundary line on mobile */
+                box-shadow: none !important; /* Remove default card shadows */
                 -webkit-tap-highlight-color: transparent;
                 outline: none !important;
             }
@@ -122,6 +124,7 @@
                 transform: none !important;
                 z-index: 1 !important;
                 box-shadow: none !important;
+                border: none !important;
             }
 
             .mondrian-card.portrait {
@@ -129,6 +132,7 @@
                 grid-row: span 4 !important; /* Portrait thumbnails set to span 4 on mobile */
                 aspect-ratio: auto;
                 border-radius: 6px !important;
+                border: none !important;
             }
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
@@ -140,6 +144,7 @@
                 grid-row: span 2 !important;
                 height: 100% !important;
                 border-radius: 6px !important;
+                border: none !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
                 background: #000 !important;
