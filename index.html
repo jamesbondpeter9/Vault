@@ -115,28 +115,36 @@
             .mondrian-card {
                 border-radius: 6px !important;
             }
+            /* 1. Very tiny curved edges for only portrait thumbnails on mobile */
             .mondrian-card.portrait {
                 grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 aspect-ratio: auto;
+                border-radius: 3px !important;
             }
+            .mondrian-card.portrait .mondrian-thumb,
+            .mondrian-card.portrait .mondrian-thumb img {
+                border-radius: 3px !important;
+            }
+
+            /* 2. Full image view with minimal cropping for landscape thumbnails on mobile */
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
-                height: 100% !important;
-                align-self: stretch !important;
+                border-radius: 6px !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
-                height: 100% !important;
-                top: 0 !important;
-                bottom: 0 !important;
+                background: #050505 !important;
+                border-radius: 6px !important;
             }
             .mondrian-card.landscape .mondrian-thumb img {
-                object-fit: cover !important;
+                object-fit: contain !important;
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
+                border-radius: 6px !important;
             }
+
             .mondrian-thumb {
                 border-radius: 6px !important;
                 background: #050505 !important;
