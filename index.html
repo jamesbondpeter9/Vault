@@ -140,9 +140,15 @@
 
             /* Auto-Optimized Mobile Dimension Rules matching upload ratios */
             .mondrian-card[data-mobile-fit="portrait"] {
-                grid-column: span 1 !important;
+                grid-column: span 2 !important; /* Match landscape horizontal length */
                 grid-row: span 4 !important;
+                background: var(--background, #000) !important;
             }
+            .mondrian-card[data-mobile-fit="portrait"] .mondrian-thumb img {
+                object-fit: contain !important; /* Show full portrait image without cropping */
+                object-position: center !important;
+            }
+
             .mondrian-card[data-mobile-fit="landscape"] {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
