@@ -113,47 +113,55 @@
         /* Mobile specific thumbnail dimension overrides & touch compatibility */
         @media(max-width: 500px) {
             .mondrian-card {
-                border-radius: 0px !important; /* Sharp edges for mobile */
+                border-radius: 6px !important; /* Little bit curved edges for mobile */
             }
+            /* Active / Click effect: moves upward from original location to overlay other thumbnails */
+            .mondrian-card:active {
+                transform: translateY(-18px) translate3d(0,0,0) !important;
+                z-index: 9999 !important;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 15px rgba(255,255,255,0.2) !important;
+                transition: transform 0.1s ease !important;
+            }
+
             .mondrian-card.portrait {
                 grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 aspect-ratio: auto;
-                border-radius: 0px !important; /* Sharp edges for portrait */
+                border-radius: 6px !important;
             }
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
-                border-radius: 0px !important;
+                border-radius: 6px !important;
             }
 
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
                 height: 100% !important;
-                border-radius: 0px !important; /* Sharp edges for landscape */
+                border-radius: 6px !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
                 background: #000 !important;
-                border-radius: 0px !important;
+                border-radius: 6px !important;
                 position: absolute !important;
                 inset: 0 !important;
                 height: 100% !important;
             }
             .mondrian-card.landscape .mondrian-thumb img {
-                object-fit: cover !important;
+                object-fit: contain !important; /* Do not crop thumbnail images */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                border-radius: 0px !important;
+                border-radius: 6px !important;
             }
 
             .mondrian-thumb {
-                border-radius: 0px !important;
+                border-radius: 6px !important;
                 background: #050505 !important;
             }
             .mondrian-thumb img {
-                border-radius: 0px !important;
-                object-fit: cover !important;
+                border-radius: 6px !important;
+                object-fit: contain !important; /* Do not crop thumbnail images */
                 width: 100% !important;
                 height: 100% !important;
             }
