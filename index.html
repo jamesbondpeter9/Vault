@@ -127,7 +127,7 @@
                 border-radius: 3px !important;
             }
 
-            /* 2. Remove top/bottom black gaps for landscape thumbnails on mobile by filling bounds */
+            /* 2. Minimal cropping with cover for landscape thumbnails on mobile */
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
@@ -146,6 +146,7 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
+                transform: scale(1.02) !important; /* Extremely minimal scale to prevent overflow gaps while preserving full view */
                 border-radius: 6px !important;
             }
 
