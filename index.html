@@ -127,27 +127,25 @@
                 border-radius: 3px !important;
             }
 
-            /* 2. Full image view with minimal cropping & removing top/bottom gaps for landscape thumbnails on mobile */
+            /* 2. Remove top/bottom black gaps for landscape thumbnails on mobile by filling bounds */
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
-                height: auto !important;
-                aspect-ratio: 16 / 9;
+                height: 100% !important;
                 border-radius: 6px !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
-                background: #050505 !important;
+                background: #000 !important;
                 border-radius: 6px !important;
-                position: relative !important;
-                inset: auto !important;
+                position: absolute !important;
+                inset: 0 !important;
                 height: 100% !important;
             }
             .mondrian-card.landscape .mondrian-thumb img {
-                object-fit: contain !important;
+                object-fit: cover !important;
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 100% !important;
                 border-radius: 6px !important;
             }
 
