@@ -110,7 +110,7 @@
             }
         }
 
-        /* Mobile specific thumbnail dimension overrides & touch stability */
+        /* Mobile specific thumbnail dimension overrides & touch stability with auto-optimization */
         @media(max-width: 500px) {
             .mondrian-card {
                 border-radius: 6px !important;
@@ -128,14 +128,30 @@
                 border: none !important;
             }
 
+            /* Default mobile fallback sizing */
             .mondrian-card.portrait {
                 grid-column: span 2 !important;
-                grid-row: span 4 !important; /* Portrait thumbnails set to span 4 on mobile */
+                grid-row: span 4 !important;
                 aspect-ratio: auto;
                 border-radius: 6px !important;
                 border: none !important;
                 background: var(--background, #000) !important;
             }
+
+            /* Auto-Optimized Mobile Dimension Rules matching upload ratios */
+            .mondrian-card[data-mobile-fit="portrait"] {
+                grid-column: span 1 !important;
+                grid-row: span 4 !important;
+            }
+            .mondrian-card[data-mobile-fit="landscape"] {
+                grid-column: span 2 !important;
+                grid-row: span 2 !important;
+            }
+            .mondrian-card[data-mobile-fit="square"] {
+                grid-column: span 1 !important;
+                grid-row: span 2 !important;
+            }
+
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
                 border-radius: 6px !important;
@@ -456,10 +472,13 @@
                                 const ratio = img.naturalWidth / img.naturalHeight;
                                 if (ratio < 0.85) {
                                     card.className = 'mondrian-card portrait';
+                                    card.setAttribute('data-mobile-fit', 'portrait');
                                 } else if (ratio > 1.25) {
                                     card.className = 'mondrian-card landscape';
+                                    card.setAttribute('data-mobile-fit', 'landscape');
                                 } else {
                                     card.className = 'mondrian-card square';
+                                    card.setAttribute('data-mobile-fit', 'square');
                                 }
                             }
                         };
