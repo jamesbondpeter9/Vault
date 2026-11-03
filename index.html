@@ -124,7 +124,7 @@
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
                 border-radius: 0px !important;
-                transform: scale(0.95) !important; /* Little bit zoom out inner image without disturbing card size */
+                transform: scale(1.01) !important; /* Very tiny minimal adjustment for full image display */
             }
 
             .mondrian-card.landscape {
@@ -145,7 +145,7 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                transform: scale(0.95) !important; /* Little bit zoom out inner image without disturbing card size */
+                transform: scale(1.01) !important; /* Very tiny minimal adjustment for full image display */
                 border-radius: 0px !important;
             }
 
@@ -155,10 +155,10 @@
             }
             .mondrian-thumb img {
                 border-radius: 0px !important;
-                object-fit: contain !important;
+                object-fit: cover !important;
                 width: 100% !important;
                 height: 100% !important;
-                transform: scale(0.95) !important; /* Little bit zoom out inner image for square/general items */
+                transform: scale(1.01) !important; /* Very tiny minimal adjustment for square/general items */
             }
             .mondrian-overlay {
                 padding: 14px 6px 4px 6px !important;
