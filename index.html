@@ -168,6 +168,12 @@
                 border-radius: 6px !important;
                 background: var(--background, #000) !important; /* Match background theme color for inner thumbnail gaps */
             }
+            
+            /* Hide automatic/fallback text placeholder or auto-generated elements on mobile streams */
+            .mondrian-thumb > div:not(.mondrian-overlay) {
+                display: none !important;
+            }
+
             .mondrian-thumb img {
                 border-radius: 6px !important;
                 object-fit: contain !important; /* Show full image without cropping for all mobile thumbnails */
