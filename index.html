@@ -116,6 +116,7 @@
                 border-radius: 6px !important;
                 border: none !important; /* Remove thin boundary line on mobile */
                 box-shadow: none !important; /* Remove default card shadows */
+                background: var(--background, #000) !important; /* Match background theme color for gaps */
                 -webkit-tap-highlight-color: transparent;
                 outline: none !important;
             }
@@ -133,6 +134,7 @@
                 aspect-ratio: auto;
                 border-radius: 6px !important;
                 border: none !important;
+                background: var(--background, #000) !important;
             }
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
@@ -145,9 +147,10 @@
                 height: 100% !important;
                 border-radius: 6px !important;
                 border: none !important;
+                background: var(--background, #000) !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
-                background: #000 !important;
+                background: var(--background, #000) !important; /* Match theme color in thumbnail wrapper gaps */
                 border-radius: 6px !important;
                 position: absolute !important;
                 inset: 0 !important;
@@ -163,7 +166,7 @@
 
             .mondrian-thumb {
                 border-radius: 6px !important;
-                background: #050505 !important;
+                background: var(--background, #000) !important; /* Match background theme color for inner thumbnail gaps */
             }
             .mondrian-thumb img {
                 border-radius: 6px !important;
