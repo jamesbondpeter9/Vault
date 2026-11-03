@@ -64,7 +64,7 @@
         @media(max-width: 500px) { 
             .home-grid { 
                 grid-template-columns: repeat(2, minmax(0, 1fr)); 
-                grid-auto-rows: 140px;
+                grid-auto-rows: 120px;
                 gap: 2px !important;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
@@ -113,22 +113,39 @@
         /* Mobile specific thumbnail dimension overrides & touch compatibility */
         @media(max-width: 500px) {
             .mondrian-card {
-                border-radius: 2px !important;
+                border-radius: 6px !important;
             }
             .mondrian-card.portrait {
-                grid-column: span 1 !important;
+                grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 aspect-ratio: auto;
             }
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
-                grid-row: span 4 !important;
+                grid-row: span 2 !important;
+                height: 100% !important;
+                align-self: stretch !important;
+            }
+            .mondrian-card.landscape .mondrian-thumb {
+                height: 100% !important;
+                top: 0 !important;
+                bottom: 0 !important;
+            }
+            .mondrian-card.landscape .mondrian-thumb img {
+                object-fit: cover !important;
+                object-position: center !important;
+                width: 100% !important;
+                height: 100% !important;
             }
             .mondrian-thumb {
-                border-radius: 2px !important;
+                border-radius: 6px !important;
+                background: #050505 !important;
             }
             .mondrian-thumb img {
-                border-radius: 2px !important;
+                border-radius: 6px !important;
+                object-fit: contain !important;
+                width: 100% !important;
+                height: 100% !important;
             }
             .mondrian-overlay {
                 padding: 14px 6px 4px 6px !important;
