@@ -126,7 +126,7 @@
 
             .mondrian-card.portrait {
                 grid-column: span 2 !important;
-                grid-row: span 6 !important; /* Increased portrait vertical height on mobile */
+                grid-row: span 4 !important; /* Portrait thumbnails set to span 4 on mobile */
                 aspect-ratio: auto;
                 border-radius: 6px !important;
             }
@@ -149,7 +149,7 @@
                 height: 100% !important;
             }
             .mondrian-card.landscape .mondrian-thumb img {
-                object-fit: cover !important;
+                object-fit: contain !important; /* Show full image without cropping */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
@@ -162,10 +162,17 @@
             }
             .mondrian-thumb img {
                 border-radius: 6px !important;
-                object-fit: contain;
+                object-fit: contain !important; /* Show full image without cropping for all mobile thumbnails */
                 width: 100% !important;
                 height: 100% !important;
             }
+
+            /* Web hover effect adapted for mobile with locked position */
+            .mondrian-card:hover .mondrian-thumb img {
+                transform: translate3d(0,0,0) scale(1.02);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
             .mondrian-overlay {
                 padding: 14px 6px 4px 6px !important;
                 font-size: 0.65rem !important;
