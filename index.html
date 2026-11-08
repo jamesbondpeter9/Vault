@@ -64,9 +64,9 @@
         }
         @media(max-width: 500px) { 
             .home-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)); 
-                grid-auto-rows: 150px;
-                gap: 2px !important;
+                grid-template-columns: 1fr !important; 
+                grid-auto-rows: auto !important;
+                gap: 8px !important;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
             } 
@@ -105,9 +105,13 @@
             }
         }
 
-        /* Mobile specific thumbnail styling matching videotag structure with slight curved edges and clean fill */
+        /* Mobile specific theater thumbnail styling (1 per row, 16:9 widescreen layout) */
         @media(max-width: 500px) {
             .mondrian-card {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+                aspect-ratio: 16 / 9 !important;
+                height: auto !important;
                 border-radius: 8px !important;
                 border: none !important;
                 box-shadow: none !important;
@@ -127,7 +131,7 @@
             }
             .mondrian-thumb img {
                 border-radius: 8px !important;
-                object-fit: fill !important;
+                object-fit: cover !important;
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
@@ -317,7 +321,7 @@
             const paginationBar = document.getElementById('paginationBar');
             
             if (!Array.isArray(allStreams) || allStreams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
                 paginationBar.innerHTML = '';
                 return;
             }
@@ -332,7 +336,7 @@
             });
 
             if (filteredStreams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
                 paginationBar.innerHTML = '';
                 return;
             }
