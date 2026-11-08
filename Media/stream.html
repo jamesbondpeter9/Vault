@@ -324,7 +324,7 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism with concise compressed frame generation
+            // Robust 10-thumbnail generator mechanism with ultra-concise compressed frame generation
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
@@ -365,7 +365,7 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Downscaled and concise compressed frame generation
+                // 2. Direct Video File URL handling: Ultra-concise compressed frame generation (max width 320px, quality 0.60)
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
                     autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting frames...</span>`;
                     
@@ -385,10 +385,9 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            // Downscale dimensions to keep data URLs concise (max width 480px)
                             const srcWidth = hiddenVideo.videoWidth || 640;
                             const srcHeight = hiddenVideo.videoHeight || 360;
-                            const targetWidth = 480;
+                            const targetWidth = 320; // Ultra-concise downscaled width
                             const targetHeight = Math.round(targetWidth * (srcHeight / srcWidth));
                             
                             canvas.width = targetWidth;
@@ -396,8 +395,8 @@
                             
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(hiddenVideo, 0, 0, targetWidth, targetHeight);
-                            // Use lower quality (0.75) to significantly concise/shorten the data URL string
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                            // Ultra-concise compressed JPEG data URL (quality 0.60)
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.60);
 
                             const imgBox = document.createElement('div');
                             imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
