@@ -217,6 +217,14 @@
                             <input type="text" id="streamThumbnail" placeholder="Leave blank for auto YouTube thumb">
                         </div>
 
+                        <!-- Auto-generated 10 Thumbnails Selector Mechanism -->
+                        <div style="margin-bottom: 16px;" id="autoThumbnailsSection">
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Auto-Generated Thumbnails (Pick 1 of 10)</label>
+                            <div id="autoThumbsContainer" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: rgba(0,0,0,0.4); padding: 8px; border: 1px solid var(--card-border); border-radius: 12px; max-height: 160px; overflow-y: auto;">
+                                <span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Enter a valid video URL above to generate 10 thumbnails</span>
+                            </div>
+                        </div>
+
                         <div class="tag-section-wrapper">
                             <div class="tag-section-header">
                                 <span class="tag-section-title">Tag Models</span>
@@ -238,6 +246,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden video element for local/file thumbnail generation -->
+    <video id="hiddenThumbGenerator" style="display:none;" crossorigin="anonymous" muted playsinline></video>
 
     <!-- Corrected prefixes: config.js & github-sync.js in root (../), storage.js in Media/ (./) -->
     <script src="../config.js"></script>
@@ -291,6 +302,8 @@
             const urlInput = document.getElementById('streamUrl');
             const thumbInput = document.getElementById('streamThumbnail');
             const previewContainer = document.getElementById('previewContainer');
+            const autoThumbsContainer = document.getElementById('autoThumbsContainer');
+            const hiddenVideo = document.getElementById('hiddenThumbGenerator');
 
             function updateThumbPreview() {
                 let url = urlInput.value.trim();
@@ -311,7 +324,101 @@
                 }
             }
 
-            urlInput.addEventListener('input', updateThumbPreview);
+            // Robust 10-thumbnail generator mechanism
+            function generate10Thumbnails() {
+                let url = urlInput.value.trim();
+                if (!url) return;
+
+                // 1. YouTube Video URL handling: Generate 10 standard time-point/resolution thumbnails
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    let ytId = '';
+                    if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
+                    else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
+                    else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
+                    
+                    if (ytId) {
+                        autoThumbsContainer.innerHTML = '';
+                        // YouTube standard quality variants & timeframe placeholders (hqdefault, mqdefault, sddefault, maxresdefault + numbered sequence variants)
+                        const ytThumbs = [
+                            `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/sddefault.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/default.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/0.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/1.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/2.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/3.jpg`,
+                            `https://img.youtube.com/vi/${ytId}/hq720.jpg`
+                        ];
+
+                        ytThumbs.forEach((tUrl, idx) => {
+                            const imgBox = document.createElement('div');
+                            imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
+                            imgBox.innerHTML = `<img src="${tUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.style.display='none';">`;
+                            imgBox.onclick = () => {
+                                thumbInput.value = tUrl;
+                                updateThumbPreview();
+                                Array.from(autoThumbsContainer.children).forEach(c => c.style.borderColor = 'transparent');
+                                imgBox.style.borderColor = '#fff';
+                            };
+                            autoThumbsContainer.appendChild(imgBox);
+                        });
+                    }
+                } 
+                // 2. Direct Video File URL handling (mp4, webm, mov, m3u8): Frame scrubbing generator for 10 distinct timestamps
+                else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting 10 frames from video...</span>`;
+                    
+                    hiddenVideo.src = url;
+                    hiddenVideo.load();
+                    hiddenVideo.onloadedmetadata = () => {
+                        const duration = hiddenVideo.duration;
+                        autoThumbsContainer.innerHTML = '';
+                        let currentTime = 0;
+                        const interval = duration / 10;
+                        let generatedCount = 0;
+
+                        const captureNextFrame = (timePoint) => {
+                            if (timePoint > duration) timePoint = duration * 0.95;
+                            hiddenVideo.currentTime = timePoint;
+                        };
+
+                        hiddenVideo.onseeked = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 320;
+                            canvas.height = 180;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                            const imgBox = document.createElement('div');
+                            imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
+                            imgBox.innerHTML = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+                            imgBox.onclick = () => {
+                                thumbInput.value = dataUrl;
+                                updateThumbPreview();
+                                Array.from(autoThumbsContainer.children).forEach(c => c.style.borderColor = 'transparent');
+                                imgBox.style.borderColor = '#fff';
+                            };
+                            autoThumbsContainer.appendChild(imgBox);
+
+                            generatedCount++;
+                            if (generatedCount < 10) {
+                                currentTime += interval;
+                                captureNextFrame(currentTime);
+                            }
+                        };
+
+                        captureNextFrame(1);
+                    };
+                }
+            }
+
+            urlInput.addEventListener('input', () => {
+                updateThumbPreview();
+                generate10Thumbnails();
+            });
             thumbInput.addEventListener('input', updateThumbPreview);
 
             document.getElementById('streamForm').addEventListener('submit', async (e) => {
