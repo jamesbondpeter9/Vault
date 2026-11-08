@@ -324,7 +324,7 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism generating original quality thumbnails
+            // Robust 10-thumbnail generator mechanism capturing perfect snapshots with original quality
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
@@ -365,18 +365,20 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Original quality frame extraction
+                // 2. Direct Video File URL handling: Capture perfect snapshots at precise intervals with original quality
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting original quality frames...</span>`;
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting perfect snapshots...</span>`;
                     
                     hiddenVideo.src = url;
                     hiddenVideo.load();
                     hiddenVideo.onloadedmetadata = () => {
                         const duration = hiddenVideo.duration;
                         autoThumbsContainer.innerHTML = '';
-                        let currentTime = 0;
-                        const interval = duration / 10;
-                        let generatedCount = 0;
+                        // Distribute snapshots evenly avoiding 0s start (e.g., from 5% to 95% of duration)
+                        const startOffset = Math.min(duration * 0.05, 1);
+                        const effectiveDuration = duration - startOffset;
+                        const interval = effectiveDuration / 9;
+                        let currentIndex = 0;
 
                         const captureNextFrame = (timePoint) => {
                             if (timePoint > duration) timePoint = duration * 0.95;
@@ -388,14 +390,17 @@
                             const srcWidth = hiddenVideo.videoWidth || 1280;
                             const srcHeight = hiddenVideo.videoHeight || 720;
                             
-                            // Set canvas dimensions to original video resolution
+                            // Set canvas dimensions to exact original video resolution for crystal-clear snapshots
                             canvas.width = srcWidth;
                             canvas.height = srcHeight;
                             
                             const ctx = canvas.getContext('2d');
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
                             ctx.drawImage(hiddenVideo, 0, 0, srcWidth, srcHeight);
-                            // Generate high/original quality data URL (quality 0.95)
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                            
+                            // Generate pristine original-quality JPEG data URL (quality 0.98)
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
 
                             const imgBox = document.createElement('div');
                             imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
@@ -408,14 +413,14 @@
                             };
                             autoThumbsContainer.appendChild(imgBox);
 
-                            generatedCount++;
-                            if (generatedCount < 10) {
-                                currentTime += interval;
-                                captureNextFrame(currentTime);
+                            currentIndex++;
+                            if (currentIndex < 10) {
+                                const nextTime = startOffset + (currentIndex * interval);
+                                captureNextFrame(nextTime);
                             }
                         };
 
-                        captureNextFrame(1);
+                        captureNextFrame(startOffset);
                     };
                 }
             }
