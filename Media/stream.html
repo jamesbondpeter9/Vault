@@ -432,6 +432,17 @@
                 const url = document.getElementById('streamUrl').value.trim();
                 let thumbnail = document.getElementById('streamThumbnail').value.trim();
 
+                if (!title || !url) return;
+
+                // Unique title constraint check (prevent duplicate title names)
+                const streams = StorageDB.getStreams() || [];
+                const isDuplicate = streams.some(s => s.title && s.title.trim().toLowerCase() === title.toLowerCase());
+                if (isDuplicate) {
+                    alert('A stream with this title already exists. Please choose a unique stream title.');
+                    document.getElementById('streamTitle').focus();
+                    return;
+                }
+
                 if (!thumbnail && url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
                     let ytId = '';
                     if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
@@ -440,13 +451,10 @@
                     if (ytId) thumbnail = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
                 }
 
-                if (!title || !url) return;
-
                 const submitBtn = document.getElementById('saveStreamBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Syncing to GitHub...';
                 
-                const streams = StorageDB.getStreams();
                 streams.push({
                     title,
                     url,
