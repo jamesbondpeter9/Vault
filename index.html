@@ -105,12 +105,12 @@
             }
         }
 
-        /* Mobile specific theater thumbnail styling with slightly increased vertical height */
+        /* Mobile specific theater thumbnail styling with increased vertical height and original quality cover rendering */
         @media(max-width: 500px) {
             .mondrian-card {
                 grid-column: span 1 !important;
                 grid-row: span 1 !important;
-                aspect-ratio: 16 / 10 !important; /* Slightly taller vertical height ratio */
+                aspect-ratio: 16 / 12 !important; /* Further increased vertical height on mobile */
                 height: auto !important;
                 border-radius: 8px !important;
                 border: none !important;
@@ -131,10 +131,11 @@
             }
             .mondrian-thumb img {
                 border-radius: 8px !important;
-                object-fit: cover !important;
+                object-fit: cover !important; /* Preserves natural image detail and covers thumbnail dimensions perfectly */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
+                image-rendering: -webkit-optimize-contrast; /* Ensures sharp original quality rendering */
             }
             .mondrian-overlay {
                 padding: 14px 10px 6px 10px !important;
