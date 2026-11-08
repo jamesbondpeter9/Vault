@@ -17,7 +17,7 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 2px; /* 2px gap between nav and stream info/content area */
             max-width: 1300px;
             margin-left: auto;
             margin-right: auto;
@@ -57,6 +57,51 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Model+ Button Styling */
+        .model-plus-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .model-plus-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .site-container {
+                width: 100%;
+                padding: 0;
+            }
+            .stream-info-panel {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav-bar-compact {
+                margin-bottom: 2px;
+            }
+            .player-wrapper {
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
+            h1#streamTitle {
+                font-size: 1.1rem !important;
+            }
         }
     </style>
 </head>
@@ -74,13 +119,17 @@
                 <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Loading player...</div>
             </div>
             <div class="stream-info-panel">
-                <div>
+                <div style="flex: 1; min-width: 250px;">
                     <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">Loading stream...</h1>
-                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"></div>
+                </div>
+                <div>
+                    <button class="model-plus-btn" onclick="openModelPlusModal()">Model+</button>
                 </div>
             </div>
         </div>
 
+        <!-- Delete Stream Modal -->
         <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Stream</h3>
@@ -88,6 +137,19 @@
                 <div style="display: flex; gap: 10px;">
                     <button onclick="confirmDeleteStream()" id="confirmDeleteBtn" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
                     <button onclick="closeDeleteModal()" class="btn-primary" style="flex:1; background:#333; color:#fff;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model+ Modal for Editing/Tagging Models -->
+        <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Model+ Tagging Manager</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Enter model tags separated by commas (e.g. GPT-4, Claude, Llama):</p>
+                <input type="text" id="modelInput" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; margin-bottom: 20px; outline: none;" placeholder="Model names...">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveModelTags()" class="btn-primary" style="flex:1; background: var(--accent-color, #4f46e5); color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Save Models</button>
+                    <button onclick="closeModelPlusModal()" class="btn-primary" style="flex:1; background:#333; color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Cancel</button>
                 </div>
             </div>
         </div>
@@ -100,6 +162,7 @@
     <script>
         let streamIndex = 0;
         let currentStreamItem = null;
+        let allStreamsRef = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize storage DB (fetches videos.json directly from Media/ folder)
@@ -124,6 +187,7 @@
                 } catch (e) {}
             }
             
+            allStreamsRef = streams;
             currentStreamItem = streams[streamIndex];
             
             if (!currentStreamItem) {
@@ -135,17 +199,7 @@
             document.title = `${currentStreamItem.title} - Video Portal`;
             document.getElementById('streamTitle').textContent = currentStreamItem.title;
 
-            const tagsContainer = document.getElementById('modelTags');
-            if (currentStreamItem.models && currentStreamItem.models.length > 0) {
-                currentStreamItem.models.forEach(modelName => {
-                    const tag = document.createElement('span');
-                    tag.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;';
-                    tag.textContent = modelName;
-                    tagsContainer.appendChild(tag);
-                });
-            } else {
-                tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
-            }
+            renderModelTags();
 
             // Initialize player using player.js inside Media/ folder
             if (typeof VideoPlayer !== 'undefined' && typeof VideoPlayer.init === 'function') {
@@ -172,6 +226,56 @@
                 playerContainer.innerHTML = embedHtml;
             }
         });
+
+        function renderModelTags() {
+            const tagsContainer = document.getElementById('modelTags');
+            tagsContainer.innerHTML = '';
+            if (currentStreamItem.models && currentStreamItem.models.length > 0) {
+                currentStreamItem.models.forEach(modelName => {
+                    const tag = document.createElement('span');
+                    tag.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 750;';
+                    tag.textContent = modelName;
+                    tagsContainer.appendChild(tag);
+                });
+            } else {
+                tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
+            }
+        }
+
+        function openModelPlusModal() {
+            if (!currentStreamItem) return;
+            const inputField = document.getElementById('modelInput');
+            inputField.value = (currentStreamItem.models || []).join(', ');
+            document.getElementById('modelPlusModal').style.display = 'flex';
+        }
+
+        function closeModelPlusModal() {
+            document.getElementById('modelPlusModal').style.display = 'none';
+        }
+
+        async function saveModelTags() {
+            if (!currentStreamItem) return;
+            const inputVal = document.getElementById('modelInput').value;
+            const newModels = inputVal.split(',').map(m => m.trim()).filter(m => m.length > 0);
+            
+            currentStreamItem.models = newModels;
+            
+            if (allStreamsRef.length > 0) {
+                allStreamsRef[streamIndex] = currentStreamItem;
+                try {
+                    if (typeof StorageDB !== 'undefined' && typeof StorageDB.saveStreams === 'function') {
+                        await StorageDB.saveStreams(allStreamsRef);
+                    } else {
+                        localStorage.setItem('video_portal_streams_db', JSON.stringify(allStreamsRef));
+                    }
+                } catch (e) {
+                    console.error('Error saving model tags to storage:', e);
+                }
+            }
+
+            renderModelTags();
+            closeModelPlusModal();
+        }
 
         function openDeleteStreamModal() {
             document.getElementById('deleteModal').style.display = 'flex';
