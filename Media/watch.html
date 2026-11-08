@@ -120,7 +120,10 @@
             </div>
             <div class="stream-info-panel">
                 <div style="flex: 1; min-width: 250px;">
-                    <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">Loading stream...</h1>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin: 0;">Loading stream...</h1>
+                        <button onclick="openAddTitleModal()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;" title="Edit Title">addTitle</button>
+                    </div>
                     <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"></div>
                 </div>
                 <div>
@@ -141,6 +144,21 @@
             </div>
         </div>
 
+        <!-- Add/Edit Stream Title Modal -->
+        <div id="addTitleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Update Stream Title</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Enter a new title for this stream:</p>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="streamTitleInput" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none; box-sizing: border-box;" placeholder="Stream title..." onkeydown="if(event.key==='Enter'){saveStreamTitle();}">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveStreamTitle()" class="btn-primary" style="flex:1; background: var(--accent-color, #4f46e5); color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Save</button>
+                    <button onclick="closeAddTitleModal()" class="btn-primary" style="flex:1; background:#333; color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Model+ Interactive Modal for Adding and Updating Models from models.html -->
         <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 440px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
@@ -154,7 +172,7 @@
                     <select id="modelsHtmlSelect" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;">
                         <option value="">-- Select model from models.html --</option>
                     </select>
-                    <button onclick="addModelFromDropdown()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</option>
+                    <button onclick="addModelFromDropdown()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</button>
                 </div>
 
                 <div style="display: flex; gap: 8px; margin-bottom: 20px;">
@@ -283,6 +301,15 @@
         function renderModelTags() {
             const tagsContainer = document.getElementById('modelTags');
             tagsContainer.innerHTML = '';
+            
+            // Render Model+ button directly adjacent to model tags with exact same styling and sizing
+            const modelPlusInlineBtn = document.createElement('button');
+            modelPlusInlineBtn.className = 'model-plus-btn';
+            modelPlusInlineBtn.style.cssText = 'background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 750; cursor: pointer; transition: all 0.2s ease;';
+            modelPlusInlineBtn.textContent = 'Model+';
+            modelPlusInlineBtn.onclick = openModelPlusModal;
+            tagsContainer.appendChild(modelPlusInlineBtn);
+
             if (currentStreamItem.models && currentStreamItem.models.length > 0) {
                 currentStreamItem.models.forEach(modelName => {
                     const tag = document.createElement('span');
@@ -290,9 +317,45 @@
                     tag.textContent = modelName;
                     tagsContainer.appendChild(tag);
                 });
-            } else {
-                tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
             }
+        }
+
+        function openAddTitleModal() {
+            if (!currentStreamItem) return;
+            document.getElementById('streamTitleInput').value = currentStreamItem.title || '';
+            document.getElementById('addTitleModal').style.display = 'flex';
+            document.getElementById('streamTitleInput').focus();
+        }
+
+        function closeAddTitleModal() {
+            document.getElementById('addTitleModal').style.display = 'none';
+        }
+
+        async function saveStreamTitle() {
+            if (!currentStreamItem) return;
+            const newTitle = document.getElementById('streamTitleInput').value.trim();
+            if (!newTitle) {
+                alert('Title cannot be empty.');
+                return;
+            }
+
+            currentStreamItem.title = newTitle;
+            document.getElementById('streamTitle').textContent = newTitle;
+            document.title = `${newTitle} - Video Portal`;
+
+            if (allStreamsRef.length > 0) {
+                allStreamsRef[streamIndex] = currentStreamItem;
+                try {
+                    if (typeof StorageDB !== 'undefined' && typeof StorageDB.saveStreams === 'function') {
+                        await StorageDB.saveStreams(allStreamsRef);
+                    } else {
+                        localStorage.setItem('video_portal_streams_db', JSON.stringify(allStreamsRef));
+                    }
+                } catch (e) {
+                    console.error('Error saving updated title to storage:', e);
+                }
+            }
+            closeAddTitleModal();
         }
 
         function openModelPlusModal() {
