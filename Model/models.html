@@ -10,396 +10,454 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch Stream - Portal</title>
+    <title>Models Directory - Portal</title>
     <link rel="stylesheet" href="../style.css">
     <style>
         .nav-bar-compact {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
-            margin-bottom: 2px; /* 2px gap between nav and stream info/content area */
-            max-width: 1300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .mondrian-nav-box {
-            height: 50px !important;
-            font-size: 0.85rem !important;
-            border-radius: 12px !important;
-        }
-        .watch-container {
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-        .player-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.95), var(--neon-glow);
             margin-bottom: 20px;
         }
-        .player-wrapper iframe, .player-wrapper video {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .stream-info-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 24px 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-        /* Model+ Button Styling */
-        .model-plus-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--card-border);
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
             color: #fff;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            cursor: pointer;
             transition: all 0.2s ease;
         }
-        .model-plus-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
             border-color: #fff;
         }
 
-        /* Mobile Responsive Adjustments */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
+        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
+        .filter-btn:hover, .filter-btn.active { background: #fff; color: #000; border-color: #fff; }
+        
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 320px;
+            grid-auto-flow: dense;
+            gap: 4px;
+            align-items: stretch;
+        }
+        @media(max-width: 1400px) { .models-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .models-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { 
+            .models-grid { 
+                grid-template-columns: 1fr; 
+                grid-auto-rows: auto;
+                gap: 2px;
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            } 
+            .mondrian-card.landscape,
+            .mondrian-card.portrait,
+            .mondrian-card.square {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+                height: auto !important;
+                aspect-ratio: auto !important;
             }
-            .site-container {
-                width: 100%;
-                padding: 0;
+            .mondrian-thumb {
+                aspect-ratio: auto;
+                height: auto;
+                will-change: transform;
             }
-            .stream-info-panel {
-                padding: 16px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .nav-bar-compact {
-                margin-bottom: 2px;
-            }
-            .player-wrapper {
-                border-radius: 12px;
-                margin-bottom: 12px;
-            }
-            h1#streamTitle {
-                font-size: 1.1rem !important;
+            .mondrian-thumb img {
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                object-fit: initial !important;
+                display: block;
+                image-rendering: high-quality;
+                image-rendering: -webkit-optimize-contrast;
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+                will-change: transform;
             }
         }
+
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 1; }
+        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
+        .mondrian-card.square { grid-column: span 1; grid-row: span 1; }
+
+        .mondrian-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            cursor: pointer;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        /* High quality mobile rendering compatibility without compression */
+        .mondrian-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            inset: 0;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        .update-thumb-btn { 
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
+            color: #fff; width: 26px; height: 26px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
+            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
+        }
+        .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
+        @media(max-width: 500px) { .update-thumb-btn { opacity: 0.8; } }
+
+        .delete-btn { 
+            position: absolute; top: 10px; right: 10px; 
+            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
+            color: #ff4d4d; width: 26px; height: 26px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
+            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
+        }
+        .mondrian-thumb:hover .delete-btn { opacity: 1; }
+        @media(max-width: 500px) { .delete-btn { opacity: 0.8; } }
     </style>
 </head>
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
             <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <div class="mondrian-nav-card" onclick="openDeleteStreamModal()" style="cursor: pointer;">
-                <div class="mondrian-nav-box" style="color: #ff4d4d; font-size: 1.1rem; font-weight: 900;" title="Delete Stream">&times;</div>
+            <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+        </div>
+
+        <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
+
+        <div class="filter-bar" id="filterBar"></div>
+        <div class="models-grid" id="modelsGrid"><div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div></div>
+
+        <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
+
+        <div id="modelModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Add New Model</h3>
+                <form id="modelForm">
+                    <div style="margin-bottom: 14px;">
+                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Model Name</label>
+                        <input type="text" id="modelName" required="" placeholder="Enter model name">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Photo / Thumbnail URL</label>
+                        <input type="text" id="modelThumb" required="" placeholder="https://...">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn-primary" style="flex:1;">Save Model</button>
+                        <button type="button" onclick="closeAddModelModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="watch-container">
-            <div class="player-wrapper" id="playerContainer">
-                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Loading player...</div>
-            </div>
-            <div class="stream-info-panel">
-                <div style="flex: 1; min-width: 250px;">
-                    <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;">Loading stream...</h1>
-                    <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"></div>
-                </div>
-                <div>
-                    <button class="model-plus-btn" onclick="openModelPlusModal()">Model+</button>
-                </div>
+        <div id="updateThumbModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Update Thumbnail Image</h3>
+                <form id="updateThumbForm">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">New Thumbnail URL</label>
+                        <input type="text" id="newThumbUrl" required="" placeholder="https://...">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn-primary" style="flex:1;">Update</button>
+                        <button type="button" onclick="closeUpdateThumbModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <!-- Delete Stream Modal -->
-        <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+        <div id="deleteModal" style="display:none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
             <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Stream</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this stream from your portal?</p>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Model</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this model from the directory?</p>
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="confirmDeleteStream()" id="confirmDeleteBtn" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
+                    <button onclick="confirmDeleteModel()" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
                     <button onclick="closeDeleteModal()" class="btn-primary" style="flex:1; background:#333; color:#fff;">Cancel</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Model+ Interactive Modal for Adding and Updating Models from models.html -->
-        <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 440px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Model+ Tagging Manager</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Manage model tags or pick from models.html:</p>
-                
-                <!-- Active Model Badges list inside Modal -->
-                <div id="modalModelTagsList" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; max-height: 120px; overflow-y: auto; padding: 4px;"></div>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <select id="modelsHtmlSelect" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;">
-                        <option value="">-- Select model from models.html --</option>
-                    </select>
-                    <button onclick="addModelFromDropdown()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</option>
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                    <input type="text" id="newModelInput" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;" placeholder="Or type custom model name..." onkeydown="if(event.key==='Enter'){addModelTagFromInput();}">
-                    <button onclick="addModelTagFromInput()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</button>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="saveModelTags()" class="btn-primary" style="flex:1; background: var(--accent-color, #4f46e5); color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Save Changes</button>
-                    <button onclick="closeModelPlusModal()" class="btn-primary" style="flex:1; background:#333; color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script references pointing to Modelstorage.js -->
     <script src="../config.js"></script>
-    <script src="storage.js"></script>
-    <script src="player.js"></script>
+    <script src="Modelstorage.js"></script>
     <script src="../github-sync.js"></script>
     <script>
-        let streamIndex = 0;
-        let currentStreamItem = null;
-        let allStreamsRef = [];
-        let editingModelsList = [];
-        let availableModelsFromHtml = [];
+        let currentLetterFilter = 'ALL';
+        let currentPage = 1;
+        const pageSize = 20;
+        let modelIndexToDelete = null;
+        let modelIndexToUpdateThumb = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize storage DB (fetches videos.json directly from Media/ folder)
-            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
-                await StorageDB.initDB();
+            // Ensure database initializes and remote sync completes BEFORE rendering elements
+            if (typeof ModelStorageDB !== 'undefined') {
+                await ModelStorageDB.initDB();
             }
 
-            // Preload models from Model/models.html
-            loadModelsFromHtmlFile();
+            buildFilterBar();
+            renderModels();
 
-            const params = new URLSearchParams(window.location.search);
-            streamIndex = parseInt(params.get('index') ?? '0', 10);
-            
-            let streams = (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') 
-                ? StorageDB.getVideoStreams() 
-                : ((typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') ? StorageDB.getStreams() : []);
-            
-            if (!streams || streams.length === 0) {
-                try {
-                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos');
-                    if (rawLocal) {
-                        const parsed = JSON.parse(rawLocal);
-                        streams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
-                    }
-                } catch (e) {}
-            }
-            
-            allStreamsRef = streams;
-            currentStreamItem = streams[streamIndex];
-            
-            if (!currentStreamItem) {
-                document.getElementById('playerContainer').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff4d4d;font-weight:700;">Stream not found or has been removed.</div>`;
-                document.getElementById('streamTitle').textContent = 'Stream Not Found';
-                return;
+            // Auto-generate name from thumbnail URL as user types/pastes
+            const thumbField = document.getElementById('modelThumb');
+            if (thumbField) {
+                thumbField.addEventListener('input', () => {
+                    const urlVal = thumbField.value.trim();
+                    if (!urlVal) return;
+                    try {
+                        const cleanUrl = urlVal.split('?')[0].split('#')[0];
+                        const segments = cleanUrl.split('/');
+                        let filename = segments[segments.length - 1];
+                        if (filename.includes('.')) {
+                            filename = filename.substring(0, filename.lastIndexOf('.'));
+                        }
+                        if (filename) {
+                            // Replace hyphens and underscores with spaces (supports First-Name, First-Middle-Last, etc.)
+                            const formattedName = filename.replace(/[-_]/g, ' ');
+                            document.getElementById('modelName').value = formattedName;
+                        }
+                    } catch (err) {}
+                });
             }
 
-            document.title = `${currentStreamItem.title} - Video Portal`;
-            document.getElementById('streamTitle').textContent = currentStreamItem.title;
+            document.getElementById('modelForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('modelName');
+                const thumbInput = document.getElementById('modelThumb');
+                const name = nameInput.value.trim();
+                const thumb = thumbInput.value.trim();
+                if (!name || !thumb) return;
 
-            renderModelTags();
+                const img = new Image();
+                img.src = thumb;
+                img.onload = () => {
+                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                    saveModel(name, thumb, shape);
+                };
+                img.onerror = () => {
+                    saveModel(name, thumb, 'square');
+                };
+            });
 
-            // Initialize player using player.js inside Media/ folder
-            if (typeof VideoPlayer !== 'undefined' && typeof VideoPlayer.init === 'function') {
-                VideoPlayer.init('playerContainer', currentStreamItem);
-            } else {
-                const playerContainer = document.getElementById('playerContainer');
-                let embedHtml = '';
-                const url = currentStreamItem.url || '';
-
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    let ytId = '';
-                    if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
-                    else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
-                    else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                    
-                    if (ytId) {
-                        embedHtml = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-                    }
-                } else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) || url.includes('.m3u8')) {
-                    embedHtml = `<video src="${url}" controls autoplay playsinline webkit-playsinline style="width:100%;height:100%;object-fit:contain;"></video>`;
-                } else {
-                    embedHtml = `<iframe src="${url}" allowfullscreen></iframe>`;
+            document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newUrl = document.getElementById('newThumbUrl').value.trim();
+                if (modelIndexToUpdateThumb !== null && newUrl) {
+                    const img = new Image();
+                    img.src = newUrl;
+                    img.onload = () => {
+                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
+                    };
+                    img.onerror = () => {
+                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
+                    };
                 }
-                playerContainer.innerHTML = embedHtml;
-            }
+                closeUpdateThumbModal();
+            });
         });
 
-        async function loadModelsFromHtmlFile() {
-            try {
-                const response = await fetch('../Model/models.html');
-                if (!response.ok) return;
-                const htmlText = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlText, 'text/html');
-                
-                // Extract model names from list items, buttons, headings, or data attributes inside models.html
-                const extracted = new Set();
-                doc.querySelectorAll('li, .model-item, [data-model], h3, h4, .card-title').forEach(el => {
-                    const text = el.textContent.trim();
-                    if (text && text.length < 50 && !text.toLowerCase().includes('model+')) {
-                        extracted.add(text);
-                    }
-                });
+        async function saveModel(name, thumbnail, shape) {
+            const modelData = { name, thumbnail, shape, createdAt: Date.now() };
 
-                availableModelsFromHtml = Array.from(extracted);
-                const selectEl = document.getElementById('modelsHtmlSelect');
-                if (selectEl && availableModelsFromHtml.length > 0) {
-                    selectEl.innerHTML = '<option value="">-- Select model from models.html --</option>';
-                    availableModelsFromHtml.forEach(modelName => {
-                        const opt = document.createElement('option');
-                        opt.value = modelName;
-                        opt.textContent = modelName;
-                        selectEl.appendChild(opt);
-                    });
+            if (typeof ModelStorageDB !== 'undefined') {
+                await ModelStorageDB.addModel(modelData);
+            }
+
+            document.getElementById('modelName').value = '';
+            document.getElementById('modelThumb').value = '';
+            closeAddModelModal();
+            currentPage = 1;
+            renderModels();
+        }
+
+        async function updateModelThumb(index, newUrl, shape) {
+            if (typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                if (models[index]) {
+                    models[index].thumbnail = newUrl;
+                    models[index].shape = shape;
+                    await ModelStorageDB.saveAndSyncModels(models, true);
                 }
-            } catch (e) {
-                console.warn('Could not load models.html from Model folder:', e);
             }
+
+            renderModels();
         }
 
-        function renderModelTags() {
-            const tagsContainer = document.getElementById('modelTags');
-            tagsContainer.innerHTML = '';
-            if (currentStreamItem.models && currentStreamItem.models.length > 0) {
-                currentStreamItem.models.forEach(modelName => {
-                    const tag = document.createElement('span');
-                    tag.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 750;';
-                    tag.textContent = modelName;
-                    tagsContainer.appendChild(tag);
-                });
-            } else {
-                tagsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models tagged</span>';
-            }
+        function buildFilterBar() {
+            const filterBar = document.getElementById('filterBar');
+            const letters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+            filterBar.innerHTML = '';
+            letters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
+                btn.textContent = letter;
+                btn.onclick = () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLetterFilter = letter;
+                    currentPage = 1;
+                    renderModels();
+                };
+                filterBar.appendChild(btn);
+            });
         }
 
-        function openModelPlusModal() {
-            if (!currentStreamItem) return;
-            editingModelsList = [...(currentStreamItem.models || [])];
-            renderModalModelTagsList();
-            document.getElementById('newModelInput').value = '';
-            document.getElementById('modelPlusModal').style.display = 'flex';
-        }
+        function renderModels() {
+            if (typeof ModelStorageDB === 'undefined') return;
+            const models = ModelStorageDB.getModels() || [];
+            const grid = document.getElementById('modelsGrid');
+            const paginationBar = document.getElementById('paginationBar');
+            
+            const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: idx }));
+            const filtered = modelsWithIndex.filter(m => {
+                if (currentLetterFilter === 'ALL') return true;
+                return m.name.toUpperCase().startsWith(currentLetterFilter);
+            });
 
-        function closeModelPlusModal() {
-            document.getElementById('modelPlusModal').style.display = 'none';
-        }
-
-        function renderModalModelTagsList() {
-            const listContainer = document.getElementById('modalModelTagsList');
-            listContainer.innerHTML = '';
-            if (editingModelsList.length === 0) {
-                listContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models added yet.</span>';
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div>`;
+                paginationBar.innerHTML = '';
                 return;
             }
-            editingModelsList.forEach((model, idx) => {
-                const chip = document.createElement('div');
-                chip.style.cssText = 'display: inline-flex; align-items: center; background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 4px 10px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; gap: 6px;';
-                chip.innerHTML = `<span>${model}</span> <span style="cursor: pointer; color: #ff4d4d; font-weight: bold;" onclick="removeEditingModel(${idx})" title="Remove">&times;</span>`;
-                listContainer.appendChild(chip);
+
+            const totalPages = Math.ceil(filtered.length / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedItems = filtered.slice(startIndex, endIndex);
+
+            grid.innerHTML = '';
+            paginatedItems.forEach((model) => {
+                const card = document.createElement('div');
+                const shape = model.shape || (model.originalIndex % 2 === 0 ? 'portrait' : 'landscape');
+                card.className = `mondrian-card ${shape}`;
+
+                card.innerHTML = `
+                    <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
+                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
+                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
+                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
+                    </div>`;
+                grid.appendChild(card);
             });
-        }
 
-        function addModelFromDropdown() {
-            const selectEl = document.getElementById('modelsHtmlSelect');
-            const val = selectEl.value;
-            if (!val) return;
-            if (!editingModelsList.includes(val)) {
-                editingModelsList.push(val);
-                renderModalModelTagsList();
-            }
-            selectEl.value = '';
-        }
-
-        function addModelTagFromInput() {
-            const inputField = document.getElementById('newModelInput');
-            const val = inputField.value.trim();
-            if (!val) return;
-            const splitVals = val.split(',').map(m => m.trim()).filter(m => m.length > 0);
-            splitVals.forEach(m => {
-                if (!editingModelsList.includes(m)) {
-                    editingModelsList.push(m);
-                }
-            });
-            inputField.value = '';
-            renderModalModelTagsList();
-        }
-
-        function removeEditingModel(index) {
-            editingModelsList.splice(index, 1);
-            renderModalModelTagsList();
-        }
-
-        async function saveModelTags() {
-            if (!currentStreamItem) return;
-            
-            currentStreamItem.models = [...editingModelsList];
-            
-            if (allStreamsRef.length > 0) {
-                allStreamsRef[streamIndex] = currentStreamItem;
-                try {
-                    if (typeof StorageDB !== 'undefined' && typeof StorageDB.saveStreams === 'function') {
-                        await StorageDB.saveStreams(allStreamsRef);
-                    } else {
-                        localStorage.setItem('video_portal_streams_db', JSON.stringify(allStreamsRef));
+            paginationBar.innerHTML = '';
+            if (totalPages > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'filter-btn';
+                prevBtn.textContent = '← Prev';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
+                prevBtn.onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderModels();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
-                } catch (e) {
-                    console.error('Error saving model tags to storage:', e);
-                }
-            }
+                };
+                paginationBar.appendChild(prevBtn);
 
-            renderModelTags();
-            closeModelPlusModal();
+                const pageInfo = document.createElement('span');
+                pageInfo.style.color = 'var(--text-muted)';
+                pageInfo.style.fontSize = '0.85rem';
+                pageInfo.style.fontWeight = '700';
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                paginationBar.appendChild(pageInfo);
+
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'filter-btn';
+                nextBtn.textContent = 'Next →';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
+                nextBtn.onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderModels();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+                paginationBar.appendChild(nextBtn);
+            }
         }
 
-        function openDeleteStreamModal() {
+        function openAlbums(name) {
+            window.location.href = `vault.html?name=${name}`;
+        }
+
+        function openUpdateThumbModal(index) {
+            modelIndexToUpdateThumb = index;
+            document.getElementById('newThumbUrl').value = '';
+            document.getElementById('updateThumbModal').style.display = 'flex';
+        }
+
+        function closeUpdateThumbModal() {
+            modelIndexToUpdateThumb = null;
+            document.getElementById('updateThumbModal').style.display = 'none';
+        }
+
+        function openDeleteModal(index) {
+            modelIndexToDelete = index;
             document.getElementById('deleteModal').style.display = 'flex';
         }
 
         function closeDeleteModal() {
+            modelIndexToDelete = null;
             document.getElementById('deleteModal').style.display = 'none';
         }
 
-        async function confirmDeleteStream() {
-            if (streamIndex === undefined || streamIndex < 0) return;
-            
-            const deleteBtn = document.getElementById('confirmDeleteBtn');
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = 'Deleting...';
-
-            const syncSuccess = await StorageDB.deleteStream(streamIndex);
-
-            if (syncSuccess) {
-                window.location.href = '../index.html';
-            } else {
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = 'Delete';
-                console.error('GitHub Sync failed during stream deletion.');
-                alert('Stream removed locally, but GitHub sync failed! Check your browser console for details.');
+        async function confirmDeleteModel() {
+            if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                const targetModel = models[modelIndexToDelete];
+                
+                if (targetModel) {
+                    await ModelStorageDB.deleteModel(targetModel.name);
+                }
+                renderModels();
             }
+            closeDeleteModal();
         }
+
+        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
+        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
 </body>
 </html>
