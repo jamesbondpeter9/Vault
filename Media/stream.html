@@ -324,12 +324,12 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism using standard responsive sizing matching index.html / optional uploads
+            // Robust 10-thumbnail generator mechanism with concise compressed frame generation
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
 
-                // 1. YouTube Video URL handling: Generate 10 standard high-res time-point/resolution thumbnails
+                // 1. YouTube Video URL handling: Generate 10 standard clean thumbnail URLs
                 if (url.includes('youtube.com') || url.includes('youtu.be')) {
                     let ytId = '';
                     if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
@@ -365,7 +365,7 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Fast optimized responsive frame scrubbing generator
+                // 2. Direct Video File URL handling: Downscaled and concise compressed frame generation
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
                     autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting frames...</span>`;
                     
@@ -385,11 +385,19 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            canvas.width = hiddenVideo.videoWidth || 640;
-                            canvas.height = hiddenVideo.videoHeight || 360;
+                            // Downscale dimensions to keep data URLs concise (max width 480px)
+                            const srcWidth = hiddenVideo.videoWidth || 640;
+                            const srcHeight = hiddenVideo.videoHeight || 360;
+                            const targetWidth = 480;
+                            const targetHeight = Math.round(targetWidth * (srcHeight / srcWidth));
+                            
+                            canvas.width = targetWidth;
+                            canvas.height = targetHeight;
+                            
                             const ctx = canvas.getContext('2d');
-                            ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
+                            ctx.drawImage(hiddenVideo, 0, 0, targetWidth, targetHeight);
+                            // Use lower quality (0.75) to significantly concise/shorten the data URL string
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
 
                             const imgBox = document.createElement('div');
                             imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
