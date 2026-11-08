@@ -113,7 +113,7 @@
         /* Mobile specific thumbnail dimension overrides & touch stability with auto-optimization */
         @media(max-width: 500px) {
             .mondrian-card {
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 border: none !important; /* Remove thin boundary line on mobile */
                 box-shadow: none !important; /* Remove default card shadows */
                 background: var(--background, #000) !important; /* Match background theme color for gaps */
@@ -133,7 +133,7 @@
                 grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 aspect-ratio: auto;
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 border: none !important;
                 background: var(--background, #000) !important;
             }
@@ -160,20 +160,20 @@
 
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
             }
 
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
                 height: 100% !important;
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 border: none !important;
                 background: var(--background, #000) !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
                 background: var(--background, #000) !important; /* Match theme color in thumbnail wrapper gaps */
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 position: absolute !important;
                 inset: 0 !important;
                 height: 100% !important;
@@ -183,11 +183,11 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
             }
 
             .mondrian-thumb {
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 background: var(--background, #000) !important; /* Match background theme color for inner thumbnail gaps */
             }
             
@@ -197,7 +197,7 @@
             }
 
             .mondrian-thumb img {
-                border-radius: 6px !important;
+                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
                 object-fit: contain !important; /* Show full image without cropping for all mobile thumbnails */
                 width: 100% !important;
                 height: 100% !important;
@@ -427,12 +427,9 @@
                 return;
             }
 
-            // Keep a reference to the original database array length for correct index mapping
             const originalStreams = allStreams;
-            // Show latest streams added first
             allStreams = allStreams.slice().reverse();
 
-            // Apply search query filter if active
             const filteredStreams = allStreams.filter(stream => {
                 if (!currentSearchQuery) return true;
                 const titleMatch = stream.title && stream.title.toLowerCase().includes(currentSearchQuery);
@@ -456,7 +453,6 @@
             grid.innerHTML = '';
             
             paginatedItems.forEach((stream, paginatedIdx) => {
-                // Map back to the exact correct index in the original database array
                 const actualIndex = originalStreams.indexOf(stream);
                 const card = document.createElement('a');
                 card.href = `Media/watch.html?index=${actualIndex}`;
@@ -498,7 +494,6 @@
                 }
             });
 
-            // Render Pagination Bar
             paginationBar.innerHTML = '';
             if (totalPages > 1) {
                 const prevBtn = document.createElement('button');
