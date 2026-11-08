@@ -324,7 +324,7 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism with 1280x854 resolution and fast optimisation
+            // Robust 10-thumbnail generator mechanism using standard responsive sizing matching index.html / optional uploads
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
@@ -365,9 +365,9 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Fast optimized 1280x854 frame scrubbing generator
+                // 2. Direct Video File URL handling: Fast optimized responsive frame scrubbing generator
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting 1280x854 frames...</span>`;
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting frames...</span>`;
                     
                     hiddenVideo.src = url;
                     hiddenVideo.load();
@@ -385,11 +385,11 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            canvas.width = 1280;
-                            canvas.height = 854;
+                            canvas.width = hiddenVideo.videoWidth || 640;
+                            canvas.height = hiddenVideo.videoHeight || 360;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
 
                             const imgBox = document.createElement('div');
                             imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
