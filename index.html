@@ -133,20 +133,21 @@
                 grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 aspect-ratio: auto;
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
+                border-radius: 8px !important;
                 border: none !important;
                 background: var(--background, #000) !important;
             }
 
             /* Auto-Optimized Mobile Dimension Rules matching upload ratios */
             .mondrian-card[data-mobile-fit="portrait"] {
-                grid-column: span 2 !important; /* Match landscape horizontal length */
+                grid-column: span 2 !important;
                 grid-row: span 4 !important;
                 background: var(--background, #000) !important;
             }
             .mondrian-card[data-mobile-fit="portrait"] .mondrian-thumb img {
-                object-fit: contain !important; /* Show full portrait image without cropping */
+                object-fit: cover !important; /* Stretch and fit perfectly with very minimal cropping */
                 object-position: center !important;
+                transform: scale(1.02);
             }
 
             .mondrian-card[data-mobile-fit="landscape"] {
@@ -160,35 +161,36 @@
 
             .mondrian-card.portrait .mondrian-thumb,
             .mondrian-card.portrait .mondrian-thumb img {
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
+                border-radius: 8px !important;
             }
 
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
                 height: 100% !important;
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
+                border-radius: 8px !important;
                 border: none !important;
                 background: var(--background, #000) !important;
             }
             .mondrian-card.landscape .mondrian-thumb {
-                background: var(--background, #000) !important; /* Match theme color in thumbnail wrapper gaps */
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
+                background: var(--background, #000) !important;
+                border-radius: 8px !important;
                 position: absolute !important;
                 inset: 0 !important;
                 height: 100% !important;
             }
             .mondrian-card.landscape .mondrian-thumb img {
-                object-fit: contain !important; /* Show full image without cropping */
+                object-fit: cover !important; /* Stretch and fit perfectly with very minimal cropping */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
+                border-radius: 8px !important;
+                transform: scale(1.02);
             }
 
             .mondrian-thumb {
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
-                background: var(--background, #000) !important; /* Match background theme color for inner thumbnail gaps */
+                border-radius: 8px !important;
+                background: var(--background, #000) !important;
             }
             
             /* Hide automatic/fallback text placeholder or auto-generated elements on mobile streams */
@@ -197,15 +199,16 @@
             }
 
             .mondrian-thumb img {
-                border-radius: 8px !important; /* Little bit curve edged for thumbnails on mobile */
-                object-fit: contain !important; /* Show full image without cropping for all mobile thumbnails */
+                border-radius: 8px !important;
+                object-fit: cover !important; /* Stretch and fit perfectly with very minimal cropping for all mobile thumbnails */
                 width: 100% !important;
                 height: 100% !important;
+                transform: scale(1.02);
             }
 
             /* Web hover effect adapted for mobile with locked position */
             .mondrian-card:hover .mondrian-thumb img {
-                transform: translate3d(0,0,0) scale(1.02);
+                transform: translate3d(0,0,0) scale(1.04);
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             }
 
