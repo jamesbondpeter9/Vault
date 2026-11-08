@@ -141,17 +141,24 @@
             </div>
         </div>
 
-        <!-- Model+ Interactive Modal for Adding and Updating Models -->
+        <!-- Model+ Interactive Modal for Adding and Updating Models from models.html -->
         <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 440px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Model+ Tagging Manager</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Add new models or modify existing ones below:</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Manage model tags or pick from models.html:</p>
                 
-                <!-- Active Model Badges list inside Modal for easy management -->
+                <!-- Active Model Badges list inside Modal -->
                 <div id="modalModelTagsList" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; max-height: 120px; overflow-y: auto; padding: 4px;"></div>
 
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <select id="modelsHtmlSelect" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;">
+                        <option value="">-- Select model from models.html --</option>
+                    </select>
+                    <button onclick="addModelFromDropdown()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</option>
+                </div>
+
                 <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                    <input type="text" id="newModelInput" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;" placeholder="Add new model (e.g. GPT-4, Claude)..." onkeydown="if(event.key==='Enter'){addModelTagFromInput();}">
+                    <input type="text" id="newModelInput" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;" placeholder="Or type custom model name..." onkeydown="if(event.key==='Enter'){addModelTagFromInput();}">
                     <button onclick="addModelTagFromInput()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</button>
                 </div>
 
@@ -172,12 +179,16 @@
         let currentStreamItem = null;
         let allStreamsRef = [];
         let editingModelsList = [];
+        let availableModelsFromHtml = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize storage DB (fetches videos.json directly from Media/ folder)
             if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
                 await StorageDB.initDB();
             }
+
+            // Preload models from Model/models.html
+            loadModelsFromHtmlFile();
 
             const params = new URLSearchParams(window.location.search);
             streamIndex = parseInt(params.get('index') ?? '0', 10);
@@ -236,6 +247,39 @@
             }
         });
 
+        async function loadModelsFromHtmlFile() {
+            try {
+                const response = await fetch('../Model/models.html');
+                if (!response.ok) return;
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                // Extract model names from list items, buttons, headings, or data attributes inside models.html
+                const extracted = new Set();
+                doc.querySelectorAll('li, .model-item, [data-model], h3, h4, .card-title').forEach(el => {
+                    const text = el.textContent.trim();
+                    if (text && text.length < 50 && !text.toLowerCase().includes('model+')) {
+                        extracted.add(text);
+                    }
+                });
+
+                availableModelsFromHtml = Array.from(extracted);
+                const selectEl = document.getElementById('modelsHtmlSelect');
+                if (selectEl && availableModelsFromHtml.length > 0) {
+                    selectEl.innerHTML = '<option value="">-- Select model from models.html --</option>';
+                    availableModelsFromHtml.forEach(modelName => {
+                        const opt = document.createElement('option');
+                        opt.value = modelName;
+                        opt.textContent = modelName;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not load models.html from Model folder:', e);
+            }
+        }
+
         function renderModelTags() {
             const tagsContainer = document.getElementById('modelTags');
             tagsContainer.innerHTML = '';
@@ -253,7 +297,6 @@
 
         function openModelPlusModal() {
             if (!currentStreamItem) return;
-            // Clone existing models into our active editing state
             editingModelsList = [...(currentStreamItem.models || [])];
             renderModalModelTagsList();
             document.getElementById('newModelInput').value = '';
@@ -279,11 +322,21 @@
             });
         }
 
+        function addModelFromDropdown() {
+            const selectEl = document.getElementById('modelsHtmlSelect');
+            const val = selectEl.value;
+            if (!val) return;
+            if (!editingModelsList.includes(val)) {
+                editingModelsList.push(val);
+                renderModalModelTagsList();
+            }
+            selectEl.value = '';
+        }
+
         function addModelTagFromInput() {
             const inputField = document.getElementById('newModelInput');
             const val = inputField.value.trim();
             if (!val) return;
-            // Support comma-separated batch adding or single model addition
             const splitVals = val.split(',').map(m => m.trim()).filter(m => m.length > 0);
             splitVals.forEach(m => {
                 if (!editingModelsList.includes(m)) {
