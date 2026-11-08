@@ -324,7 +324,7 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism with high-quality preservation and fast optimisation
+            // Robust 10-thumbnail generator mechanism with 1280x854 resolution and fast optimisation
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
@@ -365,9 +365,9 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Fast optimized original quality frame scrubbing generator
+                // 2. Direct Video File URL handling: Fast optimized 1280x854 frame scrubbing generator
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting original quality frames...</span>`;
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting 1280x854 frames...</span>`;
                     
                     hiddenVideo.src = url;
                     hiddenVideo.load();
@@ -385,8 +385,8 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            canvas.width = hiddenVideo.videoWidth || 1280;
-                            canvas.height = hiddenVideo.videoHeight || 720;
+                            canvas.width = 1280;
+                            canvas.height = 854;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
