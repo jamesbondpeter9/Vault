@@ -61,23 +61,6 @@
             flex-wrap: wrap;
         }
 
-        /* Model+ Button Styling */
-        .model-plus-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--card-border);
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .model-plus-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #fff;
-        }
-
         /* Mobile Responsive Adjustments */
         @media (max-width: 768px) {
             body {
@@ -119,15 +102,13 @@
                 <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Loading player...</div>
             </div>
             <div class="stream-info-panel">
-                <div style="flex: 1; min-width: 250px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
                         <h1 id="streamTitle" style="font-size: 1.3rem; font-weight: 800; margin: 0;">Loading stream...</h1>
-                        <button onclick="openAddTitleModal()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;" title="Edit Title">addTitle</button>
+                        <!-- +Title adjacent to title with exact same texture, padding, border radius, and font styling as model tags -->
+                        <button onclick="openAddTitleModal()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 750; cursor: pointer; transition: all 0.2s ease;" title="Edit Title">+Title</button>
                     </div>
                     <div id="modelTags" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"></div>
-                </div>
-                <div>
-                    <button class="model-plus-btn" onclick="openModelPlusModal()">Model+</button>
                 </div>
             </div>
         </div>
@@ -144,11 +125,11 @@
             </div>
         </div>
 
-        <!-- Add/Edit Stream Title Modal -->
+        <!-- Add/Edit Stream Title Modal (Affects videos.json) -->
         <div id="addTitleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 400px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Update Stream Title</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Enter a new title for this stream:</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Enter a new title for this stream (updates videos.json):</p>
                 <div style="margin-bottom: 20px;">
                     <input type="text" id="streamTitleInput" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none; box-sizing: border-box;" placeholder="Stream title..." onkeydown="if(event.key==='Enter'){saveStreamTitle();}">
                 </div>
@@ -159,11 +140,11 @@
             </div>
         </div>
 
-        <!-- Model+ Interactive Modal for Adding and Updating Models from models.html -->
+        <!-- Model+ Interactive Modal for Adding and Updating Models from models.html (Affects Models.json) -->
         <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
             <div class="control-panel" style="width: 100%; max-width: 440px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
                 <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Model+ Tagging Manager</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Manage model tags or pick from models.html:</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Add models from updated/added items in models.html (updates Models.json):</p>
                 
                 <!-- Active Model Badges list inside Modal -->
                 <div id="modalModelTagsList" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; max-height: 120px; overflow-y: auto; padding: 4px;"></div>
@@ -273,7 +254,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, 'text/html');
                 
-                // Extract model names from list items, buttons, headings, or data attributes inside models.html
+                // Extract updated/added model names from list items, buttons, headings, or data attributes inside models.html
                 const extracted = new Set();
                 doc.querySelectorAll('li, .model-item, [data-model], h3, h4, .card-title').forEach(el => {
                     const text = el.textContent.trim();
@@ -302,7 +283,7 @@
             const tagsContainer = document.getElementById('modelTags');
             tagsContainer.innerHTML = '';
             
-            // Render Model+ button directly adjacent to model tags with exact same styling and sizing
+            // Render Model+ button adjacent to model tagging names with same size and styling
             const modelPlusInlineBtn = document.createElement('button');
             modelPlusInlineBtn.className = 'model-plus-btn';
             modelPlusInlineBtn.style.cssText = 'background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 750; cursor: pointer; transition: all 0.2s ease;';
@@ -343,6 +324,7 @@
             document.getElementById('streamTitle').textContent = newTitle;
             document.title = `${newTitle} - Video Portal`;
 
+            // Title changes affect videos.json via StorageDB streams persistence
             if (allStreamsRef.length > 0) {
                 allStreamsRef[streamIndex] = currentStreamItem;
                 try {
@@ -352,7 +334,7 @@
                         localStorage.setItem('video_portal_streams_db', JSON.stringify(allStreamsRef));
                     }
                 } catch (e) {
-                    console.error('Error saving updated title to storage:', e);
+                    console.error('Error saving updated title to videos.json storage:', e);
                 }
             }
             closeAddTitleModal();
@@ -420,6 +402,7 @@
             
             currentStreamItem.models = [...editingModelsList];
             
+            // Model changes affect Models.json / models persistence
             if (allStreamsRef.length > 0) {
                 allStreamsRef[streamIndex] = currentStreamItem;
                 try {
@@ -428,8 +411,14 @@
                     } else {
                         localStorage.setItem('video_portal_streams_db', JSON.stringify(allStreamsRef));
                     }
+                    // Sync/persist models list separately to Models.json / models storage if supported
+                    if (typeof StorageDB !== 'undefined' && typeof StorageDB.saveModels === 'function') {
+                        await StorageDB.saveModels(editingModelsList);
+                    } else {
+                        localStorage.setItem('portal_models_db', JSON.stringify(editingModelsList));
+                    }
                 } catch (e) {
-                    console.error('Error saving model tags to storage:', e);
+                    console.error('Error saving model tags to Models.json storage:', e);
                 }
             }
 
