@@ -314,22 +314,22 @@
                     if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
                     else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
                     else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                    if (ytId) thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    if (ytId) thumb = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
                 }
 
                 if (thumb) {
-                    previewContainer.innerHTML = `<img src="${thumb}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:contain;border-radius:20px;background:#000;">`;
+                    previewContainer.innerHTML = `<img src="${thumb}" alt="Preview" style="width:100%;height:100%;max-height:100%;object-fit:cover;border-radius:20px;background:#000;">`;
                 } else {
                     previewContainer.innerHTML = `<span style="color: var(--text-muted);">Thumbnail Preview</span>`;
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism
+            // Robust 10-thumbnail generator mechanism with high-quality preservation and fast optimisation
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
 
-                // 1. YouTube Video URL handling: Generate 10 standard time-point/resolution thumbnails
+                // 1. YouTube Video URL handling: Generate 10 standard high-res time-point/resolution thumbnails
                 if (url.includes('youtube.com') || url.includes('youtu.be')) {
                     let ytId = '';
                     if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
@@ -338,7 +338,6 @@
                     
                     if (ytId) {
                         autoThumbsContainer.innerHTML = '';
-                        // YouTube standard quality variants & timeframe placeholders (hqdefault, mqdefault, sddefault, maxresdefault + numbered sequence variants)
                         const ytThumbs = [
                             `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
                             `https://img.youtube.com/vi/${ytId}/sddefault.jpg`,
@@ -366,9 +365,9 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling (mp4, webm, mov, m3u8): Frame scrubbing generator for 10 distinct timestamps
+                // 2. Direct Video File URL handling: Fast optimized original quality frame scrubbing generator
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting 10 frames from video...</span>`;
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting original quality frames...</span>`;
                     
                     hiddenVideo.src = url;
                     hiddenVideo.load();
@@ -386,11 +385,11 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            canvas.width = 320;
-                            canvas.height = 180;
+                            canvas.width = hiddenVideo.videoWidth || 1280;
+                            canvas.height = hiddenVideo.videoHeight || 720;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
 
                             const imgBox = document.createElement('div');
                             imgBox.style.cssText = 'position: relative; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: #111;';
@@ -432,7 +431,7 @@
                     if (url.includes('embed/')) ytId = url.split('embed/')[1].split('?')[0];
                     else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1].split('&')[0];
                     else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
-                    if (ytId) thumbnail = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    if (ytId) thumbnail = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
                 }
 
                 if (!title || !url) return;
