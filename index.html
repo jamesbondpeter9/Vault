@@ -105,12 +105,12 @@
             }
         }
 
-        /* Mobile specific theater thumbnail styling: sharp edges, increased vertical height, and perfect edge-to-edge fit */
+        /* Mobile specific theater thumbnail styling: sharp edges, slightly reduced vertical height, and perfect edge-to-edge fit */
         @media(max-width: 500px) {
             .mondrian-card {
                 grid-column: span 1 !important;
                 grid-row: span 1 !important;
-                aspect-ratio: 16 / 12 !important; /* Increased vertical height on mobile */
+                aspect-ratio: 16 / 9 !important; /* Reduced vertical height on mobile without affecting inner image scaling */
                 height: auto !important;
                 border-radius: 0 !important; /* Removed curved edges */
                 border: none !important;
