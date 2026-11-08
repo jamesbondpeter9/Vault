@@ -324,7 +324,7 @@
                 }
             }
 
-            // Robust 10-thumbnail generator mechanism capturing perfect snapshots with original quality
+            // Robust 10-thumbnail generator mechanism capturing crystal-clear snapshots without blurriness or pixel breaking
             function generate10Thumbnails() {
                 let url = urlInput.value.trim();
                 if (!url) return;
@@ -365,16 +365,15 @@
                         });
                     }
                 } 
-                // 2. Direct Video File URL handling: Capture perfect snapshots at precise intervals with original quality
+                // 2. Direct Video File URL handling: High-fidelity snapshot extraction with anti-aliasing & native resolution
                 else if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting perfect snapshots...</span>`;
+                    autoThumbsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.75rem; grid-column: span 5; text-align: center; padding: 10px;">Extracting high-definition snapshots...</span>`;
                     
                     hiddenVideo.src = url;
                     hiddenVideo.load();
                     hiddenVideo.onloadedmetadata = () => {
                         const duration = hiddenVideo.duration;
                         autoThumbsContainer.innerHTML = '';
-                        // Distribute snapshots evenly avoiding 0s start (e.g., from 5% to 95% of duration)
                         const startOffset = Math.min(duration * 0.05, 1);
                         const effectiveDuration = duration - startOffset;
                         const interval = effectiveDuration / 9;
@@ -387,10 +386,10 @@
 
                         hiddenVideo.onseeked = () => {
                             const canvas = document.createElement('canvas');
-                            const srcWidth = hiddenVideo.videoWidth || 1280;
-                            const srcHeight = hiddenVideo.videoHeight || 720;
+                            const srcWidth = hiddenVideo.videoWidth || 1920;
+                            const srcHeight = hiddenVideo.videoHeight || 1080;
                             
-                            // Set canvas dimensions to exact original video resolution for crystal-clear snapshots
+                            // Set canvas dimensions strictly to native video dimensions to prevent pixelation/blurring
                             canvas.width = srcWidth;
                             canvas.height = srcHeight;
                             
@@ -399,7 +398,7 @@
                             ctx.imageSmoothingQuality = 'high';
                             ctx.drawImage(hiddenVideo, 0, 0, srcWidth, srcHeight);
                             
-                            // Generate pristine original-quality JPEG data URL (quality 0.98)
+                            // Generate crystal clear high-quality JPEG data URL (quality 0.98)
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
 
                             const imgBox = document.createElement('div');
