@@ -105,14 +105,14 @@
             }
         }
 
-        /* Mobile specific theater thumbnail styling with increased vertical height and original quality cover rendering */
+        /* Mobile specific theater thumbnail styling: sharp edges, increased vertical height, and perfect edge-to-edge fit */
         @media(max-width: 500px) {
             .mondrian-card {
                 grid-column: span 1 !important;
                 grid-row: span 1 !important;
-                aspect-ratio: 16 / 12 !important; /* Further increased vertical height on mobile */
+                aspect-ratio: 16 / 12 !important; /* Increased vertical height on mobile */
                 height: auto !important;
-                border-radius: 8px !important;
+                border-radius: 0 !important; /* Removed curved edges */
                 border: none !important;
                 box-shadow: none !important;
                 background: var(--background, #000) !important;
@@ -126,16 +126,16 @@
                 border: none !important;
             }
             .mondrian-thumb {
-                border-radius: 8px !important;
+                border-radius: 0 !important; /* Removed curved edges */
                 background: var(--background, #000) !important;
             }
             .mondrian-thumb img {
-                border-radius: 8px !important;
-                object-fit: cover !important; /* Preserves natural image detail and covers thumbnail dimensions perfectly */
+                border-radius: 0 !important; /* Removed curved edges */
+                object-fit: fill !important; /* Perfect fit without awkward gaps inside thumbnail */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                image-rendering: -webkit-optimize-contrast; /* Ensures sharp original quality rendering */
+                image-rendering: -webkit-optimize-contrast; /* Sharp original quality rendering */
             }
             .mondrian-overlay {
                 padding: 14px 10px 6px 10px !important;
