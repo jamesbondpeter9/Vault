@@ -141,14 +141,22 @@
             </div>
         </div>
 
-        <!-- Model+ Modal for Editing/Tagging Models -->
+        <!-- Model+ Interactive Modal for Adding and Updating Models -->
         <div id="modelPlusModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Model+ Tagging Manager</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Enter model tags separated by commas (e.g. GPT-4, Claude, Llama):</p>
-                <input type="text" id="modelInput" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; margin-bottom: 20px; outline: none;" placeholder="Model names...">
+            <div class="control-panel" style="width: 100%; max-width: 440px; text-align: left; background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border);">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Model+ Tagging Manager</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Add new models or modify existing ones below:</p>
+                
+                <!-- Active Model Badges list inside Modal for easy management -->
+                <div id="modalModelTagsList" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; max-height: 120px; overflow-y: auto; padding: 4px;"></div>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <input type="text" id="newModelInput" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;" placeholder="Add new model (e.g. GPT-4, Claude)..." onkeydown="if(event.key==='Enter'){addModelTagFromInput();}">
+                    <button onclick="addModelTagFromInput()" class="btn-primary" style="background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 0 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">Add</button>
+                </div>
+
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="saveModelTags()" class="btn-primary" style="flex:1; background: var(--accent-color, #4f46e5); color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Save Models</button>
+                    <button onclick="saveModelTags()" class="btn-primary" style="flex:1; background: var(--accent-color, #4f46e5); color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Save Changes</button>
                     <button onclick="closeModelPlusModal()" class="btn-primary" style="flex:1; background:#333; color:#fff; padding: 10px; border-radius: 10px; border: none; cursor:pointer; font-weight:600;">Cancel</button>
                 </div>
             </div>
@@ -163,6 +171,7 @@
         let streamIndex = 0;
         let currentStreamItem = null;
         let allStreamsRef = [];
+        let editingModelsList = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize storage DB (fetches videos.json directly from Media/ folder)
@@ -244,8 +253,10 @@
 
         function openModelPlusModal() {
             if (!currentStreamItem) return;
-            const inputField = document.getElementById('modelInput');
-            inputField.value = (currentStreamItem.models || []).join(', ');
+            // Clone existing models into our active editing state
+            editingModelsList = [...(currentStreamItem.models || [])];
+            renderModalModelTagsList();
+            document.getElementById('newModelInput').value = '';
             document.getElementById('modelPlusModal').style.display = 'flex';
         }
 
@@ -253,12 +264,45 @@
             document.getElementById('modelPlusModal').style.display = 'none';
         }
 
+        function renderModalModelTagsList() {
+            const listContainer = document.getElementById('modalModelTagsList');
+            listContainer.innerHTML = '';
+            if (editingModelsList.length === 0) {
+                listContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No models added yet.</span>';
+                return;
+            }
+            editingModelsList.forEach((model, idx) => {
+                const chip = document.createElement('div');
+                chip.style.cssText = 'display: inline-flex; align-items: center; background: rgba(255,255,255,0.15); border: 1px solid var(--card-border); color: #fff; padding: 4px 10px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; gap: 6px;';
+                chip.innerHTML = `<span>${model}</span> <span style="cursor: pointer; color: #ff4d4d; font-weight: bold;" onclick="removeEditingModel(${idx})" title="Remove">&times;</span>`;
+                listContainer.appendChild(chip);
+            });
+        }
+
+        function addModelTagFromInput() {
+            const inputField = document.getElementById('newModelInput');
+            const val = inputField.value.trim();
+            if (!val) return;
+            // Support comma-separated batch adding or single model addition
+            const splitVals = val.split(',').map(m => m.trim()).filter(m => m.length > 0);
+            splitVals.forEach(m => {
+                if (!editingModelsList.includes(m)) {
+                    editingModelsList.push(m);
+                }
+            });
+            inputField.value = '';
+            renderModalModelTagsList();
+        }
+
+        function removeEditingModel(index) {
+            editingModelsList.splice(index, 1);
+            renderModalModelTagsList();
+        }
+
         async function saveModelTags() {
             if (!currentStreamItem) return;
-            const inputVal = document.getElementById('modelInput').value;
-            const newModels = inputVal.split(',').map(m => m.trim()).filter(m => m.length > 0);
             
-            currentStreamItem.models = newModels;
+            currentStreamItem.models = [...editingModelsList];
             
             if (allStreamsRef.length > 0) {
                 allStreamsRef[streamIndex] = currentStreamItem;
