@@ -87,20 +87,15 @@
             cursor: pointer;
         }
 
-        /* Show images exclusively on mobile screens as requested */
-        .mondrian-thumb img {
-            display: none;
-        }
-        @media(max-width: 900px) {
-            .mondrian-card.portrait .mondrian-thumb img,
-            .mondrian-card.landscape .mondrian-thumb img {
-                display: block !important;
-                object-fit: cover !important;
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                inset: 0;
-            }
+        /* Show images on all pages/screens */
+        .mondrian-card.portrait .mondrian-thumb img,
+        .mondrian-card.landscape .mondrian-thumb img {
+            display: block !important;
+            object-fit: cover !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
         }
 
         /* Inbuilt Image Viewer Overlay Styles - Fitted between browser bar and task bar */
@@ -130,12 +125,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            touch-action: none;
         }
         .viewer-image {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            transition: transform 0.3s ease;
+            transition: transform 0.1s ease-out;
+            cursor: grab;
+            transform-origin: center center;
+        }
+        .viewer-image:active {
+            cursor: grabbing;
         }
         .viewer-nav-left, .viewer-nav-right {
             position: absolute;
@@ -212,7 +214,7 @@
         <button class="viewer-close-btn" onclick="closeInbuiltModal()">&times;</button>
         <div class="viewer-nav-left" onclick="navigateViewer(-1)"></div>
         <div class="viewer-nav-right" onclick="navigateViewer(1)"></div>
-        <div class="viewer-content-wrapper">
+        <div class="viewer-content-wrapper" id="viewerContentWrapper">
             <img id="viewerImageElement" class="viewer-image" src="" alt="Full View">
         </div>
         <div id="viewerTitleElement" class="viewer-title-bar"></div>
@@ -226,6 +228,12 @@
         let currentFolderName = '';
         let currentModelName = '';
         let currentViewerIndex = 0;
+        let currentScale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
 
         function extractImageUrl(input) {
             if (!input) return '';
@@ -251,8 +259,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await ImageStorageDB.initDB();
             const params = new URLSearchParams(window.location.search);
-            currentFolderName = decodeURIComponent(params.get('folder') ?? '');
-            currentModelName = decodeURIComponent(params.get('model') ?? '');
+            currentFolderName = decodeURIComponent(params.get('folder') ?? '').trim();
+            currentModelName = decodeURIComponent(params.get('model') ?? '').trim();
 
             if (currentFolderName) {
                 document.getElementById('tagTitle').textContent = currentFolderName;
@@ -265,7 +273,11 @@
 
             const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
             const folderImages = allPhotoStreams.filter(item => {
-                const matchesFolder = item.folder === currentFolderName || (Array.isArray(item.folders) && item.folders.includes(currentFolderName));
+                const itemFolder = (item.folder || '').trim();
+                const itemFolders = Array.isArray(item.folders) ? item.folders.map(f => f.trim()) : [];
+                const matchesFolder = itemFolder.toLowerCase() === currentFolderName.toLowerCase() || 
+                                      itemFolders.some(f => f.toLowerCase() === currentFolderName.toLowerCase());
+                
                 const matchesModel = !currentModelName || (item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
                 return matchesFolder && matchesModel;
             });
@@ -300,11 +312,56 @@
             }
 
             window.folderImagesList = folderImages;
+
+            // Setup Zoom and Pan listeners for viewer image
+            const viewerImg = document.getElementById('viewerImageElement');
+            const wrapper = document.getElementById('viewerContentWrapper');
+
+            wrapper.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomIntensity = 0.1;
+                if (e.deltaY < 0) {
+                    currentScale = Math.min(currentScale + zoomIntensity, 5);
+                } else {
+                    currentScale = Math.max(currentScale - zoomIntensity, 1);
+                }
+                if (currentScale === 1) { panX = 0; panY = 0; }
+                updateImageTransform();
+            }, { passive: false });
+
+            viewerImg.addEventListener('mousedown', (e) => {
+                if (currentScale > 1) {
+                    isDragging = true;
+                    startX = e.clientX - panX;
+                    startY = e.clientY - panY;
+                    e.stopPropagation();
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                updateImageTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
         });
+
+        function updateImageTransform() {
+            const viewerImg = document.getElementById('viewerImageElement');
+            const rot = viewerImg.classList.contains('mobile-landscape-rotate') ? ' rotate(90deg)' : '';
+            viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})${rot}`;
+        }
 
         function openPhotoModal(index) {
             if (window.folderImagesList && window.folderImagesList[index]) {
                 currentViewerIndex = index;
+                currentScale = 1;
+                panX = 0;
+                panY = 0;
                 const photo = window.folderImagesList[index];
                 const url = extractImageUrl(photo.thumbnail || photo.url);
                 
@@ -316,6 +373,7 @@
                     const viewerTitle = document.getElementById('viewerTitleElement');
                     
                     viewerImg.classList.remove('mobile-landscape-rotate');
+                    viewerImg.style.transform = 'scale(1) translate(0px, 0px)';
                     viewerImg.src = url;
                     viewerTitle.textContent = photo.title || 'Photo';
                     modal.classList.add('active');
@@ -338,6 +396,9 @@
             const modal = document.getElementById('inbuiltPhotoModal');
             modal.classList.remove('active');
             document.getElementById('viewerImageElement').src = '';
+            currentScale = 1;
+            panX = 0;
+            panY = 0;
         }
 
         function navigateViewer(direction) {
