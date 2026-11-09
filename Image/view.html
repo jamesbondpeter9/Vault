@@ -135,6 +135,9 @@
             transition: transform 0.1s ease-out;
             cursor: grab;
             transform-origin: center center;
+            /* Pixel optimization for high quality scaling without harsh blocky distortion */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         .viewer-image:active {
             cursor: grabbing;
@@ -319,9 +322,9 @@
 
             wrapper.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const zoomIntensity = 0.1;
+                const zoomIntensity = 0.15;
                 if (e.deltaY < 0) {
-                    currentScale = Math.min(currentScale + zoomIntensity, 5);
+                    currentScale = Math.min(currentScale + zoomIntensity, 6);
                 } else {
                     currentScale = Math.max(currentScale - zoomIntensity, 1);
                 }
@@ -347,6 +350,23 @@
 
             window.addEventListener('mouseup', () => {
                 isDragging = false;
+            });
+
+            // Keyboard navigation support for left/right arrows and escape
+            window.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('inbuiltPhotoModal');
+                if (!modal.classList.contains('active')) return;
+
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    navigateViewer(1);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    navigateViewer(-1);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeInbuiltModal();
+                }
             });
         });
 
