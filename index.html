@@ -52,7 +52,7 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
             grid-auto-rows: 140px;
             grid-auto-flow: dense;
-            gap: 4px;
+            gap: 2px; /* Set exactly 2px gap among thumbnails */
             align-items: stretch;
         }
         @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -60,6 +60,7 @@
             .home-grid { 
                 grid-template-columns: repeat(2, minmax(0, 1fr)); 
                 grid-auto-rows: 150px;
+                gap: 2px;
             } 
         }
         @media(max-width: 500px) { 
