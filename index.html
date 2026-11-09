@@ -93,7 +93,13 @@
         }
 
         .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 3; } /* Very little bit reduced vertical height */
+        .mondrian-card.landscape { 
+            grid-column: span 2; 
+            grid-row: span 4; 
+            aspect-ratio: 16 / 9; /* Very little bit reduced vertical height without changing span */
+            max-height: 94%; 
+            margin: auto; 
+        }
         .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
         @media(max-width: 900px) {
@@ -102,6 +108,8 @@
             .mondrian-card.square {
                 grid-column: span 1;
                 grid-row: span 2;
+                max-height: none;
+                margin: 0;
             }
         }
 
@@ -118,6 +126,8 @@
                 background: var(--background, #000) !important;
                 -webkit-tap-highlight-color: transparent;
                 outline: none !important;
+                max-height: none !important;
+                margin: 0 !important;
             }
             .mondrian-card:active {
                 transform: none !important;
