@@ -9,7 +9,7 @@
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Folder View - Portal</title>
     <link rel="stylesheet" href="../style.css">
     <style>
@@ -63,19 +63,10 @@
         }
         @media(max-width: 1400px) { .vault-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media(max-width: 900px) { .vault-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .vault-grid { grid-template-columns: 1fr; grid-auto-rows: 220px; } }
+        @media(max-width: 500px) { .vault-grid { grid-template-columns: 1fr; } }
 
         .mondrian-card.landscape { grid-column: span 2; grid-row: span 3; }
         .mondrian-card.portrait { grid-column: span 1; grid-row: span 3; }
-
-        @media(max-width: 900px) {
-            .mondrian-card.landscape { grid-column: span 2; grid-row: span 2; }
-            .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
-        }
-        @media(max-width: 500px) {
-            .mondrian-card.landscape { grid-column: span 1; grid-row: span 2; }
-            .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
-        }
 
         .mondrian-thumb {
             display: flex;
@@ -87,14 +78,13 @@
             cursor: pointer;
         }
 
-        /* Show images on all pages/screens reliably with robust selector fallback */
-        .mondrian-card .mondrian-thumb img {
-            display: block !important;
+        .mondrian-card.portrait .mondrian-thumb img,
+        .mondrian-card.landscape .mondrian-thumb img {
             object-fit: cover !important;
-            width: 100% !important;
-            height: 100% !important;
-            position: absolute !important;
-            inset: 0 !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
         }
     </style>
 </head>
@@ -113,10 +103,9 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
-    <!-- External Scripts Integration -->
     <script src="../config.js"></script>
     <script src="images-storage.js"></script>
-    <script src="Image/photoviewer.js"></script>
+    <script src="photoviewer.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         let currentFolderName = '';
@@ -146,8 +135,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await ImageStorageDB.initDB();
             const params = new URLSearchParams(window.location.search);
-            currentFolderName = decodeURIComponent(params.get('folder') ?? '').trim();
-            currentModelName = decodeURIComponent(params.get('model') ?? '').trim();
+            currentFolderName = decodeURIComponent(params.get('folder') ?? '');
+            currentModelName = decodeURIComponent(params.get('model') ?? '');
 
             if (currentFolderName) {
                 document.getElementById('tagTitle').textContent = currentFolderName;
@@ -160,11 +149,7 @@
 
             const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
             const folderImages = allPhotoStreams.filter(item => {
-                const itemFolder = (item.folder || '').trim();
-                const itemFolders = Array.isArray(item.folders) ? item.folders.map(f => f.trim()) : [];
-                const matchesFolder = itemFolder.toLowerCase() === currentFolderName.toLowerCase() || 
-                                      itemFolders.some(f => f.toLowerCase() === currentFolderName.toLowerCase());
-                
+                const matchesFolder = item.folder === currentFolderName || (Array.isArray(item.folders) && item.folders.includes(currentFolderName));
                 const matchesModel = !currentModelName || (item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
                 return matchesFolder && matchesModel;
             });
@@ -194,6 +179,7 @@
                     <div class="mondrian-thumb" onclick="openPhotoModal(${idx})" style="background: var(--card-bg); border: 1px solid var(--card-border); width: 100%; height: 100%; position: relative;">
                         <button onclick="deletePhoto(${idx}, event)" title="Delete Photo" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); color: #ff4d4d; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20; padding: 0; line-height: 1;">&times;</button>
                         ${imageUrl ? `<img src="${imageUrl}" alt="${imgItem.title || 'Photo'}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Image</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px 14px; font-weight: 700; font-size: 0.8rem; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${imgItem.title || 'Photo'}</div>
                     </div>`;
                 grid.appendChild(card);
             }
@@ -206,7 +192,9 @@
                 const photo = window.folderImagesList[index];
                 const url = extractImageUrl(photo.thumbnail || photo.url);
                 if (typeof openPhotoviewer === 'function') {
-                    openPhotoviewer(url, photo.title, index);
+                    openPhotoviewer(url, photo.title);
+                } else {
+                    window.open(url, '_blank');
                 }
             }
         }
