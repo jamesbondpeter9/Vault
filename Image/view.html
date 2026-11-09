@@ -105,23 +105,7 @@
 
     <script src="../config.js"></script>
     <script src="images-storage.js"></script>
-    
-    <!-- Robust Multi-Path Fallback Loader for photoviewer.js covering all 3 paths -->
-    <script>
-        (function() {
-            const paths = ['Image/photoviewer.js', 'photoviewer.js', '../Image/photoviewer.js'];
-            let index = 0;
-            function loadNextScript() {
-                if (index >= paths.length) return;
-                const script = document.createElement('script');
-                script.src = paths[index++];
-                script.onerror = loadNextScript;
-                document.head.appendChild(script);
-            }
-            loadNextScript();
-        })();
-    </script>
-
+    <script src="photoviewer.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         let currentFolderName = '';
