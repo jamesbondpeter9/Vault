@@ -192,6 +192,8 @@
                 const url = extractImageUrl(photo.thumbnail || photo.url);
                 if (typeof openPhotoviewer === 'function') {
                     openPhotoviewer(url, photo.title, index);
+                } else {
+                    console.error("openPhotoviewer function not found. Check if photoviewer.js loaded successfully.");
                 }
             }
         }
