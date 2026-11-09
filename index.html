@@ -52,7 +52,7 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
             grid-auto-rows: 140px;
             grid-auto-flow: dense;
-            gap: 2px; /* Set exactly 2px gap among thumbnails */
+            gap: 4px;
             align-items: stretch;
         }
         @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -60,7 +60,6 @@
             .home-grid { 
                 grid-template-columns: repeat(2, minmax(0, 1fr)); 
                 grid-auto-rows: 150px;
-                gap: 2px;
             } 
         }
         @media(max-width: 500px) { 
@@ -94,13 +93,7 @@
         }
 
         .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-        .mondrian-card.landscape { 
-            grid-column: span 2; 
-            grid-row: span 4; 
-            aspect-ratio: 16 / 9; /* Very little bit reduced vertical height without changing span */
-            max-height: 94%; 
-            margin: auto; 
-        }
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
         .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
         @media(max-width: 900px) {
@@ -109,8 +102,6 @@
             .mondrian-card.square {
                 grid-column: span 1;
                 grid-row: span 2;
-                max-height: none;
-                margin: 0;
             }
         }
 
@@ -127,8 +118,6 @@
                 background: var(--background, #000) !important;
                 -webkit-tap-highlight-color: transparent;
                 outline: none !important;
-                max-height: none !important;
-                margin: 0 !important;
             }
             .mondrian-card:active {
                 transform: none !important;
