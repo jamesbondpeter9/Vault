@@ -9,7 +9,7 @@
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Folder View - Portal</title>
     <link rel="stylesheet" href="../style.css">
     <style>
@@ -87,19 +87,30 @@
             cursor: pointer;
         }
 
-        .mondrian-card.portrait .mondrian-thumb img,
-        .mondrian-card.landscape .mondrian-thumb img {
-            object-fit: cover !important;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
+        /* Show images exclusively on mobile screens as requested */
+        .mondrian-thumb img {
+            display: none;
+        }
+        @media(max-width: 900px) {
+            .mondrian-card.portrait .mondrian-thumb img,
+            .mondrian-card.landscape .mondrian-thumb img {
+                display: block !important;
+                object-fit: cover !important;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                inset: 0;
+            }
         }
 
-        /* Inbuilt Image Viewer Overlay Styles */
+        /* Inbuilt Image Viewer Overlay Styles - Fitted between browser bar and task bar */
         #inbuiltPhotoModal {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
             background: rgba(0, 0, 0, 0.95);
             z-index: 99999;
             display: none;
@@ -107,6 +118,7 @@
             justify-content: center;
             overflow: hidden;
             user-select: none;
+            box-sizing: border-box;
         }
         #inbuiltPhotoModal.active {
             display: flex;
@@ -174,7 +186,7 @@
         @media(max-width: 900px) {
             .viewer-image.mobile-landscape-rotate {
                 transform: rotate(90deg);
-                max-width: 100vh;
+                max-width: 100dvh;
                 max-height: 100vw;
             }
         }
