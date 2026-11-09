@@ -105,7 +105,7 @@
 
     <script src="../config.js"></script>
     <script src="images-storage.js"></script>
-    <script src="photoviewer.js"></script>
+    <script src="Image/photoviewer.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         let currentFolderName = '';
@@ -192,7 +192,7 @@
                 const photo = window.folderImagesList[index];
                 const url = extractImageUrl(photo.thumbnail || photo.url);
                 if (typeof openPhotoviewer === 'function') {
-                    openPhotoviewer(url, photo.title);
+                    openPhotoviewer(url, photo.title, index);
                 } else {
                     window.open(url, '_blank');
                 }
