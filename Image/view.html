@@ -87,23 +87,14 @@
             cursor: pointer;
         }
 
-        .mondrian-card.portrait .mondrian-thumb img,
-        .mondrian-card.landscape .mondrian-thumb img {
+        /* Show images on all pages/screens reliably with robust selector fallback */
+        .mondrian-card .mondrian-thumb img {
             display: block !important;
             object-fit: cover !important;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-        }
-
-        /* Mobile Landscape Auto-Rotation Transform */
-        @media(max-width: 900px) {
-            .viewer-image.mobile-landscape-rotate {
-                transform: rotate(90deg);
-                max-width: 100dvh;
-                max-height: 100vw;
-            }
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            inset: 0 !important;
         }
     </style>
 </head>
@@ -122,9 +113,10 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
+    <!-- External Scripts Integration -->
     <script src="../config.js"></script>
     <script src="images-storage.js"></script>
-    <script src="photoviewer.js"></script>
+    <script src="Image/photoviewer.js"></script>
     <script src="../github-sync.js"></script>
     <script>
         let currentFolderName = '';
@@ -213,7 +205,9 @@
             if (window.folderImagesList && window.folderImagesList[index]) {
                 const photo = window.folderImagesList[index];
                 const url = extractImageUrl(photo.thumbnail || photo.url);
-                openPhotoviewer(url, photo.title, index);
+                if (typeof openPhotoviewer === 'function') {
+                    openPhotoviewer(url, photo.title, index);
+                }
             }
         }
 
