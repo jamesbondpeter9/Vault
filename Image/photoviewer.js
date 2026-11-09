@@ -12,6 +12,19 @@ let isDragging = false;
 let startX = 0;
 let startY = 0;
 
+// Helper to extract clean image URLs consistently
+function extractImageUrl(input) {
+    if (!input) return '';
+    input = input.trim();
+    const bbcodeMatch = input.match(/\[img\](.*?)\[\/img\]/i);
+    if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
+    const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
+    const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
+    if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
+    return input;
+}
+
 // Inject the viewer modal HTML structure dynamically if it doesn't exist
 function initPhotoViewerDOM() {
     if (document.getElementById('inbuiltPhotoModal')) return;
@@ -134,13 +147,14 @@ function openPhotoviewer(url, title, index = 0) {
     panX = 0;
     panY = 0;
 
+    const cleanUrl = extractImageUrl(url);
     const modal = document.getElementById('inbuiltPhotoModal');
     const viewerImg = document.getElementById('viewerImageElement');
     const viewerTitle = document.getElementById('viewerTitleElement');
 
     viewerImg.classList.remove('mobile-landscape-rotate');
     viewerImg.style.transform = 'scale(1) translate(0px, 0px)';
-    viewerImg.src = url;
+    viewerImg.src = cleanUrl;
     viewerTitle.textContent = title || 'Photo';
     modal.classList.add('active');
 
@@ -152,7 +166,7 @@ function openPhotoviewer(url, title, index = 0) {
                 viewerImg.classList.add('mobile-landscape-rotate');
             }
         };
-        tempImg.src = url;
+        tempImg.src = cleanUrl;
     }
 }
 
@@ -176,7 +190,7 @@ function navigateViewer(direction) {
     }
     const photo = window.folderImagesList[currentViewerIndex];
     if (photo) {
-        const url = photo.thumbnail || photo.url;
+        const url = extractImageUrl(photo.thumbnail || photo.url);
         openPhotoviewer(url, photo.title, currentViewerIndex);
     }
 }
