@@ -257,8 +257,49 @@
             });
         }
 
+        // Mobile data loader fallback using view.html web data fetch logic when on mobile
+        async function fetchMobileUnifiedImages() {
+            let images = [];
+            const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
+
+            // 1. Try ImageStorageDB first
+            if (typeof ImageStorageDB !== 'undefined') {
+                try {
+                    if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
+                    images = (typeof ImageStorageDB.getPhotoStreams === 'function') ? ImageStorageDB.getPhotoStreams() || [] : [];
+                } catch (e) {}
+            }
+
+            // 2. If mobile and DB is empty, fetch directly from view.html data sources / JSON endpoints
+            if (isMobileDevice && images.length === 0) {
+                try {
+                    const res = await fetch('images.json');
+                    if (res.ok) {
+                        const json = await res.json();
+                        images = json.photostreams || json.streams || [];
+                    }
+                } catch (e) {}
+            }
+
+            // 3. Fallback to localStorage keys if still empty
+            if (images.length === 0) {
+                try {
+                    const localImages = localStorage.getItem('portal_images') || localStorage.getItem('images_db');
+                    if (localImages) {
+                        const parsed = JSON.parse(localImages);
+                        images = parsed.photostreams || parsed.streams || [];
+                    }
+                } catch (e) {}
+            }
+
+            return images;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
-            await ImageStorageDB.initDB();
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                await ImageStorageDB.initDB();
+            }
+
             const params = new URLSearchParams(window.location.search);
             currentFolderName = decodeURIComponent(params.get('folder') ?? '');
             currentModelName = decodeURIComponent(params.get('model') ?? '');
@@ -272,7 +313,7 @@
                 document.getElementById('backToAlbums').href = `albums.html?name=${encodeURIComponent(currentModelName)}`;
             }
 
-            const allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
+            const allPhotoStreams = await fetchMobileUnifiedImages();
             const folderImages = allPhotoStreams.filter(item => {
                 const matchesFolder = item.folder === currentFolderName || (Array.isArray(item.folders) && item.folders.includes(currentFolderName));
                 const matchesModel = !currentModelName || (item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
