@@ -258,7 +258,7 @@
         function extractImageUrl(input) {
             if (!input) return '';
             input = input.trim();
-            const bbcodeMatch = input.match(/[img](.*?)\[\/img\]/i);
+            const bbcodeMatch = input.match(/\[img\](.*?)\[\/img\]/i);
             if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
             const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
             if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
@@ -515,7 +515,7 @@
                 panX = 0;
                 panY = 0;
                 const photo = window.folderImagesList[index];
-                // Use original high-resolution URL for the viewer
+                // Use original high-resolution URL for the viewer matching web view.html path resolution
                 const fullResUrl = extractImageUrl(photo.url || photo.thumbnail);
 
                 const modal = document.getElementById('inbuiltPhotoModal');
@@ -532,7 +532,6 @@
                     if (window.innerWidth <= 900) {
                         const tempImg = new Image();
                         tempImg.onload = () => {
-                            // Check if mobile landscape image or screen in landscape orientation
                             if (tempImg.naturalWidth > tempImg.naturalHeight || window.innerWidth > window.innerHeight) {
                                 viewerImg.classList.add('mobile-landscape-auto-cover');
                             }
@@ -579,4 +578,12 @@
             });
 
             ImageStorageDB.savePhotoStreams(allPhotoStreams);
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === '
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
+                await GitHubSync.triggerAutoSync();
+            }
+
+            location.reload();
+        }
+    </script>
+</body>
+</html>
