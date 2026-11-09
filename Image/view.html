@@ -16,6 +16,7 @@
         html, body {
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
+            -webkit-overflow-scrolling: touch;
         }
 
         .nav-bar-compact {
@@ -81,6 +82,7 @@
             border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .mondrian-card.portrait .mondrian-thumb img,
@@ -132,6 +134,7 @@
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             will-change: transform;
+            touch-action: none;
         }
         .viewer-image:active {
             cursor: grabbing;
@@ -162,6 +165,7 @@
             justify-content: center;
             cursor: pointer;
             z-index: 20;
+            -webkit-tap-highlight-color: transparent;
         }
         .viewer-title-bar {
             position: absolute;
@@ -367,14 +371,14 @@
                         touchStartX = e.touches[0].clientX - panX;
                         touchStartY = e.touches[0].clientY - panY;
                     }
-                });
+                }, { passive: true });
 
                 viewerImg.addEventListener('touchmove', (e) => {
                     if (!isDragging || e.touches.length !== 1) return;
                     panX = e.touches[0].clientX - touchStartX;
                     panY = e.touches[0].clientY - touchStartY;
                     updateImageTransform();
-                });
+                }, { passive: true });
 
                 viewerImg.addEventListener('touchend', () => {
                     isDragging = false;
