@@ -186,7 +186,7 @@
                             </div>
                             <div class="az-bar" id="modelAZBar"></div>
                             <div class="tags-container" id="modelTagsList">
-                                <span style="color: var(--text-muted); font-size: 0.80rem; padding: 4px;">No models in directory</span>
+                                <span style="color: var(--text-muted); font-size: 0.80rem; padding: 4px;">Loading models directory...</span>
                             </div>
                         </div>
 
@@ -200,7 +200,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Photo</button>
+                        <button type="submit" id="saveButton" class="btn-primary" style="width: 100%; margin-top: 10px;" disabled>Initializing System...</button>
                     </form>
                 </div>
             </div>
@@ -221,6 +221,7 @@
         let modelLetterFilter = 'ALL';
         let folderLetterFilter = 'ALL';
         let cachedModelsList = [];
+        let isSystemReady = false;
 
         function extractAllImageUrls(input) {
             if (!input) return [];
@@ -298,11 +299,9 @@
             });
         }
 
-        // Robust multi-source model loader bridging root Model/Models.json and ImageStorageDB
         async function fetchAllModelsUnified() {
             let models = [];
             
-            // 1. Try ImageStorageDB first
             if (typeof ImageStorageDB !== 'undefined') {
                 try {
                     if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
@@ -312,7 +311,6 @@
                 } catch (e) {}
             }
 
-            // 2. Fallback: Check localStorage / portal storage keys
             if (models.length === 0) {
                 try {
                     const localData = localStorage.getItem('portal_models') || localStorage.getItem('models');
@@ -323,7 +321,6 @@
                 } catch (e) {}
             }
 
-            // 3. Fallback: Direct fetch from root Model/Models.json
             if (models.length === 0) {
                 try {
                     const res = await fetch('../Model/Models.json');
@@ -334,26 +331,37 @@
                 } catch (e) {}
             }
 
-            // Normalize models to object array format { name: "..." }
             return models.map(m => typeof m === 'string' ? { name: m } : m).filter(m => m && m.name);
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
-                await ImageStorageDB.initDB();
+            const saveButton = document.getElementById('saveButton');
+
+            // 1. Wait until all underlying page storage systems & database deployments complete fully
+            try {
+                if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                    await ImageStorageDB.initDB();
+                }
+                await refreshModelsAndFolders();
+                isSystemReady = true;
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Photo';
+            } catch (err) {
+                console.error("Initialization error:", err);
+                saveButton.textContent = 'Save Photo (Offline Mode)';
+                saveButton.disabled = false;
+                isSystemReady = true;
             }
 
-            await refreshModelsAndFolders();
-
-            // Real-time synchronization listeners for storage changes across tabs / pages
             window.addEventListener('storage', async () => {
-                await refreshModelsAndFolders();
+                if (isSystemReady) await refreshModelsAndFolders();
             });
 
-            // Periodic background check to catch model additions/deletions instantly
             setInterval(async () => {
-                await refreshModelsAndFolders();
-            }, 1000);
+                if (isSystemReady && document.visibilityState === 'visible') {
+                    await refreshModelsAndFolders();
+                }
+            }, 3000);
 
             const urlInput = document.getElementById('streamUrl');
             const previewContainer = document.getElementById('previewContainer');
@@ -367,29 +375,50 @@
                 }
             });
 
+            // 2. High-speed concurrent mechanism for fast photo saving
             document.getElementById('streamForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const urls = extractAllImageUrls(document.getElementById('streamUrl').value);
-                if (urls.length === 0) return;
-                
-                urls.forEach(url => {
-                    ImageStorageDB.addPhotoStream({
-                        title: generateTitleFromUrl(url),
-                        url,
-                        thumbnail: url,
-                        models: selectedModels,
-                        folder: selectedFolders.length > 0 ? selectedFolders[0] : '',
-                        folders: selectedFolders
-                    });
-                });
+                if (!isSystemReady) return;
 
-                document.getElementById('streamForm').reset();
-                selectedModels = [];
-                selectedFolders = [];
-                modelLetterFilter = 'ALL';
-                folderLetterFilter = 'ALL';
-                await refreshModelsAndFolders();
-                previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
+                const urlInputValue = document.getElementById('streamUrl').value;
+                const urls = extractAllImageUrls(urlInputValue);
+                if (urls.length === 0) return;
+
+                saveButton.disabled = true;
+                saveButton.textContent = 'Saving...';
+
+                try {
+                    // Parallelize batch storage operations for ultra-fast mechanism performance
+                    const savePromises = urls.map(url => {
+                        return Promise.resolve().then(() => {
+                            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.addPhotoStream === 'function') {
+                                return ImageStorageDB.addPhotoStream({
+                                    title: generateTitleFromUrl(url),
+                                    url,
+                                    thumbnail: url,
+                                    models: selectedModels,
+                                    folder: selectedFolders.length > 0 ? selectedFolders[0] : '',
+                                    folders: selectedFolders
+                                });
+                            }
+                        });
+                    });
+
+                    await Promise.all(savePromises);
+
+                    document.getElementById('streamForm').reset();
+                    selectedModels = [];
+                    selectedFolders = [];
+                    modelLetterFilter = 'ALL';
+                    folderLetterFilter = 'ALL';
+                    await refreshModelsAndFolders();
+                    previewContainer.innerHTML = `<span style="color: var(--text-muted);">Photo Preview</span>`;
+                } catch (saveErr) {
+                    console.error("Fast save batch error:", saveErr);
+                } finally {
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Save Photo';
+                }
             });
         });
 
