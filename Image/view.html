@@ -210,13 +210,12 @@
             text-overflow: ellipsis;
         }
         @media(max-width: 900px) {
-            .viewer-image.mobile-landscape-auto-cover {
-                width: 100vw !important;
-                height: 100vh !important;
-                height: 100dvh !important;
-                max-width: none !important;
-                max-height: none !important;
-                object-fit: cover !important;
+            .viewer-image.mobile-landscape-auto-rotate {
+                max-width: 100vh !important;
+                max-height: 100vw !important;
+                width: auto !important;
+                height: auto !important;
+                object-fit: contain !important;
                 transform: rotate(90deg) !important;
             }
             .viewer-image.mobile-portrait-fit {
@@ -606,7 +605,7 @@
             });
 
             ImageStorageDB.savePhotoStreams(allPhotoStreams);
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAuto-sync === 'function') {
+            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
                 await GitHubSync.triggerAutoSync();
             }
 
