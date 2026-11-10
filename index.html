@@ -118,7 +118,7 @@
             }
         }
 
-        /* Mobile specific adjustments: wide edge-to-edge thumbnails touching display edges, and reduced thumbnail title size */
+        /* Mobile specific adjustments: remove titles, expand vertically slightly, reduce nav background blur/opacity */
         @media(max-width: 500px) {
             .home-grid {
                 grid-template-columns: 1fr !important;
@@ -126,7 +126,7 @@
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 16 / 9 !important;
+                aspect-ratio: 16 / 9.5 !important; /* Expanded slightly vertical */
                 height: auto !important;
                 border-radius: 0 !important;
                 border: none !important;
@@ -156,13 +156,13 @@
                 height: 100% !important;
                 image-rendering: -webkit-optimize-contrast;
             }
+            
+            /* Remove title on thumbnails */
             .mondrian-overlay {
-                padding: 10px 12px 6px 12px !important;
-                font-size: 0.7rem !important; /* Reduced size of thumbnail titles */
-                background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%) !important;
+                display: none !important;
             }
             
-            /* Reduced size of navigations on mobile */
+            /* Reduced size and navigation background white blur/opacity */
             .nav-bar-compact {
                 gap: 1px !important;
                 margin-bottom: 12px !important;
@@ -173,6 +173,12 @@
                 height: 36px !important;
                 font-size: 0.72rem !important;
                 border-radius: 8px !important;
+                background: rgba(255, 255, 255, 0.03) !important; /* Reduced white blur / opacity */
+                backdrop-filter: blur(2px) !important;
+            }
+            .mondrian-nav-box:hover {
+                background: rgba(255, 255, 255, 0.08) !important;
+                color: #fff !important;
             }
         }
 
