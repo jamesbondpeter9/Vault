@@ -69,9 +69,9 @@
             .home-grid { 
                 grid-template-columns: 1fr !important; 
                 grid-auto-rows: auto !important;
-                gap: 12px !important; /* Separated vertical space between stacked thumbnails */
-                padding-left: 12px !important;
-                padding-right: 12px !important;
+                gap: 2px !important; /* Exactly 2px gap among thumbnails */
+                padding-left: 0 !important; /* Edge-to-edge full width coverage */
+                padding-right: 0 !important; /* Edge-to-edge full width coverage */
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
             } 
@@ -110,7 +110,7 @@
             }
         }
 
-        /* Mobile specific web-browser thumbnail structure matching */
+        /* Mobile specific adjustments: wide edge-to-edge thumbnails, minimal cropping like web browser, reduced navigation sizes */
         @media(max-width: 500px) {
             .home-grid {
                 grid-template-columns: 1fr !important;
@@ -118,39 +118,52 @@
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 16 / 9 !important; /* Standard browser 16:9 box structure */
+                aspect-ratio: 16 / 9 !important; /* Large wide layout */
                 height: auto !important;
-                border-radius: 12px !important; /* Soft card border radius matching browser style */
-                border: 1px solid var(--card-border, #333) !important;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important; /* Clean stacked shadow without overlap */
-                background: #111 !important;
+                border-radius: 0 !important; /* Edge-to-edge wide block */
+                border: none !important;
+                box-shadow: none !important;
+                background: #000 !important;
                 -webkit-tap-highlight-color: transparent;
                 outline: none !important;
-                margin-bottom: 4px;
+                margin-bottom: 0 !important;
             }
             .mondrian-card:active {
-                transform: scale(0.98) !important;
+                transform: none !important;
                 z-index: 1 !important;
             }
             .mondrian-thumb {
-                border-radius: 12px !important;
+                border-radius: 0 !important;
                 background: #000 !important;
-                position: relative !important; /* Ensures proper natural positioning inside card container */
+                position: relative !important;
                 width: 100% !important;
                 height: 100% !important;
             }
             .mondrian-thumb img {
-                border-radius: 12px !important;
-                object-fit: contain !important; /* Preserves inner image fully without cropping or reducing quality */
+                border-radius: 0 !important;
+                object-fit: cover !important; /* Minimal cropping like web browsers (fills frame naturally) */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
                 image-rendering: -webkit-optimize-contrast;
             }
             .mondrian-overlay {
-                padding: 10px 12px 8px 12px !important;
+                padding: 12px 14px 8px 14px !important;
                 font-size: 0.85rem !important;
                 background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%) !important;
+            }
+            
+            /* Reduced size of navigations on mobile */
+            .nav-bar-compact {
+                gap: 1px !important;
+                margin-bottom: 12px !important;
+                padding-left: 4px !important;
+                padding-right: 4px !important;
+            }
+            .mondrian-nav-box {
+                height: 36px !important; /* Reduced height */
+                font-size: 0.72rem !important; /* Reduced font size */
+                border-radius: 8px !important;
             }
         }
 
@@ -237,10 +250,10 @@
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
-            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Search">🔍</div></a>
-            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.75rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
+            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
@@ -423,7 +436,7 @@
                 paginationBar.appendChild(pageInfo);
 
                 const nextBtn = document.createElement('button');
-                nextBtn.className, 'page-btn';
+                nextBtn.className = 'page-btn';
                 nextBtn.textContent = 'Next →';
                 nextBtn.disabled = currentPage === totalPages;
                 nextBtn.onclick = () => {
