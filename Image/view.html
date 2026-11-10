@@ -210,13 +210,14 @@
             text-overflow: ellipsis;
         }
         @media(max-width: 900px) {
-            .viewer-image.mobile-landscape-auto-rotate {
-                max-width: 100vh !important;
-                max-height: 100vw !important;
-                width: auto !important;
-                height: auto !important;
-                object-fit: contain !important;
-                transform: rotate(90deg) !important;
+            .viewer-image.mobile-landscape-cover {
+                width: 100vw !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                max-width: none !important;
+                max-height: none !important;
+                object-fit: cover !important;
+                transform: none !important;
             }
             .viewer-image.mobile-portrait-fit {
                 max-width: 100% !important;
@@ -527,10 +528,7 @@
         function updateImageTransform() {
             const viewerImg = document.getElementById('viewerImageElement');
             if (!viewerImg) return;
-            const isMobile = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-            const isRotated = isMobile && viewerImg.classList.contains('mobile-landscape-auto-rotate');
-            const rot = isRotated ? ' rotate(90deg)' : '';
-            viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})${rot}`;
+            viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
         }
 
         function openPhotoModal(index) {
@@ -547,7 +545,7 @@
                 const viewerTitle = document.getElementById('viewerTitleElement');
 
                 if (modal && viewerImg) {
-                    viewerImg.classList.remove('mobile-landscape-auto-rotate', 'mobile-portrait-fit');
+                    viewerImg.classList.remove('mobile-landscape-cover', 'mobile-portrait-fit');
                     viewerImg.style.transform = 'scale(1) translate(0px, 0px)';
                     viewerImg.src = fullResUrl;
                     if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo';
@@ -558,7 +556,7 @@
                         const tempImg = new Image();
                         tempImg.onload = () => {
                             if (tempImg.naturalWidth > tempImg.naturalHeight) {
-                                viewerImg.classList.add('mobile-landscape-auto-rotate');
+                                viewerImg.classList.add('mobile-landscape-cover');
                             } else {
                                 viewerImg.classList.add('mobile-portrait-fit');
                             }
