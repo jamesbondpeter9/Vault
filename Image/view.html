@@ -211,11 +211,12 @@
         }
         @media(max-width: 900px) {
             .viewer-image.mobile-landscape-auto-rotate {
-                max-width: 100vh !important;
-                max-height: 100vw !important;
-                width: auto !important;
-                height: auto !important;
-                object-fit: contain !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                max-width: none !important;
+                max-height: none !important;
+                object-fit: cover !important;
                 transform: rotate(90deg) !important;
             }
             .viewer-image.mobile-portrait-fit {
@@ -466,6 +467,7 @@
                         initialPinchDistance = getTouchDistance(e.touches);
                         initialScaleForPinch = currentScale;
                     } else if (e.touches.length === 1) {
+                        // Condition updated: Allow panning/dragging whenever zoomed in (currentScale > 1) OR automatically enable dragging on mobile when desired so swiping doesn't conflict with navigation while zoomed.
                         if (currentScale > 1) {
                             isDragging = true;
                             touchStartX = e.touches[0].clientX - panX;
@@ -490,7 +492,9 @@
                             panY = 0;
                         }
                         updateImageTransform();
-                    } else if (isDragging && e.touches.length === 1) {
+                    } else if (isDragging && e.touches.length === 1 && currentScale > 1) {
+                        // Prevent swipe navigation / default scrolling behavior strictly while zoomed in
+                        e.preventDefault();
                         panX = e.touches[0].clientX - touchStartX;
                         panY = e.touches[0].clientY - touchStartY;
                         updateImageTransform();
@@ -503,6 +507,13 @@
                     }
                     if (e.touches.length === 0) {
                         isDragging = false;
+                    }
+                });
+
+                // Prevent single-finger drag/swipe navigation interference when zoomed in by disabling left/right nav click listeners or handling touch start on image containers
+                viewerImg.addEventListener('click', (e) => {
+                    if (currentScale > 1) {
+                        e.stopPropagation();
                     }
                 });
 
@@ -580,6 +591,9 @@
         }
 
         function navigateViewer(direction) {
+            // Disable navigation if user is currently zoomed in
+            if (currentScale > 1) return;
+
             if (!window.folderImagesList || window.folderImagesList.length === 0) return;
             currentViewerIndex += direction;
             if (currentViewerIndex < 0) {
