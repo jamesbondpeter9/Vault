@@ -276,21 +276,21 @@
             });
         }
 
-        // Mobile data loader fetching directly from images.json as primary source
+        // Mobile data loader fetching directly from Image/images.json as primary source
         async function fetchMobileUnifiedImages() {
             let images = [];
             const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
 
-            // 1. Fetch directly from images.json first to fulfill data resource requirement
+            // 1. Fetch directly from Image/images.json first to fulfill data resource requirement
             try {
-                const res = await fetch('../images.json');
+                const res = await fetch('../Image/images.json');
                 if (res.ok) {
                     const json = await res.json();
                     images = json.photostreams || json.streams || [];
                 }
             } catch (e) {
                 try {
-                    const resLocal = await fetch('images.json');
+                    const resLocal = await fetch('Image/images.json');
                     if (resLocal.ok) {
                         const json = await resLocal.json();
                         images = json.photostreams || json.streams || [];
@@ -298,7 +298,7 @@
                 } catch (err) {}
             }
 
-            // 2. Fallback to ImageStorageDB if images.json returned empty
+            // 2. Fallback to ImageStorageDB if Image/images.json returned empty
             if (images.length === 0 && typeof ImageStorageDB !== 'undefined') {
                 try {
                     if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
