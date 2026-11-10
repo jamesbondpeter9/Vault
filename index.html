@@ -52,8 +52,11 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
             grid-auto-rows: 140px;
             grid-auto-flow: dense;
-            gap: 4px;
+            gap: 2px;
             align-items: stretch;
+            padding-left: 2px;
+            padding-right: 2px;
+            box-sizing: border-box;
         }
         @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media(max-width: 900px) { 
@@ -66,7 +69,9 @@
             .home-grid { 
                 grid-template-columns: 1fr !important; 
                 grid-auto-rows: auto !important;
-                gap: 2px !important; /* Exactly 2px gap among thumbnails */
+                gap: 2px !important;
+                padding-left: 2px !important;
+                padding-right: 2px !important;
                 -webkit-transform: translateZ(0);
                 transform: translateZ(0);
             } 
@@ -105,14 +110,17 @@
             }
         }
 
-        /* Mobile specific theater thumbnail styling: sharp edges, slightly increased vertical height, and perfect edge-to-edge fit */
+        /* Mobile specific theater thumbnail styling: single thumbnail order, compact size without cropping, edge gaps */
         @media(max-width: 500px) {
+            .home-grid {
+                grid-template-columns: 1fr !important;
+            }
             .mondrian-card {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
-                aspect-ratio: 16 / 10 !important; /* Slightly increased vertical height on mobile */
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 10 !important;
                 height: auto !important;
-                border-radius: 0 !important; /* Removed curved edges */
+                border-radius: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
                 background: var(--background, #000) !important;
@@ -126,16 +134,16 @@
                 border: none !important;
             }
             .mondrian-thumb {
-                border-radius: 0 !important; /* Removed curved edges */
+                border-radius: 0 !important;
                 background: var(--background, #000) !important;
             }
             .mondrian-thumb img {
-                border-radius: 0 !important; /* Removed curved edges */
-                object-fit: fill !important; /* Perfect fit without awkward gaps inside thumbnail */
+                border-radius: 0 !important;
+                object-fit: contain !important; /* Preserves inner image without cropping or reducing quality */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                image-rendering: -webkit-optimize-contrast; /* Sharp original quality rendering */
+                image-rendering: -webkit-optimize-contrast;
             }
             .mondrian-overlay {
                 padding: 14px 10px 6px 10px !important;
