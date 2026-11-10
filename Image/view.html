@@ -114,7 +114,11 @@
             overflow: hidden;
             user-select: none;
             box-sizing: border-box;
-            touch-action: none;
+        }
+        @media (max-width: 900px) {
+            #inbuiltPhotoModal {
+                touch-action: none;
+            }
         }
         #inbuiltPhotoModal.active {
             display: flex;
@@ -127,7 +131,11 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            touch-action: none;
+        }
+        @media (max-width: 900px) {
+            .viewer-content-wrapper {
+                touch-action: none;
+            }
         }
         .viewer-image {
             max-width: 100%;
@@ -138,7 +146,11 @@
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             will-change: transform;
-            touch-action: none;
+        }
+        @media (max-width: 900px) {
+            .viewer-image {
+                touch-action: none;
+            }
         }
         .viewer-image:active {
             cursor: grabbing;
@@ -368,7 +380,7 @@
 
             window.folderImagesList = folderImages;
 
-            // Setup Custom Viewer Interactions (Wheel Zoom, Mouse Drag, Touch Pan/Pinch Zoom, Keyboard Navigation) for ALL devices
+            // Setup Custom Viewer Interactions (Wheel Zoom, Mouse Drag, Touch Pan/Pinch Zoom, Keyboard Navigation)
             const viewerImg = document.getElementById('viewerImageElement');
             const wrapper = document.getElementById('viewerContentWrapper');
 
@@ -429,6 +441,9 @@
                 }
 
                 viewerImg.addEventListener('touchstart', (e) => {
+                    const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
+                    if (!isMobileDevice) return;
+
                     if (e.touches.length === 2) {
                         isDragging = false;
                         initialPinchDistance = getTouchDistance(e.touches);
@@ -445,6 +460,9 @@
                 }, { passive: true });
 
                 viewerImg.addEventListener('touchmove', (e) => {
+                    const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
+                    if (!isMobileDevice) return;
+
                     if (e.touches.length === 2 && initialPinchDistance > 0) {
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
