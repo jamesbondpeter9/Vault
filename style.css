@@ -169,7 +169,12 @@ body {
 .album-card.landscape,
 .stream-card.landscape,
 .home-card.landscape,
-.index-card.landscape { grid-column: span 2; grid-row: span 4; }
+.index-card.landscape,
+.index-card, 
+.home-card { 
+    grid-column: span 2 !important; 
+    grid-row: span 2 !important; 
+}
 
 .mondrian-card.square,
 .album-card.square,
@@ -281,6 +286,21 @@ body {
     .home-overlay,
     .index-overlay {
         display: block !important;
+    }
+
+    /* Mobile Navigation Light Yellow Styling matching Web Browser font style */
+    .mondrian-nav-box {
+        background: #FFEE55 !important;
+        border-color: #FFDD33 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        text-shadow: 
+            -1px -1px 0 #000000,  
+             1px -1px 0 #000000,
+            -1px  1px 0 #000000,
+             1px  1px 0 #000000,
+             0px 2px 4px rgba(0,0,0,0.8) !important;
+        box-shadow: var(--gold-glow-nav) !important;
     }
 }
 
