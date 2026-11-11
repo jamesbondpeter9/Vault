@@ -62,21 +62,21 @@ body {
     height: 52px !important;
     font-size: 0.85rem !important;
     border-radius: 12px !important;
-    background: rgb(255, 222, 66);
-    border: 1px solid rgba(255, 222, 66, 0.6);
+    background: rgb(255, 222, 66) !important;
+    border: 1px solid rgba(255, 222, 66, 0.9) !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #000000;
+    color: #000000 !important;
     font-weight: 800;
     box-shadow: none !important;
     transition: all 0.3s ease;
 }
 
 .mondrian-nav-box:hover {
-    background: rgba(255, 222, 66, 0.85);
-    color: #000000;
-    border-color: #ffffff;
+    background: rgb(255, 222, 66) !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
     box-shadow: none !important;
     transform: translateY(-1px);
 }
@@ -119,10 +119,14 @@ body {
     } 
 }
 
-/* ==========================================================
-   DESKTOP BROWSER THUMBNAILS SECTION (Index, View & Videotag)
-   ================================================---------- */
-.mondrian-card {
+
+/* ==========================================================================
+   SECTION 1: WEB BROWSER STUFF (Image/albums, photostream, view & Media/stream, videotag, watch)
+   ========================================================================== */
+.mondrian-card,
+.album-card,
+.stream-card,
+.photo-card {
     position: relative;
     width: 100%;
     height: 100%;
@@ -136,25 +140,40 @@ body {
     transform: translate3d(0,0,0);
     transition: transform 0.2s ease;
 }
-.mondrian-card:hover {
+
+.mondrian-card:hover,
+.album-card:hover,
+.stream-card:hover,
+.photo-card:hover {
     transform: translateY(-2px);
     z-index: 10;
 }
 
-.mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-.mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
-.mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+.mondrian-card.portrait,
+.album-card.portrait,
+.stream-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+
+.mondrian-card.landscape,
+.album-card.landscape,
+.stream-card.landscape { grid-column: span 2; grid-row: span 4; }
+
+.mondrian-card.square,
+.album-card.square,
+.stream-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
 @media(max-width: 900px) {
-    .mondrian-card.portrait,
-    .mondrian-card.landscape,
-    .mondrian-card.square {
+    .mondrian-card.portrait, .mondrian-card.landscape, .mondrian-card.square,
+    .album-card.portrait, .album-card.landscape, .album-card.square,
+    .stream-card.portrait, .stream-card.landscape, .stream-card.square {
         grid-column: span 1;
         grid-row: span 2;
     }
 }
 
-.mondrian-thumb {
+.mondrian-thumb,
+.album-thumb,
+.stream-thumb,
+.photo-thumb {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -169,7 +188,10 @@ body {
     box-shadow: none !important;
 }
 
-.mondrian-thumb img {
+.mondrian-thumb img,
+.album-thumb img,
+.stream-thumb img,
+.photo-thumb img {
     width: 100%;
     height: 100%;
     object-fit: fill;
@@ -179,9 +201,9 @@ body {
 }
 
 
-/* ==========================================================
-   MOBILE THUMBNAILS SECTION
-   ================================================---------- */
+/* ==========================================================================
+   SECTION 2: MOBILE STUFF (Image/albums, photostream, view & Media/stream, videotag, watch)
+   ========================================================================== */
 @media(max-width: 500px) {
     html, body {
         background: rgb(0, 0, 0) !important;
@@ -192,11 +214,18 @@ body {
         text-rendering: optimizeLegibility;
     }
 
-    .home-grid {
+    .home-grid,
+    .albums-grid,
+    .photostream-grid,
+    .stream-grid,
+    .videos-grid {
         grid-template-columns: 1fr !important;
     }
 
-    .mondrian-card {
+    .mondrian-card,
+    .album-card,
+    .stream-card,
+    .photo-card {
         grid-column: 1 / -1 !important;
         grid-row: auto !important;
         aspect-ratio: 16 / 10 !important;
@@ -212,14 +241,19 @@ body {
         transition: none !important;
     }
 
-    .mondrian-card:hover,
-    .mondrian-card:active {
+    .mondrian-card:hover, .mondrian-card:active,
+    .album-card:hover, .album-card:active,
+    .stream-card:hover, .stream-card:active,
+    .photo-card:hover, .photo-card:active {
         transform: none !important;
         box-shadow: none !important;
         z-index: 1 !important;
     }
 
-    .mondrian-thumb {
+    .mondrian-thumb,
+    .album-thumb,
+    .stream-thumb,
+    .photo-thumb {
         border-radius: 0 !important;
         background: rgb(0, 0, 0) !important;
         position: relative !important;
@@ -229,7 +263,10 @@ body {
         border: none !important;
     }
 
-    .mondrian-thumb img {
+    .mondrian-thumb img,
+    .album-thumb img,
+    .stream-thumb img,
+    .photo-thumb img {
         border-radius: 0 !important;
         object-fit: contain !important; 
         object-position: center !important;
@@ -239,7 +276,10 @@ body {
         image-rendering: -webkit-optimize-contrast;
     }
     
-    .mondrian-overlay {
+    .mondrian-overlay,
+    .album-overlay,
+    .stream-overlay,
+    .photo-overlay {
         display: none !important;
     }
     
@@ -266,7 +306,7 @@ body {
         border-radius: 4px !important;
         background: rgb(255, 222, 66) !important;
         color: #000000 !important;
-        border: 1px solid rgba(255, 222, 66, 0.6) !important;
+        border: 1px solid rgba(255, 222, 66, 0.9) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         font-family: 'Montserrat', sans-serif !important;
@@ -275,7 +315,7 @@ body {
     }
 
     .mondrian-nav-box:hover {
-        background: rgba(255, 222, 66, 0.85) !important;
+        background: rgb(255, 222, 66) !important;
         color: #000000 !important;
         transform: none !important;
         box-shadow: none !important;
