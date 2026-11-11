@@ -118,11 +118,20 @@
             }
         }
 
-        /* Mobile specific adjustments: full image fitting edge-to-edge, removed white blur from nav and edge-to-edge expansion */
+        /* Mobile specific enhancements */
         @media(max-width: 500px) {
+            /* Full HD resolution quality rendering & deep dark black theme */
+            html, body {
+                background: #000000 !important;
+                color: #ffffff !important;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
             .home-grid {
                 grid-template-columns: 1fr !important;
             }
+
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
@@ -132,15 +141,24 @@
                 border: none !important;
                 box-shadow: none !important;
                 background: #000 !important;
-                -webkit-tap-highlight-color: transparent;
                 outline: none !important;
                 margin-bottom: 0 !important;
                 width: 100vw !important;
+                transform: none !important;
+                transition: none !important;
+            }
+
+            /* Remove hover and click zoom/translate effects on mobile */
+            .mondrian-card:hover {
+                transform: none !important;
+                box-shadow: none !important;
+                z-index: 1 !important;
             }
             .mondrian-card:active {
                 transform: none !important;
                 z-index: 1 !important;
             }
+
             .mondrian-thumb {
                 border-radius: 0 !important;
                 background: #000 !important;
@@ -148,12 +166,15 @@
                 width: 100% !important;
                 height: 100% !important;
             }
+
+            /* Stretch inner thumbnail image to fill completely without reducing size or cropping */
             .mondrian-thumb img {
                 border-radius: 0 !important;
-                object-fit: contain !important; /* Shows full image with perfect edge-to-edge fitting */
+                object-fit: fill !important;
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
+                image-rendering: high-dpi;
                 image-rendering: -webkit-optimize-contrast;
             }
             
@@ -162,7 +183,7 @@
                 display: none !important;
             }
             
-            /* Expand navigation to touch mobile display edges completely, remove white blur/background opacity */
+            /* Expand navigation to touch edges completely with dark background and yellow inner navigation theme with white font */
             .nav-bar-compact {
                 width: 100vw !important;
                 position: relative !important;
@@ -170,23 +191,28 @@
                 right: 50% !important;
                 margin-left: -50vw !important;
                 margin-right: -50vw !important;
-                gap: 1px !important;
+                gap: 2px !important;
                 margin-bottom: 12px !important;
-                padding-left: 2px !important;
-                padding-right: 2px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
                 box-sizing: border-box !important;
+                background: #000000 !important;
             }
+
             .mondrian-nav-box {
-                height: 38px !important;
-                font-size: 0.72rem !important;
-                border-radius: 0 !important; /* Edge-to-edge look */
-                background: transparent !important; /* Completely removed white blur/background */
+                height: 42px !important;
+                font-size: 0.75rem !important;
+                border-radius: 0 !important;
+                background: #ffcc00 !important; /* Yellow inner background theme */
+                color: #ffffff !important; /* White color font */
+                border: 1px solid #e6b800 !important;
                 backdrop-filter: none !important;
-                border-color: rgba(255, 255, 255, 0.15) !important;
             }
+
             .mondrian-nav-box:hover {
-                background: rgba(255, 255, 255, 0.1) !important;
-                color: #fff !important;
+                background: #ffdb4d !important;
+                color: #ffffff !important;
+                transform: none !important;
             }
         }
 
@@ -271,7 +297,7 @@
     <div class="site-container">
         <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: transparent; color: #fff;">Home</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="color: #ffffff;">Home</div></a>
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
