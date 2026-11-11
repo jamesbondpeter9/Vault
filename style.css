@@ -72,6 +72,12 @@ body {
     justify-content: center;
     color: #ffffff !important;
     font-weight: 800;
+    text-shadow: 
+        -1px -1px 0 #000000,  
+         1px -1px 0 #000000,
+        -1px  1px 0 #000000,
+         1px  1px 0 #000000,
+         0px 2px 4px rgba(0,0,0,0.8) !important;
     box-shadow: var(--gold-glow-nav) !important;
     transition: all 0.3s ease;
 }
@@ -104,21 +110,18 @@ body {
 }
 @media(max-width: 500px) { 
     .home-grid { 
-        grid-template-columns: 1fr !important; 
-        grid-auto-rows: auto !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+        grid-auto-rows: 140px !important;
         gap: 2px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        width: 100% !important;
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
-        width: 100vw !important;
-        position: relative !important;
-        left: 50% !important;
-        right: 50% !important;
-        margin-left: -50vw !important;
-        margin-right: -50vw !important;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
+        transform: none !important;
     } 
 }
 
@@ -239,7 +242,7 @@ body {
     .stream-grid,
     .videos-grid,
     .index-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     .mondrian-card,
@@ -248,30 +251,8 @@ body {
     .photo-card,
     .home-card,
     .index-card {
-        grid-column: 1 / -1 !important;
-        grid-row: auto !important;
-        aspect-ratio: 16 / 10 !important;
-        height: auto !important;
-        border-radius: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        background: rgb(0, 0, 0) !important;
-        outline: none !important;
-        margin-bottom: 0 !important;
-        width: 100vw !important;
-        transform: none !important;
-        transition: none !important;
-    }
-
-    .mondrian-card:hover, .mondrian-card:active,
-    .album-card:hover, .album-card:active,
-    .stream-card:hover, .stream-card:active,
-    .photo-card:hover, .photo-card:active,
-    .home-card:hover, .home-card:active,
-    .index-card:hover, .index-card:active {
-        transform: none !important;
-        box-shadow: none !important;
-        z-index: 1 !important;
+        border-radius: 12px !important;
+        border: 1px solid var(--card-border) !important;
     }
 
     .mondrian-thumb,
@@ -280,13 +261,7 @@ body {
     .photo-thumb,
     .home-thumb,
     .index-thumb {
-        border-radius: 0 !important;
-        background: rgb(0, 0, 0) !important;
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-        box-shadow: none !important;
-        border: none !important;
+        border-radius: 12px !important;
     }
 
     .mondrian-thumb img,
@@ -295,13 +270,8 @@ body {
     .photo-thumb img,
     .home-thumb img,
     .index-thumb img {
-        border-radius: 0 !important;
-        object-fit: contain !important; 
-        object-position: center !important;
-        width: 100% !important;
-        height: 100% !important;
-        image-rendering: high-dpi;
-        image-rendering: -webkit-optimize-contrast;
+        border-radius: 12px !important;
+        object-fit: fill !important;
     }
     
     .mondrian-overlay,
@@ -310,24 +280,7 @@ body {
     .photo-overlay,
     .home-overlay,
     .index-overlay {
-        display: none !important;
-    }
-    
-    .nav-bar-compact {
-        width: 100vw !important;
-        position: relative !important;
-        left: 50% !important;
-        right: 50% !important;
-        margin-left: -50vw !important;
-        margin-right: -50vw !important;
-        gap: 2px !important;
-        margin-bottom: 12px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        box-sizing: border-box !important;
-        background: rgb(0, 0, 0) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        display: block !important;
     }
 }
 
