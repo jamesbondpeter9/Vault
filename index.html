@@ -122,13 +122,14 @@
 
         /* Mobile specific enhancements */
         @media(max-width: 500px) {
-            /* Apply Montserrat font on mobile globally, set dark background, and remove white blur effect */
+            /* 1. Use background black colour with rgb(0, 0, 0) with high contrast as high quality resolution */
             html, body {
-                background: #000000 !important;
+                background: rgb(0, 0, 0) !important;
                 color: #ffffff !important;
                 font-family: 'Montserrat', sans-serif !important;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
             }
 
             .home-grid {
@@ -144,7 +145,7 @@
                 border-radius: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
-                background: #000 !important;
+                background: rgb(0, 0, 0) !important;
                 outline: none !important;
                 margin-bottom: 0 !important;
                 width: 100vw !important;
@@ -165,13 +166,13 @@
 
             .mondrian-thumb {
                 border-radius: 0 !important;
-                background: #000 !important;
+                background: rgb(0, 0, 0) !important;
                 position: relative !important;
                 width: 100% !important;
                 height: 100% !important;
             }
 
-            /* Show original quality inner image without cutting/cropping */
+            /* Show original quality inner image without cutting/cropping with high-resolution optimization */
             .mondrian-thumb img {
                 border-radius: 0 !important;
                 object-fit: contain !important; 
@@ -187,7 +188,7 @@
                 display: none !important;
             }
             
-            /* Expand navigation to edge-to-edge, remove white blur background, apply rgb(250, 226, 81) yellow inner theme, curve slightly, and use Montserrat font */
+            /* 2. Expand navigation to edge-to-edge, remove white blur background around navigations, use high contrast light yellow for navigation */
             .nav-bar-compact {
                 width: 100vw !important;
                 position: relative !important;
@@ -195,28 +196,32 @@
                 right: 50% !important;
                 margin-left: -50vw !important;
                 margin-right: -50vw !important;
-                gap: 3px !important;
+                gap: 2px !important;
                 margin-bottom: 12px !important;
-                padding-left: 2px !important;
-                padding-right: 2px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
                 box-sizing: border-box !important;
-                background: #000000 !important;
+                background: rgb(0, 0, 0) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
             }
 
             .mondrian-nav-box {
                 height: 42px !important;
                 font-size: 0.75rem !important;
-                border-radius: 6px !important;
-                background: rgb(250, 226, 81) !important; /* Specified yellow inner background */
-                color: #ffffff !important; /* White color font */
-                border: 1px solid #e0c238 !important;
+                border-radius: 4px !important;
+                background: #fffacd !important; /* High contrast light yellow (LemonChiffon) */
+                color: #000000 !important; /* High contrast dark text on light yellow */
+                border: 1px solid #eedaa2 !important;
                 backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
                 font-family: 'Montserrat', sans-serif !important;
+                font-weight: 800 !important;
             }
 
             .mondrian-nav-box:hover {
-                background: rgba(250, 226, 81, 0.85) !important;
-                color: #ffffff !important;
+                background: #fff8dc !important; /* Cornsilk hover for high contrast */
+                color: #000000 !important;
                 transform: none !important;
             }
         }
@@ -302,12 +307,12 @@
     <div class="site-container">
         <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="color: #ffffff;">Home</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
             <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
-            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800; color: #ffffff;">Logout</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
