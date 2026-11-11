@@ -7,6 +7,7 @@
     --card-border-hover: rgba(255, 255, 255, 1);
     --gold-accent: rgba(255, 215, 0, 0.65);
     --gold-glow-nav: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+    --gold-glow-page: 0 0 25px rgba(255, 215, 0, 0.25), inset 0 0 50px rgba(255, 215, 0, 0.08);
     --primary: #ffffff;
     --text-main: #ffffff;
     --text-muted: #aaaaaa;
@@ -31,14 +32,15 @@ body {
     background-color: rgb(0, 0, 0);
     background-image: 
         radial-gradient(circle at 50% -20%, rgba(30, 30, 30, 0.8) 0%, transparent 60%),
-        radial-gradient(circle at 10% 80%, rgba(255, 223, 0, 0.08) 0%, transparent 35%),
-        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
-        linear-gradient(135deg, rgba(5, 5, 5, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
-    color: var(--text-main);
+        radial-gradient(circle at 10% 80%, rgba(255, 215, 0, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(15, 12, 0, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
+    color: #ffffff;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     padding: 40px 20px;
+    box-shadow: var(--gold-glow-page);
 }
 
 .site-container { width: 100%; max-width: 1700px; }
@@ -122,12 +124,14 @@ body {
 
 
 /* ==========================================================================
-   SECTION 1: WEB BROWSER STUFF (Image/albums, photostream, view & Media/stream, videotag, watch)
+   SECTION 1: WEB BROWSER STUFF (Matched across all pages excluding models.html)
    ========================================================================== */
 .mondrian-card,
 .album-card,
 .stream-card,
-.photo-card {
+.photo-card,
+.home-card,
+.index-card {
     position: relative;
     width: 100%;
     height: 100%;
@@ -145,27 +149,37 @@ body {
 .mondrian-card:hover,
 .album-card:hover,
 .stream-card:hover,
-.photo-card:hover {
+.photo-card:hover,
+.home-card:hover,
+.index-card:hover {
     transform: translateY(-2px);
     z-index: 10;
 }
 
 .mondrian-card.portrait,
 .album-card.portrait,
-.stream-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+.stream-card.portrait,
+.home-card.portrait,
+.index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
 .mondrian-card.landscape,
 .album-card.landscape,
-.stream-card.landscape { grid-column: span 2; grid-row: span 4; }
+.stream-card.landscape,
+.home-card.landscape,
+.index-card.landscape { grid-column: span 2; grid-row: span 4; }
 
 .mondrian-card.square,
 .album-card.square,
-.stream-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+.stream-card.square,
+.home-card.square,
+.index-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
 @media(max-width: 900px) {
     .mondrian-card.portrait, .mondrian-card.landscape, .mondrian-card.square,
     .album-card.portrait, .album-card.landscape, .album-card.square,
-    .stream-card.portrait, .stream-card.landscape, .stream-card.square {
+    .stream-card.portrait, .stream-card.landscape, .stream-card.square,
+    .home-card.portrait, .home-card.landscape, .home-card.square,
+    .index-card.portrait, .index-card.landscape, .index-card.square {
         grid-column: span 1;
         grid-row: span 2;
     }
@@ -174,7 +188,9 @@ body {
 .mondrian-thumb,
 .album-thumb,
 .stream-thumb,
-.photo-thumb {
+.photo-thumb,
+.home-thumb,
+.index-thumb {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -192,7 +208,9 @@ body {
 .mondrian-thumb img,
 .album-thumb img,
 .stream-thumb img,
-.photo-thumb img {
+.photo-thumb img,
+.home-thumb img,
+.index-thumb img {
     width: 100%;
     height: 100%;
     object-fit: fill;
@@ -203,7 +221,7 @@ body {
 
 
 /* ==========================================================================
-   SECTION 2: MOBILE STUFF (Image/albums, photostream, view & Media/stream, videotag, watch)
+   SECTION 2: MOBILE STUFF (Matched across all pages excluding models.html)
    ========================================================================== */
 @media(max-width: 500px) {
     html, body {
@@ -219,14 +237,17 @@ body {
     .albums-grid,
     .photostream-grid,
     .stream-grid,
-    .videos-grid {
+    .videos-grid,
+    .index-grid {
         grid-template-columns: 1fr !important;
     }
 
     .mondrian-card,
     .album-card,
     .stream-card,
-    .photo-card {
+    .photo-card,
+    .home-card,
+    .index-card {
         grid-column: 1 / -1 !important;
         grid-row: auto !important;
         aspect-ratio: 16 / 10 !important;
@@ -245,7 +266,9 @@ body {
     .mondrian-card:hover, .mondrian-card:active,
     .album-card:hover, .album-card:active,
     .stream-card:hover, .stream-card:active,
-    .photo-card:hover, .photo-card:active {
+    .photo-card:hover, .photo-card:active,
+    .home-card:hover, .home-card:active,
+    .index-card:hover, .index-card:active {
         transform: none !important;
         box-shadow: none !important;
         z-index: 1 !important;
@@ -254,7 +277,9 @@ body {
     .mondrian-thumb,
     .album-thumb,
     .stream-thumb,
-    .photo-thumb {
+    .photo-thumb,
+    .home-thumb,
+    .index-thumb {
         border-radius: 0 !important;
         background: rgb(0, 0, 0) !important;
         position: relative !important;
@@ -267,7 +292,9 @@ body {
     .mondrian-thumb img,
     .album-thumb img,
     .stream-thumb img,
-    .photo-thumb img {
+    .photo-thumb img,
+    .home-thumb img,
+    .index-thumb img {
         border-radius: 0 !important;
         object-fit: contain !important; 
         object-position: center !important;
@@ -280,7 +307,9 @@ body {
     .mondrian-overlay,
     .album-overlay,
     .stream-overlay,
-    .photo-overlay {
+    .photo-overlay,
+    .home-overlay,
+    .index-overlay {
         display: none !important;
     }
     
@@ -306,7 +335,7 @@ body {
         font-size: 0.75rem !important;
         border-radius: 3px !important;
         background: #FFD700 !important;
-        color: #000000 !important;
+        color: #ffffff !important;
         border: 1px solid #FFC700 !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -317,14 +346,19 @@ body {
 
     .mondrian-nav-box:hover {
         background: #FFE033 !important;
-        color: #000000 !important;
+        color: #ffffff !important;
         transform: none !important;
         box-shadow: var(--gold-glow-nav) !important;
     }
 }
 
 
-.mondrian-overlay {
+.mondrian-overlay,
+.album-overlay,
+.stream-overlay,
+.photo-overlay,
+.home-overlay,
+.index-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -362,7 +396,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
+    color: #ffffff;
     position: relative;
     box-shadow: none !important;
 }
@@ -373,7 +407,7 @@ input[type="text"] {
     border: 1px solid var(--card-border);
     border-radius: 12px;
     padding: 12px 16px;
-    color: var(--text-main);
+    color: #ffffff;
     font-family: 'Montserrat', sans-serif;
     outline: none;
     box-shadow: none !important;
@@ -408,7 +442,7 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: n
 .page-btn {
     background: var(--card-bg, #111);
     border: 1px solid var(--card-border, #333);
-    color: var(--text-muted, #ccc);
+    color: #ffffff;
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -427,7 +461,7 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: n
     cursor: not-allowed;
 }
 .page-info {
-    color: var(--text-muted, #ccc);
+    color: #ffffff;
     font-size: 0.85rem;
     font-weight: 700;
     font-family: 'Montserrat', sans-serif;
