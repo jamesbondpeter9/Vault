@@ -169,17 +169,21 @@ body {
 .home-card.portrait,
 .index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
-/* 1. Web browser uses span 4 for thumbnails */
+/* Web browser width span 4 & increased vertical height specifically for index.html / home-card */
 @media(min-width: 501px) {
     .mondrian-card.landscape,
     .album-card.landscape,
     .stream-card.landscape,
     .home-card.landscape,
-    .index-card.landscape,
+    .index-card.landscape { 
+        grid-column: span 4 !important; 
+        grid-row: span 4 !important; 
+    }
+    
     .index-card, 
     .home-card { 
         grid-column: span 4 !important; 
-        grid-row: span 4 !important; 
+        grid-row: span 6 !important; 
     }
 }
 
@@ -269,7 +273,6 @@ body {
         width: 100vw !important;
     }
 
-    /* 2. Increased vertical height of thumbnails on mobile matching index.html / view.html */
     .mondrian-card,
     .album-card,
     .stream-card,
@@ -299,7 +302,6 @@ body {
         width: 100vw !important;
     }
 
-    /* 3. Original quality image handling for thumbnails in models.html on mobile */
     .models-card .mondrian-thumb img,
     .models-card img,
     .model-thumb img,
@@ -349,7 +351,6 @@ body {
         box-sizing: border-box !important;
     }
 
-    /* 4. Unified font style across remaining all pages in mobile */
     .mondrian-nav-box {
         background: #FFEE55 !important;
         border-color: #FFDD33 !important;
