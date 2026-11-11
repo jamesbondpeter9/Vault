@@ -70,7 +70,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #000000 !important;
+    color: #ffffff !important;
     font-weight: 800;
     box-shadow: var(--gold-glow-nav) !important;
     transition: all 0.3s ease;
@@ -78,7 +78,7 @@ body {
 
 .mondrian-nav-box:hover {
     background: #FFE033 !important;
-    color: #000000 !important;
+    color: #ffffff !important;
     border-color: #ffffff !important;
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5) !important;
     transform: translateY(-1px);
