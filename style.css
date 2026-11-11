@@ -72,6 +72,7 @@ body {
     justify-content: center;
     color: #ffffff !important;
     font-weight: 800;
+    font-family: 'Montserrat', sans-serif !important;
     text-shadow: 
         -1px -1px 0 #000000,  
          1px -1px 0 #000000,
@@ -168,7 +169,7 @@ body {
 .home-card.portrait,
 .index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
-/* Merged thumbnail width ONLY for web browsers */
+/* 1. Web browser uses span 4 for thumbnails */
 @media(min-width: 501px) {
     .mondrian-card.landscape,
     .album-card.landscape,
@@ -177,8 +178,8 @@ body {
     .index-card.landscape,
     .index-card, 
     .home-card { 
-        grid-column: span 2 !important; 
-        grid-row: span 2 !important; 
+        grid-column: span 4 !important; 
+        grid-row: span 4 !important; 
     }
 }
 
@@ -268,6 +269,7 @@ body {
         width: 100vw !important;
     }
 
+    /* 2. Increased vertical height of thumbnails on mobile matching index.html / view.html */
     .mondrian-card,
     .album-card,
     .stream-card,
@@ -276,7 +278,7 @@ body {
     .index-card {
         grid-column: 1 / -1 !important;
         grid-row: auto !important;
-        aspect-ratio: 16 / 10 !important;
+        aspect-ratio: 4 / 5 !important;
         height: auto !important;
         border-radius: 0 !important;
         border: none !important;
@@ -297,6 +299,21 @@ body {
         width: 100vw !important;
     }
 
+    /* 3. Original quality image handling for thumbnails in models.html on mobile */
+    .models-card .mondrian-thumb img,
+    .models-card img,
+    .model-thumb img,
+    .models-grid img {
+        image-rendering: auto !important;
+        image-rendering: high-dpi !important;
+        -webkit-font-smoothing: subpixel-antialiased !important;
+        object-fit: none !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+    }
+
     .mondrian-thumb img,
     .album-thumb img,
     .stream-thumb img,
@@ -304,8 +321,9 @@ body {
     .home-thumb img,
     .index-thumb img {
         border-radius: 0 !important;
-        object-fit: contain !important;
+        object-fit: cover !important;
         width: 100vw !important;
+        height: 100% !important;
     }
     
     .mondrian-overlay,
@@ -331,12 +349,14 @@ body {
         box-sizing: border-box !important;
     }
 
-    /* Mobile Navigation Light Yellow Styling matching Web Browser font style */
+    /* 4. Unified font style across remaining all pages in mobile */
     .mondrian-nav-box {
         background: #FFEE55 !important;
         border-color: #FFDD33 !important;
         color: #ffffff !important;
+        font-family: 'Montserrat', sans-serif !important;
         font-weight: 800 !important;
+        font-size: 0.85rem !important;
         text-shadow: 
             -1px -1px 0 #000000,  
              1px -1px 0 #000000,
@@ -363,6 +383,7 @@ body {
     font-weight: 700;
     font-size: 0.8rem;
     color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
     text-shadow: 0 2px 4px rgba(0,0,0,0.9);
     z-index: 5;
     box-sizing: border-box;
