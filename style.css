@@ -63,8 +63,8 @@ body {
     height: 52px !important;
     font-size: 0.85rem !important;
     border-radius: 12px !important;
-    background: #ffeb3b;
-    border: 1px solid rgba(255, 235, 59, 0.6);
+    background: rgb(255, 178, 44);
+    border: 1px solid rgba(255, 178, 44, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -75,7 +75,7 @@ body {
 }
 
 .mondrian-nav-box:hover {
-    background: #fff176;
+    background: rgba(255, 178, 44, 0.85);
     color: #000000;
     border-color: #ffffff;
     box-shadow: none !important;
@@ -265,9 +265,9 @@ body {
         height: 42px !important;
         font-size: 0.75rem !important;
         border-radius: 4px !important;
-        background: #fffacd !important;
+        background: rgb(255, 178, 44) !important;
         color: #000000 !important;
-        border: 1px solid #eedaa2 !important;
+        border: 1px solid rgba(255, 178, 44, 0.6) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         font-family: 'Montserrat', sans-serif !important;
@@ -276,7 +276,7 @@ body {
     }
 
     .mondrian-nav-box:hover {
-        background: #fff8dc !important;
+        background: rgba(255, 178, 44, 0.85) !important;
         color: #000000 !important;
         transform: none !important;
         box-shadow: none !important;
