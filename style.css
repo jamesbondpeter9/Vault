@@ -5,7 +5,8 @@
     --card-bg: rgba(10, 10, 10, 0.95);
     --card-border: rgba(255, 255, 255, 0.35);
     --card-border-hover: rgba(255, 255, 255, 1);
-    --gold-accent: rgba(255, 223, 0, 0.65);
+    --gold-accent: rgba(255, 215, 0, 0.65);
+    --gold-glow-nav: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
     --primary: #ffffff;
     --text-main: #ffffff;
     --text-muted: #aaaaaa;
@@ -61,23 +62,23 @@ body {
 .mondrian-nav-box {
     height: 52px !important;
     font-size: 0.85rem !important;
-    border-radius: 12px !important;
-    background: rgb(255, 222, 66) !important;
-    border: 1px solid rgba(255, 222, 66, 0.9) !important;
+    border-radius: 8px !important;
+    background: #FFD700 !important;
+    border: 1px solid #FFC700 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000000 !important;
     font-weight: 800;
-    box-shadow: none !important;
+    box-shadow: var(--gold-glow-nav) !important;
     transition: all 0.3s ease;
 }
 
 .mondrian-nav-box:hover {
-    background: rgb(255, 222, 66) !important;
+    background: #FFE033 !important;
     color: #000000 !important;
     border-color: #ffffff !important;
-    box-shadow: none !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5) !important;
     transform: translateY(-1px);
 }
 
@@ -303,22 +304,22 @@ body {
     .mondrian-nav-box {
         height: 42px !important;
         font-size: 0.75rem !important;
-        border-radius: 4px !important;
-        background: rgb(255, 222, 66) !important;
+        border-radius: 3px !important;
+        background: #FFD700 !important;
         color: #000000 !important;
-        border: 1px solid rgba(255, 222, 66, 0.9) !important;
+        border: 1px solid #FFC700 !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 800 !important;
-        box-shadow: none !important;
+        box-shadow: var(--gold-glow-nav) !important;
     }
 
     .mondrian-nav-box:hover {
-        background: rgb(255, 222, 66) !important;
+        background: #FFE033 !important;
         color: #000000 !important;
         transform: none !important;
-        box-shadow: none !important;
+        box-shadow: var(--gold-glow-nav) !important;
     }
 }
 
