@@ -80,6 +80,9 @@ body {
     box-shadow: 0 20px 35px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 235, 59, 0.6);
 }
 
+/* ==========================================================
+   DESKTOP BROWSER THUMBNAILS SECTION (Exact Index.html Structure)
+   ================================================---------- */
 .mondrian-card { display: flex; flex-direction: column; text-decoration: none; height: 100%; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .mondrian-card:hover { transform: translateY(-3px); }
 
@@ -96,6 +99,60 @@ body {
 }
 
 .mondrian-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 20px; }
+
+
+/* ==========================================================
+   MOBILE THUMBNAILS SECTION (Separate Mobile Structure)
+   ================================================---------- */
+@media(max-width: 500px) {
+    .mondrian-card {
+        grid-column: 1 / -1 !important;
+        grid-row: auto !important;
+        aspect-ratio: 16 / 10 !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: rgb(0, 0, 0) !important;
+        outline: none !important;
+        margin-bottom: 0 !important;
+        width: 100vw !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .mondrian-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+        z-index: 1 !important;
+    }
+
+    .mondrian-card:active {
+        transform: none !important;
+        z-index: 1 !important;
+    }
+
+    .mondrian-thumb {
+        border-radius: 0 !important;
+        background: rgb(0, 0, 0) !important;
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .mondrian-thumb img {
+        border-radius: 0 !important;
+        object-fit: contain !important;
+        object-position: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        image-rendering: high-dpi;
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
 
 .stream-layout-container { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: center; max-width: 1650px; margin: 0 auto; }
 @media(max-width: 1000px) { .stream-layout-container { grid-template-columns: 1fr; } }
