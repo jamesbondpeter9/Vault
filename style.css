@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
 
 :root {
     --bg-base: #000000;
@@ -29,7 +30,7 @@ html {
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #000000;
+    background-color: rgb(0, 0, 0);
     background-image: 
         radial-gradient(circle at 50% -20%, rgba(30, 30, 30, 0.8) 0%, transparent 60%),
         radial-gradient(circle at 10% 80%, rgba(255, 223, 0, 0.08) 0%, transparent 35%),
@@ -47,27 +48,30 @@ body {
 /* Navigation Bar Sizing & 2px Gap */
 .nav-bar-compact {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 2px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    max-width: 1700px;
+    margin-left: auto;
+    margin-right: auto;
 }
-@media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .mondrian-nav-card { text-decoration: none; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .mondrian-nav-card:hover { transform: translateY(-2px); }
 
 .mondrian-nav-box {
-    width: 100%;
-    height: 70px;
+    height: 52px !important;
+    font-size: 0.85rem !important;
+    border-radius: 12px !important;
     background: #ffeb3b;
     backdrop-filter: blur(40px);
     border: 1px solid rgba(255, 235, 59, 0.6);
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000000;
-    font-size: 0.95rem;
     font-weight: 800;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 235, 59, 0.35);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -78,33 +82,125 @@ body {
     color: #000000;
     border-color: #ffffff;
     box-shadow: 0 20px 35px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 235, 59, 0.6);
+    transform: translateY(-1px);
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 140px;
+    grid-auto-flow: dense;
+    gap: 2px;
+    align-items: stretch;
+    padding-left: 2px;
+    padding-right: 2px;
+    box-sizing: border-box;
+}
+@media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media(max-width: 900px) { 
+    .home-grid { 
+        grid-template-columns: repeat(2, minmax(0, 1fr)); 
+        grid-auto-rows: 150px;
+    } 
+}
+@media(max-width: 500px) { 
+    .home-grid { 
+        grid-template-columns: 1fr !important; 
+        grid-auto-rows: auto !important;
+        gap: 2px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100vw !important;
+        position: relative !important;
+        left: 50% !important;
+        right: 50% !important;
+        margin-left: -50vw !important;
+        margin-right: -50vw !important;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    } 
 }
 
 /* ==========================================================
-   DESKTOP BROWSER THUMBNAILS SECTION (Exact Index.html Structure)
+   DESKTOP BROWSER THUMBNAILS SECTION
    ================================================---------- */
-.mondrian-card { display: flex; flex-direction: column; text-decoration: none; height: 100%; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.mondrian-card:hover { transform: translateY(-3px); }
+.mondrian-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    text-decoration: none;
+    background: #000;
+    display: block;
+    box-sizing: border-box;
+    will-change: transform, box-shadow;
+    transform: translate3d(0,0,0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.mondrian-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+.mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
+.mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+
+@media(max-width: 900px) {
+    .mondrian-card.portrait,
+    .mondrian-card.landscape,
+    .mondrian-card.square {
+        grid-column: span 1;
+        grid-row: span 2;
+    }
+}
 
 .mondrian-thumb {
     width: 100%;
     height: 100%;
-    min-height: 100%;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), var(--neon-glow);
 }
 
-.mondrian-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 20px; }
+.mondrian-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    object-position: center;
+    display: block;
+    border-radius: 12px;
+}
 
 
 /* ==========================================================
-   MOBILE THUMBNAILS SECTION (Separate Mobile Structure)
+   MOBILE THUMBNAILS SECTION
    ================================================---------- */
 @media(max-width: 500px) {
+    html, body {
+        background: rgb(0, 0, 0) !important;
+        color: #ffffff !important;
+        font-family: 'Montserrat', sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    .home-grid {
+        grid-template-columns: 1fr !important;
+    }
+
     .mondrian-card {
         grid-column: 1 / -1 !important;
         grid-row: auto !important;
@@ -121,14 +217,10 @@ body {
         transition: none !important;
     }
 
-    .mondrian-card:hover {
-        transform: none !important;
-        box-shadow: none !important;
-        z-index: 1 !important;
-    }
-
+    .mondrian-card:hover,
     .mondrian-card:active {
         transform: none !important;
+        box-shadow: none !important;
         z-index: 1 !important;
     }
 
@@ -144,15 +236,75 @@ body {
 
     .mondrian-thumb img {
         border-radius: 0 !important;
-        object-fit: contain !important;
+        object-fit: contain !important; 
         object-position: center !important;
         width: 100% !important;
         height: 100% !important;
         image-rendering: high-dpi;
         image-rendering: -webkit-optimize-contrast;
     }
+    
+    .mondrian-overlay {
+        display: none !important;
+    }
+    
+    .nav-bar-compact {
+        width: 100vw !important;
+        position: relative !important;
+        left: 50% !important;
+        right: 50% !important;
+        margin-left: -50vw !important;
+        margin-right: -50vw !important;
+        gap: 2px !important;
+        margin-bottom: 12px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box !important;
+        background: rgb(0, 0, 0) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .mondrian-nav-box {
+        height: 42px !important;
+        font-size: 0.75rem !important;
+        border-radius: 4px !important;
+        background: #fffacd !important;
+        color: #000000 !important;
+        border: 1px solid #eedaa2 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 800 !important;
+        box-shadow: none !important;
+    }
+
+    .mondrian-nav-box:hover {
+        background: #fff8dc !important;
+        color: #000000 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
 }
 
+
+.mondrian-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 22px 10px 8px 10px;
+    background: transparent;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    z-index: 5;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .stream-layout-container { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: center; max-width: 1650px; margin: 0 auto; }
 @media(max-width: 1000px) { .stream-layout-container { grid-template-columns: 1fr; } }
@@ -207,9 +359,44 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0
 }
 .btn-primary:hover { background: #e0e0e0; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
 
-/* --- Smoothness & Performance Extensions --- */
+/* Pagination Controls Styling */
+.pagination-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+.page-btn {
+    background: var(--card-bg, #111);
+    border: 1px solid var(--card-border, #333);
+    color: var(--text-muted, #ccc);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+.page-btn:hover:not(:disabled) {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.page-info {
+    color: var(--text-muted, #ccc);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
 
-/* Smooth image load animation to prevent jarring pop-ins */
+/* --- Smoothness & Performance Extensions --- */
 @keyframes imageFadeIn {
     from {
         opacity: 0;
@@ -225,7 +412,6 @@ img, .lazy-thumb {
     animation: imageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Glassmorphic smooth modal animations */
 @keyframes modalScaleIn {
     from {
         opacity: 0;
@@ -249,7 +435,6 @@ div[id*="Modal"] > .control-panel {
     animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* GPU acceleration for interactive UI components */
 .mondrian-nav-box,
 .mondrian-card,
 .tag-pill,
