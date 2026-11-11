@@ -10,6 +10,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video Portal - Home</title>
+    <!-- Imported Montserrat Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .nav-bar-compact {
@@ -120,10 +122,11 @@
 
         /* Mobile specific enhancements */
         @media(max-width: 500px) {
-            /* Remove white blurness from page and apply dark background */
+            /* Apply Montserrat font on mobile globally, set dark background, and remove white blur effect */
             html, body {
                 background: #000000 !important;
                 color: #ffffff !important;
+                font-family: 'Montserrat', sans-serif !important;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
@@ -136,7 +139,7 @@
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 16 / 10 !important; /* Increased vertical height slightly */
+                aspect-ratio: 16 / 10 !important;
                 height: auto !important;
                 border-radius: 0 !important;
                 border: none !important;
@@ -184,7 +187,7 @@
                 display: none !important;
             }
             
-            /* Expand navigation to edge-to-edge, remove white blurness, use rgb(255,191,0) yellow inner background, curve little bit each navigation */
+            /* Expand navigation to edge-to-edge, remove white blur background, apply rgb(250, 226, 81) yellow inner theme, curve slightly, and use Montserrat font */
             .nav-bar-compact {
                 width: 100vw !important;
                 position: relative !important;
@@ -203,15 +206,16 @@
             .mondrian-nav-box {
                 height: 42px !important;
                 font-size: 0.75rem !important;
-                border-radius: 6px !important; /* Curved a little bit for each navigation box */
-                background: rgb(255, 191, 0) !important; /* Specified yellow inner background */
+                border-radius: 6px !important;
+                background: rgb(250, 226, 81) !important; /* Specified yellow inner background */
                 color: #ffffff !important; /* White color font */
-                border: 1px solid #e0a800 !important;
+                border: 1px solid #e0c238 !important;
                 backdrop-filter: none !important;
+                font-family: 'Montserrat', sans-serif !important;
             }
 
             .mondrian-nav-box:hover {
-                background: rgba(255, 191, 0, 0.85) !important;
+                background: rgba(250, 226, 81, 0.85) !important;
                 color: #ffffff !important;
                 transform: none !important;
             }
