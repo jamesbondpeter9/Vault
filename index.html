@@ -120,7 +120,7 @@
 
         /* Mobile specific enhancements */
         @media(max-width: 500px) {
-            /* Full HD resolution quality rendering & deep dark black theme */
+            /* Remove white blurness from page and apply dark background */
             html, body {
                 background: #000000 !important;
                 color: #ffffff !important;
@@ -132,10 +132,11 @@
                 grid-template-columns: 1fr !important;
             }
 
+            /* Increase vertical height of thumbnails slightly and show original quality inner image without cropping */
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 16 / 9.5 !important;
+                aspect-ratio: 16 / 10 !important; /* Increased vertical height slightly */
                 height: auto !important;
                 border-radius: 0 !important;
                 border: none !important;
@@ -148,7 +149,7 @@
                 transition: none !important;
             }
 
-            /* Remove hover and click zoom/translate effects on mobile */
+            /* Remove hover and click effects on mobile */
             .mondrian-card:hover {
                 transform: none !important;
                 box-shadow: none !important;
@@ -167,10 +168,10 @@
                 height: 100% !important;
             }
 
-            /* Stretch inner thumbnail image to fill completely without reducing size or cropping */
+            /* Show original quality inner image without cutting/cropping */
             .mondrian-thumb img {
                 border-radius: 0 !important;
-                object-fit: fill !important;
+                object-fit: contain !important; 
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
@@ -183,7 +184,7 @@
                 display: none !important;
             }
             
-            /* Expand navigation to touch edges completely with dark background and yellow inner navigation theme with white font */
+            /* Expand navigation to edge-to-edge, remove white blurness, use rgb(255,191,0) yellow inner background, curve little bit each navigation */
             .nav-bar-compact {
                 width: 100vw !important;
                 position: relative !important;
@@ -191,10 +192,10 @@
                 right: 50% !important;
                 margin-left: -50vw !important;
                 margin-right: -50vw !important;
-                gap: 2px !important;
+                gap: 3px !important;
                 margin-bottom: 12px !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
+                padding-left: 2px !important;
+                padding-right: 2px !important;
                 box-sizing: border-box !important;
                 background: #000000 !important;
             }
@@ -202,15 +203,15 @@
             .mondrian-nav-box {
                 height: 42px !important;
                 font-size: 0.75rem !important;
-                border-radius: 0 !important;
-                background: #ffcc00 !important; /* Yellow inner background theme */
+                border-radius: 6px !important; /* Curved a little bit for each navigation box */
+                background: rgb(255, 191, 0) !important; /* Specified yellow inner background */
                 color: #ffffff !important; /* White color font */
-                border: 1px solid #e6b800 !important;
+                border: 1px solid #e0a800 !important;
                 backdrop-filter: none !important;
             }
 
             .mondrian-nav-box:hover {
-                background: #ffdb4d !important;
+                background: rgba(255, 191, 0, 0.85) !important;
                 color: #ffffff !important;
                 transform: none !important;
             }
@@ -302,7 +303,7 @@
             <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
             <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
             <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
-            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800; color: #ff4d4d;">Logout</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800; color: #ffffff;">Logout</div></a>
         </div>
         
         <div class="home-grid" id="streamsGrid"></div>
