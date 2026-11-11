@@ -169,7 +169,7 @@ body {
 .home-card.portrait,
 .index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
-/* Web browser width span 4 & increased vertical height specifically for index.html / home-card */
+/* Web browser width span 4 & increased vertical height specifically in index.html and view.html */
 @media(min-width: 501px) {
     .mondrian-card.landscape,
     .album-card.landscape,
