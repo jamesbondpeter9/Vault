@@ -11,6 +11,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Folder View - Portal</title>
+    <!-- Imported Montserrat Font matching index.html -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
     <style>
         html, body {
@@ -96,6 +98,120 @@
             height: 100%;
             position: absolute;
             inset: 0;
+        }
+
+        /* Mobile specific enhancements matching index.html structure, shapes, fonts, colours, and backgrounds */
+        @media(max-width: 500px) {
+            html, body {
+                background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
+                color: #ffffff !important;
+                font-family: 'Montserrat', sans-serif !important;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+                -webkit-tap-highlight-color: transparent !important;
+            }
+
+            .vault-grid {
+                grid-template-columns: 1fr !important;
+                grid-auto-rows: auto !important;
+                gap: 0.5px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .mondrian-card {
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 11 !important;
+                height: auto !important;
+                border-radius: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
+                background: rgb(0, 0, 0) !important;
+                outline: none !important;
+                margin-bottom: 0.5px !important;
+                width: 100vw !important;
+                position: relative !important;
+                left: 50% !important;
+                right: 50% !important;
+                margin-left: -50vw !important;
+                margin-right: -50vw !important;
+                transform: none !important;
+                transition: none !important;
+                -webkit-tap-highlight-color: transparent !important;
+                box-sizing: border-box !important;
+            }
+
+            .mondrian-thumb {
+                border-radius: 0 !important;
+                background: rgb(0, 0, 0) !important;
+                position: relative !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+
+            .mondrian-thumb img {
+                border-radius: 0 !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                width: 100% !important;
+                height: 100% !important;
+                filter: saturate(1.15) contrast(1.1) !important;
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+
+            .nav-bar-compact {
+                width: 100% !important;
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                gap: 4px !important;
+                margin-bottom: 12px !important;
+                padding-left: 4px !important;
+                padding-right: 4px !important;
+                box-sizing: border-box !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .mondrian-nav-box {
+                height: 42px !important;
+                font-size: 0.85rem !important;
+                border-radius: 12px !important;
+                background: rgba(15, 12, 5, 0.8) !important;
+                color: #fff !important;
+                border: 1px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 0 15px rgba(212, 175, 55, 0.15) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                font-family: 'Plus Jakarta Sans', sans-serif !important;
+                font-weight: 700 !important;
+                -webkit-tap-highlight-color: transparent !important;
+            }
+
+            .mondrian-nav-box:hover,
+            .mondrian-nav-box:active,
+            .mondrian-nav-box:focus {
+                background: rgba(25, 20, 8, 0.9) !important;
+                color: #fff !important;
+                border-color: rgba(212, 175, 55, 0.7) !important;
+                transform: none !important;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.3) !important;
+                outline: none !important;
+            }
         }
 
         /* Inbuilt Custom Photo Viewer Styles */
@@ -227,6 +343,12 @@
                 max-width: 100vw !important;
                 object-fit: contain !important;
                 transform: none !important;
+            }
+            /* Auto-rotation feature in custom photoviewer for landscape photos on mobile browsers */
+            .viewer-image.mobile-auto-rotate {
+                transform: rotate(90deg) !important;
+                max-width: 100vh !important;
+                max-height: 100vw !important;
             }
         }
     </style>
@@ -536,7 +658,14 @@
         function updateImageTransform() {
             const viewerImg = document.getElementById('viewerImageElement');
             if (!viewerImg) return;
-            viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+            const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
+            const isAutoRotated = isMobileDevice && viewerImg.classList.contains('mobile-auto-rotate');
+            
+            if (isAutoRotated) {
+                viewerImg.style.transform = `translate(${panX}px, ${panY}px) rotate(90deg) scale(${currentScale})`;
+            } else {
+                viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+            }
         }
 
         function openPhotoModal(index) {
@@ -553,7 +682,7 @@
                 const viewerTitle = document.getElementById('viewerTitleElement');
 
                 if (modal && viewerImg) {
-                    viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural');
+                    viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
                     viewerImg.style.transform = 'scale(1) translate(0px, 0px)';
                     viewerImg.src = fullResUrl;
                     if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo';
@@ -563,8 +692,9 @@
                     if (isMobileDevice) {
                         const tempImg = new Image();
                         tempImg.onload = () => {
-                            if (tempImg.naturalWidth >= tempImg.naturalHeight) {
-                                viewerImg.classList.add('mobile-landscape-natural');
+                            if (tempImg.naturalWidth > tempImg.naturalHeight) {
+                                // Landscape photo detected on mobile: apply auto-rotation feature in custom photoviewer
+                                viewerImg.classList.add('mobile-auto-rotate');
                             } else {
                                 viewerImg.classList.add('mobile-portrait-natural');
                             }
@@ -579,7 +709,10 @@
             const modal = document.getElementById('inbuiltPhotoModal');
             if (modal) modal.classList.remove('active');
             const viewerImg = document.getElementById('viewerImageElement');
-            if (viewerImg) viewerImg.src = '';
+            if (viewerImg) {
+                viewerImg.src = '';
+                viewerImg.classList.remove('mobile-auto-rotate', 'mobile-landscape-natural', 'mobile-portrait-natural');
+            }
             currentScale = 1;
             panX = 0;
             panY = 0;
