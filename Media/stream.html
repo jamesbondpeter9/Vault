@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Mobile Browser Restriction Guard -->
+    <!-- Mobile Browser Restriction Guard (Blocks Mobile, Allows Desktop/Web) -->
     <script>
         (function() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -10,8 +10,8 @@
             // Additional check for touch capability / screen width as a fallback
             const isSmallScreen = window.innerWidth <= 800 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
             
-            if (!isMobile && !isSmallScreen) {
-                // Instantly replace the document content with a strict block message for desktop browsers
+            if (isMobile || isSmallScreen) {
+                // Instantly replace the document content with a strict block message for mobile browsers
                 document.documentElement.innerHTML = `
                     <head>
                         <title>Access Restricted</title>
@@ -53,12 +53,12 @@
                     <body>
                         <div class="blocked-container">
                             <h1>Access Restricted</h1>
-                            <p>This portal page is designed and locked exclusively for mobile browsers. Please open this link on your mobile device to proceed.</p>
+                            <p>This portal page is restricted and cannot be opened on mobile browsers. Please open this link on a desktop or web browser to proceed.</p>
                         </div>
                     </body>
                 `;
                 // Throw an error or halt execution to prevent further script loading
-                throw new Error("Desktop access blocked by mobile restriction guard.");
+                throw new Error("Mobile access blocked by browser restriction guard.");
             }
         })();
     </script>
@@ -578,7 +578,7 @@
 
                 tag.onclick = () => {
                     if (selectedModels.includes(model.name)) {
-                        selectedModels = selectedModels.filter(m => m.name);
+                        selectedModels = selectedModels.filter(m => m !== model.name);
                     } else {
                         selectedModels.push(model.name);
                     }
