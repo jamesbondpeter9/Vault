@@ -13,6 +13,295 @@
     <!-- Imported Montserrat Font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .nav-bar-compact {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 2px;
+            margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        .mondrian-nav-box {
+            height: 52px !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--card-border);
+            text-decoration: none;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mondrian-nav-box:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 140px;
+            grid-auto-flow: dense;
+            gap: 2px;
+            align-items: stretch;
+            padding-left: 2px;
+            padding-right: 2px;
+            box-sizing: border-box;
+        }
+        @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { 
+            .home-grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 150px;
+            } 
+        }
+        @media(max-width: 500px) { 
+            .home-grid { 
+                grid-template-columns: 1fr !important; 
+                grid-auto-rows: auto !important;
+                gap: 2px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: 100vw !important;
+                position: relative !important;
+                left: 50% !important;
+                right: 50% !important;
+                margin-left: -50vw !important;
+                margin-right: -50vw !important;
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            } 
+        }
+
+        .mondrian-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            text-decoration: none;
+            background: #000;
+            display: block;
+            box-sizing: border-box;
+            will-change: transform, box-shadow;
+            transform: translate3d(0,0,0);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mondrian-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
+        .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+
+        @media(max-width: 900px) {
+            .mondrian-card.portrait,
+            .mondrian-card.landscape,
+            .mondrian-card.square {
+                grid-column: span 1;
+                grid-row: span 2;
+            }
+        }
+
+        /* Mobile specific enhancements */
+        @media(max-width: 500px) {
+            /* 1. Use background black colour with rgb(0, 0, 0) with high contrast as high quality resolution */
+            html, body {
+                background: rgb(0, 0, 0) !important;
+                color: #ffffff !important;
+                font-family: 'Montserrat', sans-serif !important;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+            }
+
+            .home-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Increase vertical height of thumbnails slightly and show original quality inner image without cropping */
+            .mondrian-card {
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 10 !important;
+                height: auto !important;
+                border-radius: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: rgb(0, 0, 0) !important;
+                outline: none !important;
+                margin-bottom: 0 !important;
+                width: 100vw !important;
+                transform: none !important;
+                transition: none !important;
+            }
+
+            /* Remove hover and click effects on mobile */
+            .mondrian-card:hover {
+                transform: none !important;
+                box-shadow: none !important;
+                z-index: 1 !important;
+            }
+            .mondrian-card:active {
+                transform: none !important;
+                z-index: 1 !important;
+            }
+
+            .mondrian-thumb {
+                border-radius: 0 !important;
+                background: rgb(0, 0, 0) !important;
+                position: relative !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            /* Show original quality inner image without cutting/cropping with high-resolution optimization */
+            .mondrian-thumb img {
+                border-radius: 0 !important;
+                object-fit: contain !important; 
+                object-position: center !important;
+                width: 100% !important;
+                height: 100% !important;
+                image-rendering: high-dpi;
+                image-rendering: -webkit-optimize-contrast;
+            }
+            
+            /* Remove title on thumbnails */
+            .mondrian-overlay {
+                display: none !important;
+            }
+            
+            /* 2. Expand navigation to edge-to-edge, remove white blur background around navigations, use high contrast light yellow for navigation */
+            .nav-bar-compact {
+                width: 100vw !important;
+                position: relative !important;
+                left: 50% !important;
+                right: 50% !important;
+                margin-left: -50vw !important;
+                margin-right: -50vw !important;
+                gap: 2px !important;
+                margin-bottom: 12px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                box-sizing: border-box !important;
+                background: rgb(0, 0, 0) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .mondrian-nav-box {
+                height: 42px !important;
+                font-size: 0.75rem !important;
+                border-radius: 4px !important;
+                background: #fffacd !important; /* High contrast light yellow (LemonChiffon) */
+                color: #000000 !important; /* High contrast dark text on light yellow */
+                border: 1px solid #eedaa2 !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                font-family: 'Montserrat', sans-serif !important;
+                font-weight: 800 !important;
+            }
+
+            .mondrian-nav-box:hover {
+                background: #fff8dc !important; /* Cornsilk hover for high contrast */
+                color: #000000 !important;
+                transform: none !important;
+            }
+        }
+
+        .mondrian-thumb {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .mondrian-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            object-position: center;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .mondrian-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 22px 10px 8px 10px;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            z-index: 5;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Pagination Controls Styling */
+        .pagination-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 30px;
+            margin-bottom: 40px;
+        }
+        .page-btn {
+            background: var(--card-bg, #111);
+            border: 1px solid var(--card-border, #333);
+            color: var(--text-muted, #ccc);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .page-btn:hover:not(:disabled) {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .page-info {
+            color: var(--text-muted, #ccc);
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
 </head>
 <body>
     <div class="site-container">
