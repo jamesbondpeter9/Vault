@@ -128,6 +128,7 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
+                -webkit-tap-highlight-color: transparent !important;
             }
 
             .home-grid {
@@ -148,16 +149,16 @@
                 width: 100% !important;
                 transform: none !important;
                 transition: none !important;
+                -webkit-tap-highlight-color: transparent !important;
             }
 
-            .mondrian-card:hover {
+            .mondrian-card:hover,
+            .mondrian-card:active,
+            .mondrian-card:focus {
                 transform: none !important;
                 box-shadow: none !important;
                 z-index: 1 !important;
-            }
-            .mondrian-card:active {
-                transform: none !important;
-                z-index: 1 !important;
+                outline: none !important;
             }
 
             .mondrian-thumb {
@@ -201,23 +202,28 @@
 
             .mondrian-nav-box {
                 height: 42px !important;
-                font-size: 0.75rem !important;
-                border-radius: 6px !important;
-                background: #FFD700 !important; /* Full rich golden color without shading */
-                color: #000000 !important; /* High contrast text */
-                border: 1px solid #FFD700 !important;
+                font-size: 0.85rem !important;
+                border-radius: 12px !important;
+                background: transparent !important;
+                color: #fff !important;
+                border: 1px solid var(--card-border) !important;
                 box-shadow: none !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
-                font-family: 'Montserrat', sans-serif !important;
-                font-weight: 800 !important;
+                font-family: 'Plus Jakarta Sans', sans-serif !important;
+                font-weight: 700 !important;
+                -webkit-tap-highlight-color: transparent !important;
             }
 
-            .mondrian-nav-box:hover {
-                background: #FFD700 !important;
-                color: #000000 !important;
-                border-color: #FFD700 !important;
+            .mondrian-nav-box:hover,
+            .mondrian-nav-box:active,
+            .mondrian-nav-box:focus {
+                background: transparent !important;
+                color: #fff !important;
+                border-color: var(--card-border) !important;
                 transform: none !important;
+                box-shadow: none !important;
+                outline: none !important;
             }
         }
 
