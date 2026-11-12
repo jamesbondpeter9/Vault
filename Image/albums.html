@@ -121,7 +121,7 @@
             inset: 0;
         }
 
-        /* 1. Mobile browser compatibility enhancements */
+        /* 1 & 2. Mobile screen adjustments: covering side gaps edge-to-edge and rendering 4K HD high-res images */
         @media(max-width: 500px) {
             html, body {
                 background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
@@ -133,6 +133,19 @@
                 -webkit-tap-highlight-color: transparent !important;
                 overflow-x: hidden !important;
                 width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .site-container {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                max-width: 100% !important;
+                width: 100vw !important;
+                overflow-x: hidden !important;
+                box-sizing: border-box !important;
             }
 
             .tag-header {
@@ -145,21 +158,12 @@
                 background: rgba(10, 8, 2, 0.95) !important;
                 width: 100vw !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
                 margin-bottom: 12px !important;
                 padding: 16px 20px !important;
-                box-sizing: border-box !important;
-            }
-
-            .site-container {
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                max-width: 100% !important;
-                overflow-x: hidden !important;
-                width: 100% !important;
                 box-sizing: border-box !important;
             }
 
@@ -167,11 +171,9 @@
                 grid-template-columns: 1fr !important;
                 grid-auto-rows: auto !important;
                 gap: 0.5px !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100vw !important;
                 box-sizing: border-box !important;
             }
 
@@ -188,13 +190,11 @@
                 box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                margin-bottom: 0.5px !important;
+                margin: 0 0 0.5px 0 !important;
                 width: 100vw !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0 !important;
+                right: 0 !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
@@ -216,22 +216,19 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                filter: saturate(1.15) contrast(1.1) !important;
+                filter: saturate(1.2) contrast(1.15) !important;
                 image-rendering: -webkit-optimize-contrast;
-                image-rendering: crisp-edges;
+                image-rendering: high-quality;
             }
 
             .nav-bar-compact {
                 width: 100vw !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin: 0 0 12px 0 !important;
                 gap: 4px !important;
-                margin-bottom: 12px !important;
-                padding-left: 4px !important;
-                padding-right: 4px !important;
+                padding: 0 4px !important;
                 box-sizing: border-box !important;
                 background: transparent !important;
                 backdrop-filter: none !important;
@@ -333,6 +330,21 @@
             return input;
         }
 
+        // Upgraded helper to request/display 4K/high-res source images for mobile thumbnails
+        function getHighResImageUrl(url) {
+            if (!url) return '';
+            // If URL points to services like Unsplash, ImgBB, or standard CDN params, boost parameters or fallback to original URL
+            try {
+                const parsedUrl = new URL(url);
+                if (parsedUrl.hostname.includes('images.unsplash.com')) {
+                    parsedUrl.searchParams.set('w', '3840');
+                    parsedUrl.searchParams.set('q', '95');
+                    return parsedUrl.toString();
+                }
+            } catch (e) {}
+            return url;
+        }
+
         function getImageOrientation(url) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -412,6 +424,8 @@
                 return;
             }
 
+            const isMobile = window.innerWidth <= 500;
+
             for (const folder of allFolders) {
                 const folderImages = matchedItems.filter(item => {
                     return item.folder === folder.name || (Array.isArray(item.folders) && item.folders.includes(folder.name));
@@ -430,7 +444,8 @@
                 let orientation = 'landscape';
 
                 if (folderImages.length > 0) {
-                    firstImage = extractImageUrl(folderImages[0].thumbnail || folderImages[0].url || '');
+                    const rawImg = extractImageUrl(folderImages[0].thumbnail || folderImages[0].url || '');
+                    firstImage = isMobile ? getHighResImageUrl(rawImg) : rawImg;
                     orientation = await getImageOrientation(firstImage);
                 }
 
