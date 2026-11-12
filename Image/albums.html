@@ -32,6 +32,7 @@
             margin-right: auto;
         }
         @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
             height: 52px !important;
@@ -121,7 +122,7 @@
             inset: 0;
         }
 
-        /* 1 & 2. Mobile adaptations: exact navigation positioning from index.html & removed bottom blur/gradient on folders */
+        /* Mobile specific styling matching index.html navigation and edge-to-edge layout */
         @media(max-width: 500px) {
             html, body {
                 background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
@@ -221,38 +222,33 @@
                 image-rendering: high-quality;
             }
 
-            /* Exact navigation placement matching index.html structure */
+            /* Exact navigation layout and structure matching index.html */
             .nav-bar-compact {
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                width: 100vw !important;
+                width: 100% !important;
                 position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
-                margin: 0 0 12px 0 !important;
-                gap: 8px !important;
-                padding: 10px 16px !important;
+                left: auto !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                gap: 4px !important;
+                margin-bottom: 12px !important;
+                padding-left: 4px !important;
+                padding-right: 4px !important;
                 box-sizing: border-box !important;
-                background: var(--card-bg, rgba(10, 8, 2, 0.95)) !important;
-                backdrop-filter: blur(20px) !important;
-                -webkit-backdrop-filter: blur(20px) !important;
-                border-bottom: 0.5px solid rgba(212, 175, 55, 0.3) !important;
-            }
-
-            .mondrian-nav-card {
-                flex: 1 !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
             }
 
             .mondrian-nav-box {
-                height: 40px !important;
-                font-size: 0.8rem !important;
-                border-radius: 10px !important;
-                background: rgba(255, 255, 255, 0.05) !important;
+                height: 42px !important;
+                font-size: 0.85rem !important;
+                border-radius: 12px !important;
+                background: rgba(15, 12, 5, 0.8) !important;
                 color: #fff !important;
-                border: 1px solid rgba(212, 175, 55, 0.3) !important;
-                box-shadow: none !important;
+                border: 1px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 0 15px rgba(212, 175, 55, 0.15) !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -263,23 +259,29 @@
             .mondrian-nav-box:hover,
             .mondrian-nav-box:active,
             .mondrian-nav-box:focus {
-                background: #fff !important;
-                color: #000 !important;
-                border-color: #fff !important;
+                background: rgba(25, 20, 8, 0.9) !important;
+                color: #fff !important;
+                border-color: rgba(212, 175, 55, 0.7) !important;
                 transform: none !important;
-                box-shadow: none !important;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.3) !important;
                 outline: none !important;
+            }
+
+            .mobile-hide-nav {
+                display: none !important;
             }
         }
     </style>
 </head>
 <body>
     <div class="site-container">
-        <!-- Top Nav Bar (Home, Models matching index.html & New Folder Action) -->
+        <!-- Top Nav Bar matching index.html mobile structure -->
         <div class="nav-bar-compact">
             <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="../Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New Folder</div></a>
+            <a href="../Image/photostream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="../Media/stream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New</div></a>
         </div>
 
         <div class="tag-header">
@@ -339,7 +341,6 @@
             return input;
         }
 
-        // Upgraded helper to request/display 4K/high-res source images for mobile thumbnails
         function getHighResImageUrl(url) {
             if (!url) return '';
             try {
@@ -368,7 +369,6 @@
         async function fetchImagesJsonUnified() {
             let data = { models: [], photostreams: [], folders: [] };
 
-            // 1. Try ImageStorageDB
             if (typeof ImageStorageDB !== 'undefined') {
                 try {
                     if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
@@ -377,7 +377,6 @@
                 } catch (e) {}
             }
 
-            // 2. Fallback: Check localStorage keys
             if (data.photostreams.length === 0 && data.folders.length === 0) {
                 try {
                     const localImages = localStorage.getItem('portal_images') || localStorage.getItem('images_db');
@@ -389,7 +388,6 @@
                 } catch (e) {}
             }
 
-            // 3. Fallback: Direct fetch from Image/images.json
             if (data.photostreams.length === 0 && data.folders.length === 0) {
                 try {
                     const res = await fetch('images.json');
@@ -428,7 +426,7 @@
             grid.innerHTML = '';
 
             if (allFolders.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No albums found for this model. Click '+ New Folder' above to create one.</div>`;
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No albums found for this model. Click '+ New' above to create one.</div>`;
                 return;
             }
 
@@ -496,7 +494,6 @@
             
             closeFolderModal();
 
-            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
@@ -543,7 +540,6 @@
 
             closeRenameModal();
 
-            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
@@ -568,7 +564,6 @@
             });
             ImageStorageDB.savePhotoStreams(streams);
 
-            // Trigger GitHub auto-sync before reloading
             await GitHubSync.triggerAutoSync();
             location.reload();
         }
