@@ -554,7 +554,7 @@
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
             let allFolders = ImageStorageDB.getFolders();
-            allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
+            allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
             ImageStorageDB.saveFolders(allFolders);
 
             let streams = ImageStorageDB.getPhotoStreams();
