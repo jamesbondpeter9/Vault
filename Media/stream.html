@@ -1,6 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Mobile Browser Restriction Guard -->
+    <script>
+        (function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            // Check for common mobile/tablet user agent tokens
+            const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(ua.toLowerCase());
+            // Additional check for touch capability / screen width as a fallback
+            const isSmallScreen = window.innerWidth <= 800 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+            
+            if (!isMobile && !isSmallScreen) {
+                // Instantly replace the document content with a strict block message for desktop browsers
+                document.documentElement.innerHTML = `
+                    <head>
+                        <title>Access Restricted</title>
+                        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;850&display=swap" rel="stylesheet">
+                        <style>
+                            body {
+                                background: #050505;
+                                color: #ffffff;
+                                font-family: 'Montserrat', sans-serif;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100vh;
+                                margin: 0;
+                                text-align: center;
+                                padding: 20px;
+                            }
+                            .blocked-container {
+                                background: #111111;
+                                border: 1px solid #333333;
+                                border-radius: 16px;
+                                padding: 40px;
+                                max-width: 450px;
+                                width: 100%;
+                            }
+                            h1 {
+                                font-size: 1.5rem;
+                                font-weight: 850;
+                                margin-bottom: 12px;
+                                color: #ff4d4d;
+                            }
+                            p {
+                                color: #a0a0a0;
+                                font-size: 0.9rem;
+                                line-height: 1.5;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="blocked-container">
+                            <h1>Access Restricted</h1>
+                            <p>This portal page is designed and locked exclusively for mobile browsers. Please open this link on your mobile device to proceed.</p>
+                        </div>
+                    </body>
+                `;
+                // Throw an error or halt execution to prevent further script loading
+                throw new Error("Desktop access blocked by mobile restriction guard.");
+            }
+        })();
+    </script>
+
     <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
@@ -516,7 +578,7 @@
 
                 tag.onclick = () => {
                     if (selectedModels.includes(model.name)) {
-                        selectedModels = selectedModels.filter(m => m !== model.name);
+                        selectedModels = selectedModels.filter(m => m.name);
                     } else {
                         selectedModels.push(model.name);
                     }
