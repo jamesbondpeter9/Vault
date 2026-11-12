@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Master Authentication Guard -->
+    <!-- Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
-            window.location.href = 'login.html';
+            alert('Access Denied: Please log in first.');
+            window.location.href = '../login.html';
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Video Portal - Home</title>
-    <!-- Imported Montserrat Font -->
+    <title>Model Albums - Portal</title>
+    <!-- Imported Montserrat Font matching index.html -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <style>
+        html, body {
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Compact Navigation Header Sizing matching index.html */
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
             max-width: 1700px;
@@ -40,86 +48,81 @@
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .mondrian-nav-box:hover {
             background: #fff;
             color: #000;
             border-color: #fff;
-            transform: translateY(-1px);
         }
 
-        .home-grid {
+        .tag-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
+        }
+
+        /* Mosaic Grid configured for 180px base row height matching index.html */
+        .album-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 140px;
+            grid-auto-rows: 180px;
             grid-auto-flow: dense;
             gap: 2px;
             align-items: stretch;
-            padding-left: 2px;
-            padding-right: 2px;
-            box-sizing: border-box;
         }
-        @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 900px) { 
-            .home-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)); 
-                grid-auto-rows: 150px;
-            } 
-        }
-        @media(max-width: 500px) { 
-            .home-grid { 
-                grid-template-columns: 1fr !important; 
-                grid-auto-rows: auto !important;
-                gap: 0.5px !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
-                -webkit-transform: none;
-                transform: none;
-            } 
+        @media(max-width: 1400px) { .album-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .album-grid { grid-template-columns: 1fr; } }
+
+        /* Exact matching view.html sizing and proportions */
+        .mondrian-card.landscape { 
+            grid-column: span 2; 
+            grid-row: span 3; 
         }
 
-        .mondrian-card {
+        .mondrian-card.portrait { 
+            grid-column: span 1; 
+            grid-row: span 3; 
+        }
+
+        .mondrian-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Portrait-specific mini-cropping styling matching view.html */
+        .mondrian-card.portrait .mondrian-thumb img {
+            object-fit: cover !important;
+            object-position: center center !important;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            text-decoration: none;
-            background: #000;
-            display: block;
-            box-sizing: border-box;
-            will-change: transform, box-shadow;
-            transform: translate3d(0,0,0);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .mondrian-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 10;
+            position: absolute;
+            inset: 0;
         }
 
-        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
-        .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
-
-        @media(max-width: 900px) {
-            .mondrian-card.portrait,
-            .mondrian-card.landscape,
-            .mondrian-card.square {
-                grid-column: span 1;
-                grid-row: span 2;
-            }
+        /* Landscape-specific styling for folder thumbnails */
+        .mondrian-card.landscape .mondrian-thumb img {
+            object-fit: cover !important;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
         }
 
-        /* Mobile specific enhancements */
+        /* Mobile specific styling matching index.html navigation and edge-to-edge layout */
         @media(max-width: 500px) {
             html, body {
                 background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
@@ -129,10 +132,51 @@
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
                 -webkit-tap-highlight-color: transparent !important;
+                overflow-x: hidden !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
-            .home-grid {
+            .site-container {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                max-width: 100% !important;
+                width: 100vw !important;
+                overflow-x: hidden !important;
+                box-sizing: border-box !important;
+                padding-top: 0px !important; /* Matches index.html gap between top display edge and navigation */
+            }
+
+            .tag-header {
+                border-radius: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+                background: rgba(10, 8, 2, 0.95) !important;
+                width: 100vw !important;
+                position: relative !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                margin-bottom: 12px !important;
+                padding: 16px 20px !important;
+                box-sizing: border-box !important;
+            }
+
+            .album-grid {
                 grid-template-columns: 1fr !important;
+                grid-auto-rows: auto !important;
+                gap: 0.5px !important;
+                padding: 0 2px !important; /* 2px gap between tag header / grid and display edges */
+                margin: 0 !important;
+                width: 100vw !important;
+                box-sizing: border-box !important;
             }
 
             .mondrian-card {
@@ -148,27 +192,15 @@
                 box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                margin-bottom: 0.5px !important;
-                width: 100vw !important;
+                margin: 0 0 0.5px 0 !important;
+                width: 100% !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0 !important;
+                right: 0 !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
                 box-sizing: border-box !important;
-            }
-
-            .mondrian-card:hover,
-            .mondrian-card:active,
-            .mondrian-card:focus {
-                transform: none !important;
-                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
-                z-index: 1 !important;
-                outline: none !important;
-                border-color: rgba(212, 175, 55, 0.6) !important;
             }
 
             .mondrian-thumb {
@@ -186,15 +218,12 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                filter: saturate(1.15) contrast(1.1) !important;
+                filter: saturate(1.2) contrast(1.15) !important;
                 image-rendering: -webkit-optimize-contrast;
-                image-rendering: crisp-edges;
+                image-rendering: high-quality;
             }
-            
-            .mondrian-overlay {
-                display: none !important;
-            }
-            
+
+            /* Exact navigation layout and structure matching index.html */
             .nav-bar-compact {
                 width: 100% !important;
                 position: relative !important;
@@ -204,12 +233,13 @@
                 margin-right: 0 !important;
                 gap: 4px !important;
                 margin-bottom: 12px !important;
-                padding-left: 4px !important;
-                padding-right: 4px !important;
+                padding-left: 2px !important; /* 2px gap between navigation and display edges */
+                padding-right: 2px !important; /* 2px gap between navigation and display edges */
                 box-sizing: border-box !important;
                 background: transparent !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
             }
 
             .mondrian-nav-box {
@@ -238,293 +268,305 @@
                 outline: none !important;
             }
 
-            /* Hide Photostream and '+' navigation items exclusively on mobile screens */
             .mobile-hide-nav {
                 display: none !important;
             }
-        }
-
-        .mondrian-thumb {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-        }
-
-        .mondrian-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-            object-position: center;
-            display: block;
-            border-radius: 12px;
-        }
-
-        .mondrian-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 22px 10px 8px 10px;
-            background: transparent;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            z-index: 5;
-            box-sizing: border-box;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Pagination Controls Styling */
-        .pagination-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-top: 30px;
-            margin-bottom: 40px;
-        }
-        .page-btn {
-            background: var(--card-bg, #111);
-            border: 1px solid var(--card-border, #333);
-            color: var(--text-muted, #ccc);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
-        }
-        .page-btn:hover:not(:disabled) {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
-        .page-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .page-info {
-            color: var(--text-muted, #ccc);
-            font-size: 0.85rem;
-            font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
         }
     </style>
 </head>
 <body>
     <div class="site-container">
-        <!-- Compact Top Nav Bar -->
+        <!-- Top Nav Bar matching index.html mobile structure -->
         <div class="nav-bar-compact">
-            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="Image/photostream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="Media/stream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
-            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
-            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
+            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="../Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="../Image/photostream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="../Media/stream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New</div></a>
         </div>
-        
-        <div class="home-grid" id="streamsGrid"></div>
-        <div class="pagination-bar" id="paginationBar"></div>
 
-        <!-- Search Modal Popup -->
-        <div id="searchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative; background:#111; border:1px solid var(--card-border, #333); padding:24px; border-radius:16px; box-sizing:border-box;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color:#fff; font-family:'Plus Jakarta Sans', sans-serif;">Search Streams</h3>
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="searchInput" placeholder="Type to filter streams..." style="width:100%; padding:10px 14px; background:#000; border:1px solid var(--card-border, #333); color:#fff; border-radius:8px; font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; box-sizing:border-box;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="clearSearchFilter()" class="page-btn" style="flex:1; background:#333; color:#fff; border-color:#444;">Clear</button>
-                    <button type="button" onclick="closeSearchModal()" class="page-btn" style="flex:1; background:#fff; color:#000; border-color:#fff;">Done</button>
-                </div>
+        <div class="tag-header" style="margin-left: 2px; margin-right: 2px; width: calc(100% - 4px); box-sizing: border-box;">
+            <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Albums</h1>
+            <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Albums featuring this model</p>
+        </div>
+
+        <div class="album-grid" id="albumGrid"></div>
+    </div>
+
+    <!-- Custom Popup Modal for Folder Creation -->
+    <div id="folderModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Create New Folder</h3>
+            <input type="text" id="folderNameInput" placeholder="Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button onclick="closeFolderModal()" style="padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                <button onclick="submitFolderCreation()" style="padding: 8px 16px; background: #fff; border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Create</button>
             </div>
         </div>
     </div>
-    
-    <script src="config.js"></script>
-    <script src="Media/storage.js"></script>
-    <script src="github-sync.js"></script>
+
+    <!-- Custom Popup Modal for Folder Renaming (+ Symbol Feature) -->
+    <div id="renameModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 16px; font-weight: 700;">Rename Folder</h3>
+            <input type="text" id="renameInput" placeholder="New Folder Name" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 16px; box-sizing: border-box;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button onclick="closeRenameModal()" style="padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                <button onclick="submitFolderRename()" style="padding: 8px 16px; background: #fff; border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config, Storage, Viewer & GitHub Sync Scripts with root path prefixing -->
+    <script src="../config.js"></script>
+    <script src="images-storage.js"></script>
+    <script src="photoviewer.js"></script>
+    <script src="../github-sync.js"></script>
     <script>
-        let currentPage = 1;
-        const pageSize = 20;
-        let currentSearchQuery = '';
+        let currentModelName = '';
+        let folderToRename = '';
 
-        function portalLogout() {
-            sessionStorage.removeItem('portal_authenticated');
+        function extractImageUrl(input) {
+            if (!input) return '';
+            input = input.trim();
+
+            const bbcodeMatch = input.match(/\[img\](.*?)\[\/img\]/i);
+            if (bbcodeMatch && bbcodeMatch[1]) return bbcodeMatch[1].trim();
+
+            const htmlImgMatch = input.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (htmlImgMatch && htmlImgMatch[1]) return htmlImgMatch[1].trim();
+
+            const urlMatch = input.match(/(https?:\/\/[^\s"'<>]+)/i);
+            if (urlMatch && urlMatch[1]) return urlMatch[1].trim();
+
+            return input;
+        }
+
+        function getHighResImageUrl(url) {
+            if (!url) return '';
             try {
-                localStorage.removeItem('portal_authenticated');
+                const parsedUrl = new URL(url);
+                if (parsedUrl.hostname.includes('images.unsplash.com')) {
+                    parsedUrl.searchParams.set('w', '3840');
+                    parsedUrl.searchParams.set('q', '95');
+                    return parsedUrl.toString();
+                }
             } catch (e) {}
-            window.location.href = 'login.html';
+            return url;
         }
 
-        function openSearchModal() {
-            document.getElementById('searchModal').style.display = 'flex';
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = currentSearchQuery;
-            searchInput.focus();
+        function getImageOrientation(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve(img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape');
+                };
+                img.onerror = () => resolve('landscape');
+                img.src = url;
+            });
         }
 
-        function closeSearchModal() {
-            document.getElementById('searchModal').style.display = 'none';
-        }
+        // Multi-source bridge loader for Image/images.json data
+        async function fetchImagesJsonUnified() {
+            let data = { models: [], photostreams: [], folders: [] };
 
-        function clearSearchFilter() {
-            currentSearchQuery = '';
-            document.getElementById('searchInput').value = '';
-            currentPage = 1;
-            renderPortalStreams();
-            closeSearchModal();
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
-                await StorageDB.initDB();
-            }
-
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    currentSearchQuery = e.target.value.trim().toLowerCase();
-                    currentPage = 1;
-                    renderPortalStreams();
-                });
-            }
-
-            renderPortalStreams();
-        });
-
-        function renderPortalStreams() {
-            let allStreams = [];
-            if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
-                allStreams = StorageDB.getVideoStreams() || [];
-            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') {
-                allStreams = StorageDB.getStreams() || [];
-            } else {
+            if (typeof ImageStorageDB !== 'undefined') {
                 try {
-                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
-                    if (rawLocal) {
-                        const parsed = JSON.parse(rawLocal);
-                        allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
+                    if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
+                    data.photostreams = (typeof ImageStorageDB.getPhotoStreams === 'function') ? ImageStorageDB.getPhotoStreams() || [] : [];
+                    data.folders = (typeof ImageStorageDB.getFolders === 'function') ? ImageStorageDB.getFolders() || [] : [];
+                } catch (e) {}
+            }
+
+            if (data.photostreams.length === 0 && data.folders.length === 0) {
+                try {
+                    const localImages = localStorage.getItem('portal_images') || localStorage.getItem('images_db');
+                    if (localImages) {
+                        const parsed = JSON.parse(localImages);
+                        data.photostreams = parsed.photostreams || parsed.streams || [];
+                        data.folders = parsed.folders || [];
                     }
                 } catch (e) {}
             }
 
-            const grid = document.getElementById('streamsGrid');
-            const paginationBar = document.getElementById('paginationBar');
-            
-            if (!Array.isArray(allStreams) || allStreams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
-                paginationBar.innerHTML = '';
-                return;
+            if (data.photostreams.length === 0 && data.folders.length === 0) {
+                try {
+                    const res = await fetch('images.json');
+                    if (res.ok) {
+                        const json = await res.json();
+                        data.photostreams = json.photostreams || [];
+                        data.folders = json.folders || [];
+                    }
+                } catch (e) {}
             }
 
-            const originalStreams = allStreams;
-            allStreams = allStreams.slice().reverse();
+            return data;
+        }
 
-            const filteredStreams = allStreams.filter(stream => {
-                if (!currentSearchQuery) return true;
-                const titleMatch = stream.title && stream.title.toLowerCase().includes(currentSearchQuery);
-                return titleMatch;
-            });
-
-            if (filteredStreams.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
-                paginationBar.innerHTML = '';
-                return;
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.initDB === 'function') {
+                await ImageStorageDB.initDB();
             }
 
-            const totalPages = Math.ceil(filteredStreams.length / pageSize);
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+            const params = new URLSearchParams(window.location.search);
+            currentModelName = decodeURIComponent(params.get('name') ?? '').trim();
 
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const paginatedItems = filteredStreams.slice(startIndex, endIndex);
+            if (currentModelName) {
+                document.getElementById('tagTitle').textContent = `${currentModelName} - Albums`;
+                document.title = `${currentModelName} Albums - Portal`;
+            }
 
+            const dbData = await fetchImagesJsonUnified();
+            const allPhotoStreams = dbData.photostreams || [];
+            const matchedItems = allPhotoStreams.filter(item => item.models && item.models.some(m => m.toLowerCase() === currentModelName.toLowerCase()));
+
+            let allFolders = dbData.folders || [];
+            allFolders = allFolders.filter(f => f.model && f.model.toLowerCase() === currentModelName.toLowerCase());
+
+            const grid = document.getElementById('albumGrid');
             grid.innerHTML = '';
-            
-            paginatedItems.forEach((stream, paginatedIdx) => {
-                const actualIndex = originalStreams.indexOf(stream);
-                const card = document.createElement('a');
-                card.href = `Media/watch.html?index=${actualIndex}`;
-                card.className = `mondrian-card portrait`;
 
-                card.innerHTML = `
-                    <div class="mondrian-thumb">
-                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.80rem;">No Thumbnail</div>'}
-                        <div class="mondrian-overlay">${stream.title}</div>
+            if (allFolders.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No albums found for this model. Click '+ New' above to create one.</div>`;
+                return;
+            }
+
+            const isMobile = window.innerWidth <= 500;
+
+            for (const folder of allFolders) {
+                const folderImages = matchedItems.filter(item => {
+                    return item.folder === folder.name || (Array.isArray(item.folders) && item.folders.includes(folder.name));
+                });
+
+                folderImages.sort((a, b) => {
+                    const titleA = (a.title || '').toLowerCase();
+                    const titleB = (b.title || '').toLowerCase();
+                    if (titleA !== titleB) {
+                        return titleA.localeCompare(titleB);
+                    }
+                    return (a.createdAt || 0) - (b.createdAt || 0);
+                });
+
+                let firstImage = null;
+                let orientation = 'landscape';
+
+                if (folderImages.length > 0) {
+                    const rawImg = extractImageUrl(folderImages[0].thumbnail || folderImages[0].url || '');
+                    firstImage = isMobile ? getHighResImageUrl(rawImg) : rawImg;
+                    orientation = await getImageOrientation(firstImage);
+                }
+
+                const folderCard = document.createElement('div');
+                folderCard.className = `mondrian-card ${orientation}`;
+                folderCard.innerHTML = `
+                    <div class="mondrian-thumb" onclick="openFolderPage('${encodeURIComponent(folder.name)}')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                        <!-- Top-left Rename (+) Button -->
+                        <button onclick="openRenameModal('${folder.name.replace(/'/g, "\\'")}', event)" title="Rename Folder" style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1; -webkit-tap-highlight-color: transparent;">+</button>
+                        <!-- Top-right Delete Button -->
+                        <button onclick="deleteFolder('${folder.name.replace(/'/g, "\\'")}', event)" title="Delete Folder" style="position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; padding: 0; line-height: 1; -webkit-tap-highlight-color: transparent;">&times;</button>
+                        ${firstImage ? `<img src="${firstImage}" alt="${folder.name}" style="width: 100%; height: 100%; position: absolute; inset: 0;">` : '<div style="font-size: 1.5rem; margin-bottom: 4px;">📁</div>'}
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; font-weight: 700; font-size: 0.75rem; color: #fff; background: none; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${folder.name}</div>
                     </div>`;
-            
-                grid.appendChild(card);
+                grid.appendChild(folderCard);
+            }
+        });
 
-                if (stream.thumbnail) {
-                    const img = card.querySelector('.lazy-thumb');
-                    if (img) {
-                        const updateRatio = () => {
-                            if (img.naturalWidth && img.naturalHeight) {
-                                const ratio = img.naturalWidth / img.naturalHeight;
-                                if (ratio < 0.85) {
-                                    card.className = 'mondrian-card portrait';
-                                } else if (ratio > 1.25) {
-                                    card.className = 'mondrian-card landscape';
-                                } else {
-                                    card.className = 'mondrian-card square';
-                                }
-                            }
-                        };
-                        
-                        if (img.complete) {
-                            updateRatio();
-                        } else {
-                            img.onload = updateRatio;
-                        }
+        function openFolderModal() {
+            document.getElementById('folderModal').style.display = 'flex';
+            document.getElementById('folderNameInput').value = '';
+            document.getElementById('folderNameInput').focus();
+        }
+
+        function closeFolderModal() {
+            document.getElementById('folderModal').style.display = 'none';
+        }
+
+        async function submitFolderCreation() {
+            const folderName = document.getElementById('folderNameInput').value;
+            if (!folderName || !folderName.trim()) return;
+
+            const nameClean = folderName.trim();
+            
+            let allFolders = ImageStorageDB.getFolders();
+            if (!allFolders.some(f => f.name.toLowerCase() === nameClean.toLowerCase() && f.model.toLowerCase() === currentModelName.toLowerCase())) {
+                allFolders.push({ name: nameClean, model: currentModelName });
+                ImageStorageDB.saveFolders(allFolders);
+            }
+            
+            closeFolderModal();
+
+            await GitHubSync.triggerAutoSync();
+            location.reload();
+        }
+
+        function openRenameModal(folderName, event) {
+            event.stopPropagation();
+            folderToRename = folderName;
+            document.getElementById('renameModal').style.display = 'flex';
+            document.getElementById('renameInput').value = folderName;
+            document.getElementById('renameInput').focus();
+        }
+
+        function closeRenameModal() {
+            document.getElementById('renameModal').style.display = 'none';
+            folderToRename = '';
+        }
+
+        async function submitFolderRename() {
+            const newName = document.getElementById('renameInput').value;
+            if (!newName || !newName.trim() || !folderToRename) return;
+            const newNameClean = newName.trim();
+
+            let allFolders = ImageStorageDB.getFolders();
+            allFolders.forEach(f => {
+                if (f.name === folderToRename && f.model.toLowerCase() === currentModelName.toLowerCase()) {
+                    f.name = newNameClean;
+                }
+            });
+            ImageStorageDB.saveFolders(allFolders);
+
+            let streams = ImageStorageDB.getPhotoStreams();
+            streams.forEach(s => {
+                const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
+                if (matchesModel) {
+                    if (s.folder === folderToRename) {
+                        s.folder = newNameClean;
+                    }
+                    if (Array.isArray(s.folders)) {
+                        s.folders = s.folders.map(f => f === folderToRename ? newNameClean : f);
                     }
                 }
             });
+            ImageStorageDB.savePhotoStreams(streams);
 
-            paginationBar.innerHTML = '';
-            if (totalPages > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'page-btn';
-                prevBtn.textContent = '← Prev';
-                prevBtn.disabled = currentPage === 1;
-                prevBtn.onclick = () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderPortalStreams();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(prevBtn);
+            closeRenameModal();
 
-                const pageInfo = document.createElement('span');
-                pageInfo.className = 'page-info';
-                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-                paginationBar.appendChild(pageInfo);
+            await GitHubSync.triggerAutoSync();
+            location.reload();
+        }
 
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'page-btn';
-                nextBtn.textContent = 'Next →';
-                nextBtn.disabled = currentPage === totalPages;
-                nextBtn.onclick = () => {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderPortalStreams();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(nextBtn);
-            }
+        function openFolderPage(folderName) {
+            window.location.href = `view.html?folder=${folderName}&model=${encodeURIComponent(currentModelName)}`;
+        }
+
+        async function deleteFolder(folderName, event) {
+            event.stopPropagation();
+            if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
+
+            let allFolders = ImageStorageDB.getFolders();
+            allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
+            ImageStorageDB.saveFolders(allFolders);
+
+            let streams = ImageStorageDB.getPhotoStreams();
+            streams = streams.filter(s => {
+                const matchesFolder = s.folder === folderName || (Array.isArray(s.folders) && s.folders.includes(folderName));
+                const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
+                return !(matchesFolder && matchesModel);
+            });
+            ImageStorageDB.savePhotoStreams(streams);
+
+            await GitHubSync.triggerAutoSync();
+            location.reload();
         }
     </script>
 </body>
