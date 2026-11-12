@@ -169,21 +169,21 @@ body {
 .home-card.portrait,
 .index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
-/* Web browser width span 2 (2 thumbnails per row) & increased vertical height specifically in index.html and view.html */
+/* Web browser width: exactly 2 individual thumbnails per horizontal row */
 @media(min-width: 501px) {
+    .mondrian-card,
+    .album-card,
+    .stream-card,
+    .photo-card,
+    .home-card,
+    .index-card,
     .mondrian-card.landscape,
     .album-card.landscape,
     .stream-card.landscape,
     .home-card.landscape,
     .index-card.landscape { 
-        grid-column: span 2 !important; 
-        grid-row: span 4 !important; 
-    }
-    
-    .index-card, 
-    .home-card { 
-        grid-column: span 2 !important; 
-        grid-row: span 6 !important; 
+        grid-column: span 1 !important; 
+        grid-row: span 1 !important; 
     }
 }
 
