@@ -112,6 +112,11 @@
                 -webkit-tap-highlight-color: transparent !important;
             }
 
+            /* 1. Only when site used in mobile, remove neon glow from tag-header */
+            .tag-header {
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+            }
+
             .vault-grid {
                 grid-template-columns: 1fr !important;
                 grid-auto-rows: auto !important;
@@ -262,8 +267,10 @@
             object-fit: contain;
             cursor: grab;
             transform-origin: center center;
+            /* 3. Pixel optimization for high-res/crisp rendering during zoom */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
+            image-rendering: high-quality;
             will-change: transform;
             -webkit-tap-highlight-color: transparent;
         }
@@ -344,11 +351,14 @@
                 object-fit: contain !important;
                 transform: none !important;
             }
-            /* Auto-rotation feature in custom photoviewer for landscape photos on mobile browsers */
+            /* 2. Stretch landscape image while auto rotating into landscape mode on mobile */
             .viewer-image.mobile-auto-rotate {
-                transform: rotate(90deg) !important;
+                transform: rotate(90deg) scale(1.15) !important;
+                width: 100vh !important;
+                height: 100vw !important;
                 max-width: 100vh !important;
                 max-height: 100vw !important;
+                object-fit: fill !important;
             }
         }
     </style>
@@ -608,6 +618,7 @@
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
                         const pinchFactor = currentDistance / initialPinchDistance;
+                        // 3. Pinch gesture with pixel optimization (smooth scaling clamped up to 10x without breaking pixels)
                         currentScale = Math.min(Math.max(initialScaleForPinch * pinchFactor, 1), 10);
                         if (currentScale === 1) {
                             panX = 0;
@@ -693,7 +704,7 @@
                         const tempImg = new Image();
                         tempImg.onload = () => {
                             if (tempImg.naturalWidth > tempImg.naturalHeight) {
-                                // Landscape photo detected on mobile: apply auto-rotation feature in custom photoviewer
+                                // 2. Stretch landscape image while auto-rotating into landscape mode on mobile
                                 viewerImg.classList.add('mobile-auto-rotate');
                             } else {
                                 viewerImg.classList.add('mobile-portrait-natural');
