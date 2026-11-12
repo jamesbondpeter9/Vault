@@ -10,7 +10,6 @@
     --primary: #d4af37;
     --text-main: #ffffff;
     --text-muted: #888895;
-    --neon-glow: 0 0 30px rgba(212, 175, 55, 0.22), 0 0 15px var(--gold-glow), inset 0 0 15px rgba(212, 175, 55, 0.12);
 }
 
 /* Enable smooth scrolling portal-wide */
