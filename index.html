@@ -138,7 +138,7 @@
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 16 / 10 !important;
+                aspect-ratio: 16 / 11 !important; /* Slightly increased vertical height */
                 height: auto !important;
                 border-radius: 12px !important;
                 border: 1px solid #FFE082 !important; /* Same very light yellow boundary as navigation */
@@ -174,13 +174,13 @@
 
             .mondrian-thumb img {
                 border-radius: 11px !important;
-                object-fit: contain !important; 
+                object-fit: cover !important; /* Stretches and fits to touch left & right sides completely */
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
                 filter: saturate(1.15) contrast(1.1) !important;
-                image-rendering: high-dpi;
-                image-rendering: -webkit-optimize-contrast;
+                image-rendering: -webkit-optimize-contrast; /* 4K-HD ultra-sharp rendering */
+                image-rendering: crisp-edges;
             }
             
             .mondrian-overlay {
