@@ -303,3 +303,206 @@
         <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
+        </div>
+        
+        <div class="home-grid" id="streamsGrid"></div>
+        <div class="pagination-bar" id="paginationBar"></div>
+
+        <!-- Search Modal Popup -->
+        <div id="searchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative; background:#111; border:1px solid var(--card-border, #333); padding:24px; border-radius:16px; box-sizing:border-box;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color:#fff; font-family:'Plus Jakarta Sans', sans-serif;">Search Streams</h3>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="Type to filter streams..." style="width:100%; padding:10px 14px; background:#000; border:1px solid var(--card-border, #333); color:#fff; border-radius:8px; font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; box-sizing:border-box;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="clearSearchFilter()" class="page-btn" style="flex:1; background:#333; color:#fff; border-color:#444;">Clear</button>
+                    <button type="button" onclick="closeSearchModal()" class="page-btn" style="flex:1; background:#fff; color:#000; border-color:#fff;">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="Media/storage.js"></script>
+    <script src="github-sync.js"></script>
+    <script>
+        let currentPage = 1;
+        const pageSize = 20;
+        let currentSearchQuery = '';
+
+        function portalLogout() {
+            sessionStorage.removeItem('portal_authenticated');
+            try {
+                localStorage.removeItem('portal_authenticated');
+            } catch (e) {}
+            window.location.href = 'login.html';
+        }
+
+        function openSearchModal() {
+            document.getElementById('searchModal').style.display = 'flex';
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = currentSearchQuery;
+            searchInput.focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').style.display = 'none';
+        }
+
+        function clearSearchFilter() {
+            currentSearchQuery = '';
+            document.getElementById('searchInput').value = '';
+            currentPage = 1;
+            renderPortalStreams();
+            closeSearchModal();
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
+            }
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchQuery = e.target.value.trim().toLowerCase();
+                    currentPage = 1;
+                    renderPortalStreams();
+                });
+            }
+
+            renderPortalStreams();
+        });
+
+        function renderPortalStreams() {
+            let allStreams = [];
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
+                allStreams = StorageDB.getVideoStreams() || [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') {
+                allStreams = StorageDB.getStreams() || [];
+            } else {
+                try {
+                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
+                    if (rawLocal) {
+                        const parsed = JSON.parse(rawLocal);
+                        allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
+                    }
+                } catch (e) {}
+            }
+
+            const grid = document.getElementById('streamsGrid');
+            const paginationBar = document.getElementById('paginationBar');
+            
+            if (!Array.isArray(allStreams) || allStreams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
+                paginationBar.innerHTML = '';
+                return;
+            }
+
+            const originalStreams = allStreams;
+            allStreams = allStreams.slice().reverse();
+
+            const filteredStreams = allStreams.filter(stream => {
+                if (!currentSearchQuery) return true;
+                const titleMatch = stream.title && stream.title.toLowerCase().includes(currentSearchQuery);
+                return titleMatch;
+            });
+
+            if (filteredStreams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
+                paginationBar.innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredStreams.length / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedItems = filteredStreams.slice(startIndex, endIndex);
+
+            grid.innerHTML = '';
+            
+            paginatedItems.forEach((stream, paginatedIdx) => {
+                const actualIndex = originalStreams.indexOf(stream);
+                const card = document.createElement('a');
+                card.href = `Media/watch.html?index=${actualIndex}`;
+                card.className = `mondrian-card portrait`;
+
+                card.innerHTML = `
+                    <div class="mondrian-thumb">
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.80rem;">No Thumbnail</div>'}
+                        <div class="mondrian-overlay">${stream.title}</div>
+                    </div>`;
+            
+                grid.appendChild(card);
+
+                if (stream.thumbnail) {
+                    const img = card.querySelector('.lazy-thumb');
+                    if (img) {
+                        const updateRatio = () => {
+                            if (img.naturalWidth && img.naturalHeight) {
+                                const ratio = img.naturalWidth / img.naturalHeight;
+                                if (ratio < 0.85) {
+                                    card.className = 'mondrian-card portrait';
+                                } else if (ratio > 1.25) {
+                                    card.className = 'mondrian-card landscape';
+                                } else {
+                                    card.className = 'mondrian-card square';
+                                }
+                            }
+                        };
+                        
+                        if (img.complete) {
+                            updateRatio();
+                        } else {
+                            img.onload = updateRatio;
+                        }
+                    }
+                }
+            });
+
+            paginationBar.innerHTML = '';
+            if (totalPages > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.textContent = '← Prev';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPortalStreams();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+                paginationBar.appendChild(prevBtn);
+
+                const pageInfo = document.createElement('span');
+                pageInfo.className = 'page-info';
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                paginationBar.appendChild(pageInfo);
+
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'page-btn';
+                nextBtn.textContent = 'Next →';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPortalStreams();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+                paginationBar.appendChild(nextBtn);
+            }
+        }
+    </script>
+</body>
+</html>
