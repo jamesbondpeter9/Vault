@@ -1,16 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
     --bg-base: #000000;
-    --card-bg: rgba(10, 10, 10, 0.95);
-    --card-border: rgba(255, 255, 255, 0.35);
-    --card-border-hover: rgba(255, 255, 255, 1);
-    --gold-accent: rgba(255, 215, 0, 0.65);
-    --gold-glow-nav: 0 0 6px rgba(255, 215, 0, 0.25), 0 0 12px rgba(255, 215, 0, 0.1);
-    --gold-glow-page: 0 0 25px rgba(255, 215, 0, 0.25), inset 0 0 50px rgba(255, 215, 0, 0.08);
+    --card-bg: rgba(8, 8, 11, 0.88);
+    --card-border: rgba(255, 255, 255, 0.22);
+    --card-border-hover: rgba(255, 255, 255, 0.95);
+    --gold-accent: rgba(212, 175, 55, 0.45);
+    --gold-glow: rgba(212, 175, 55, 0.15);
     --primary: #ffffff;
     --text-main: #ffffff;
-    --text-muted: #aaaaaa;
+    --text-muted: #888895;
+    --neon-glow: 0 0 30px rgba(255, 255, 255, 0.15), 0 0 15px var(--gold-glow), inset 0 0 15px rgba(255, 255, 255, 0.08);
 }
 
 /* Enable smooth scrolling portal-wide */
@@ -28,461 +28,77 @@ html {
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: rgb(0, 0, 0);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-base);
     background-image: 
-        radial-gradient(circle at 50% -20%, rgba(30, 30, 30, 0.8) 0%, transparent 60%),
-        radial-gradient(circle at 10% 80%, rgba(255, 215, 0, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 90% 90%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
-        linear-gradient(135deg, rgba(15, 12, 0, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
-    color: #ffffff;
+        radial-gradient(circle at 50% -20%, rgba(50, 50, 65, 0.5) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(212, 175, 55, 0.07) 0%, transparent 35%),
+        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
+        linear-gradient(135deg, rgba(15, 15, 20, 0.9) 0%, rgba(0, 0, 0, 1) 100%);
+    color: var(--text-main);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     padding: 40px 20px;
-    box-shadow: var(--gold-glow-page);
 }
 
 .site-container { width: 100%; max-width: 1700px; }
 
-/* Navigation Bar Sizing & 5 Columns (Excluding models.html) */
+/* Navigation Bar Sizing & 2px Gap */
 .nav-bar-compact {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2px;
-    margin-bottom: 20px;
-    max-width: 1700px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-bottom: 24px;
 }
-@media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-.mondrian-nav-card { text-decoration: none; display: flex; flex-direction: column; transition: all 0.3s ease; }
-.mondrian-nav-card:hover { transform: translateY(-1px); }
+.mondrian-nav-card { text-decoration: none; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.mondrian-nav-card:hover { transform: translateY(-2px); }
 
 .mondrian-nav-box {
-    height: 52px !important;
-    font-size: 0.85rem !important;
-    border-radius: 8px !important;
-    background: #FFD700 !important;
-    border: 1px solid #FFC700 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff !important;
-    font-weight: 800;
-    font-family: 'Montserrat', sans-serif !important;
-    text-shadow: 
-        -1px -1px 0 #000000,  
-         1px -1px 0 #000000,
-        -1px  1px 0 #000000,
-         1px  1px 0 #000000,
-         0px 2px 4px rgba(0,0,0,0.8) !important;
-    box-shadow: var(--gold-glow-nav) !important;
-    transition: all 0.3s ease;
-}
-
-.mondrian-nav-box:hover {
-    background: #FFE033 !important;
-    color: #ffffff !important;
-    border-color: #ffffff !important;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2) !important;
-    transform: translateY(-1px);
-}
-
-.home-grid,
-.view-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-auto-rows: 140px;
-    grid-auto-flow: dense;
-    gap: 2px;
-    align-items: stretch;
-    padding-left: 2px;
-    padding-right: 2px;
-    box-sizing: border-box;
-}
-@media(max-width: 1400px) { 
-    .home-grid, .view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } 
-}
-@media(max-width: 900px) { 
-    .home-grid, .view-grid { 
-        grid-template-columns: repeat(2, minmax(0, 1fr)); 
-        grid-auto-rows: 150px;
-    } 
-}
-@media(max-width: 500px) { 
-    .home-grid, .view-grid { 
-        grid-template-columns: 1fr !important; 
-        grid-auto-rows: auto !important;
-        gap: 2px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        width: 100vw !important;
-        position: relative !important;
-        left: 50% !important;
-        right: 50% !important;
-        margin-left: -50vw !important;
-        margin-right: -50vw !important;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-    } 
-}
-
-
-/* ==========================================================================
-   SECTION 1: WEB BROWSER STUFF (Matched across all pages excluding models.html)
-   ========================================================================== */
-.mondrian-card,
-.album-card,
-.stream-card,
-.photo-card,
-.home-card,
-.index-card,
-.view-card {
-    position: relative;
     width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius: 12px;
-    text-decoration: none;
-    background: #000;
-    display: block;
-    box-sizing: border-box;
-    will-change: transform;
-    transform: translate3d(0,0,0);
-    transition: transform 0.2s ease;
-}
-
-.mondrian-card:hover,
-.album-card:hover,
-.stream-card:hover,
-.photo-card:hover,
-.home-card:hover,
-.index-card:hover,
-.view-card:hover {
-    transform: translateY(-2px);
-    z-index: 10;
-}
-
-.mondrian-card.portrait,
-.album-card.portrait,
-.stream-card.portrait,
-.home-card.portrait,
-.index-card.portrait,
-.view-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
-
-/* Web browser width: span 4 vertical height for thumbnails, excluding models.html / Models.html */
-@media(min-width: 501px) {
-    body:not(:has(script[src*="models"])) .mondrian-card,
-    body:not(:has(script[src*="models"])) .album-card,
-    body:not(:has(script[src*="models"])) .stream-card,
-    body:not(:has(script[src*="models"])) .photo-card,
-    body:not(:has(script[src*="models"])) .home-card,
-    body:not(:has(script[src*="models"])) .index-card,
-    body:not(:has(script[src*="models"])) .view-card,
-    .mondrian-card:not(.models-card):not([href*="models"]),
-    .album-card:not(.models-card):not([href*="models"]),
-    .stream-card:not(.models-card):not([href*="models"]),
-    .photo-card:not(.models-card):not([href*="models"]),
-    .home-card:not(.models-card):not([href*="models"]),
-    .index-card:not(.models-card):not([href*="models"]),
-    .view-card:not(.models-card):not([href*="models"]) { 
-        grid-column: span 1 !important; 
-        grid-row: span 4 !important; 
-    }
-}
-
-.mondrian-card.square,
-.album-card.square,
-.stream-card.square,
-.home-card.square,
-.index-card.square,
-.view-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
-
-@media(max-width: 900px) {
-    .mondrian-card.portrait, .mondrian-card.landscape, .mondrian-card.square,
-    .album-card.portrait, .album-card.landscape, .album-card.square,
-    .stream-card.portrait, .stream-card.landscape, .stream-card.square,
-    .home-card.portrait, .home-card.landscape, .home-card.square,
-    .index-card.portrait, .index-card.landscape, .index-card.square,
-    .view-card.portrait, .view-card.landscape, .view-card.square {
-        grid-column: span 1;
-        grid-row: span 2;
-    }
-}
-
-.mondrian-thumb,
-.album-thumb,
-.stream-thumb,
-.photo-thumb,
-.home-thumb,
-.index-thumb,
-.view-thumb {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    border-radius: 12px;
+    height: 70px;
+    background: var(--card-bg);
+    backdrop-filter: blur(40px);
     border: 1px solid var(--card-border);
-    box-shadow: none !important;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 800;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9), var(--neon-glow);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Original quality inner image rendering & fitting for web browser thumbnails (excluding models.html) */
-@media(min-width: 501px) {
-    :not(.models-card):not([href*="models"]) > .mondrian-thumb img,
-    :not(.models-card):not([href*="models"]) > .album-thumb img,
-    :not(.models-card):not([href*="models"]) > .stream-thumb img,
-    :not(.models-card):not([href*="models"]) > .photo-thumb img,
-    :not(.models-card):not([href*="models"]) > .home-thumb img,
-    :not(.models-card):not([href*="models"]) > .index-thumb img,
-    :not(.models-card):not([href*="models"]) > .view-thumb img,
-    .mondrian-card:not(.models-card):not([href*="models"]) .mondrian-thumb img,
-    .album-card:not(.models-card):not([href*="models"]) .album-thumb img,
-    .stream-card:not(.models-card):not([href*="models"]) .stream-thumb img,
-    .photo-card:not(.models-card):not([href*="models"]) .photo-thumb img,
-    .home-card:not(.models-card):not([href*="models"]) .home-thumb img,
-    .index-card:not(.models-card):not([href*="models"]) .index-thumb img,
-    .view-card:not(.models-card):not([href*="models"]) .view-thumb img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        object-position: center !important;
-        display: block !important;
-        border-radius: 12px !important;
-    }
-}
+.mondrian-card { display: flex; flex-direction: column; text-decoration: none; height: 100%; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.mondrian-card:hover { transform: translateY(-3px); }
 
-.mondrian-thumb img,
-.album-thumb img,
-.stream-thumb img,
-.photo-thumb img,
-.home-thumb img,
-.index-thumb img,
-.view-thumb img {
+.mondrian-thumb {
     width: 100%;
     height: 100%;
-    object-fit: fill;
-    object-position: center;
-    display: block;
-    border-radius: 12px;
-}
-
-
-/* ==========================================================================
-   MODELS.HTML & MODEL/MODELS.HTML SPECIFIC STYLING RULES
-   ========================================================================== */
-.models-grid { 
-    grid-template-columns: 1fr; 
-    grid-auto-rows: auto;
-    gap: 2px;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-} 
-.mondrian-card.landscape,
-.mondrian-card.portrait,
-.mondrian-card.square {
-    grid-column: span 1 !important;
-    grid-row: span 1 !important;
-    height: auto !important;
-    aspect-ratio: auto !important;
-}
-.mondrian-thumb {
-    aspect-ratio: auto;
-    height: auto;
-    will-change: transform;
-}
-.mondrian-thumb img {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: none !important;
-    object-fit: initial !important;
-    display: block;
-    image-rendering: high-quality;
-    image-rendering: -webkit-optimize-contrast;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    will-change: transform;
-}
-
-
-/* ==========================================================================
-   SECTION 2: MOBILE STUFF (Matched across all pages excluding models.html)
-   ========================================================================== */
-@media(max-width: 500px) {
-    html, body {
-        background: rgb(0, 0, 0) !important;
-        color: #ffffff !important;
-        font-family: 'Montserrat', sans-serif !important;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-
-    .site-container {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        max-width: 100vw !important;
-    }
-
-    .home-grid,
-    .view-grid,
-    .albums-grid,
-    .photostream-grid,
-    .stream-grid,
-    .videos-grid,
-    .index-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        width: 100vw !important;
-    }
-
-    .mondrian-card,
-    .album-card,
-    .stream-card,
-    .photo-card,
-    .home-card,
-    .index-card,
-    .view-card {
-        grid-column: 1 / -1 !important;
-        grid-row: auto !important;
-        aspect-ratio: 4 / 5 !important;
-        height: auto !important;
-        border-radius: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        background: rgb(0, 0, 0) !important;
-        width: 100vw !important;
-    }
-
-    .mondrian-thumb,
-    .album-thumb,
-    .stream-thumb,
-    .photo-thumb,
-    .home-thumb,
-    .index-thumb,
-    .view-thumb {
-        border-radius: 0 !important;
-        background: rgb(0, 0, 0) !important;
-        border: none !important;
-        width: 100vw !important;
-    }
-
-    .models-card .mondrian-thumb img,
-    .models-card img,
-    .model-thumb img,
-    .models-grid img {
-        image-rendering: auto !important;
-        image-rendering: high-dpi !important;
-        -webkit-font-smoothing: subpixel-antialiased !important;
-        object-fit: none !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: none !important;
-        max-height: none !important;
-    }
-
-    .mondrian-thumb img,
-    .album-thumb img,
-    .stream-thumb img,
-    .photo-thumb img,
-    .home-thumb img,
-    .index-thumb img,
-    .view-thumb img {
-        border-radius: 0 !important;
-        object-fit: cover !important;
-        width: 100vw !important;
-        height: 100% !important;
-    }
-    
-    .mondrian-overlay,
-    .album-overlay,
-    .stream-overlay,
-    .photo-overlay,
-    .home-overlay,
-    .index-overlay,
-    .view-overlay {
-        display: none !important;
-    }
-
-    .nav-bar-compact {
-        width: 100vw !important;
-        position: relative !important;
-        left: 50% !important;
-        right: 50% !important;
-        margin-left: -50vw !important;
-        margin-right: -50vw !important;
-        gap: 2px !important;
-        margin-bottom: 12px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .mondrian-nav-box {
-        background: #FFEE55 !important;
-        border-color: #FFDD33 !important;
-        color: #ffffff !important;
-        font-family: 'Montserrat', sans-serif !important;
-        font-weight: 800 !important;
-        font-size: 0.85rem !important;
-        text-shadow: 
-            -1px -1px 0 #000000,  
-             1px -1px 0 #000000,
-            -1px  1px 0 #000000,
-             1px  1px 0 #000000,
-             0px 2px 4px rgba(0,0,0,0.8) !important;
-        box-shadow: var(--gold-glow-nav) !important;
-    }
-}
-
-
-.mondrian-overlay,
-.album-overlay,
-.stream-overlay,
-.photo-overlay,
-.home-overlay,
-.index-overlay,
-.view-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 22px 10px 8px 10px;
-    background: transparent;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: #ffffff;
-    font-family: 'Montserrat', sans-serif;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-    z-index: 5;
-    box-sizing: border-box;
-    white-space: nowrap;
+    min-height: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), var(--neon-glow);
 }
+
+.mondrian-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 20px; }
 
 .stream-layout-container { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: center; max-width: 1650px; margin: 0 auto; }
 @media(max-width: 1000px) { .stream-layout-container { grid-template-columns: 1fr; } }
 
 .control-panel {
     background: var(--card-bg);
+    backdrop-filter: blur(40px);
     border: 1px solid var(--card-border);
     border-radius: 20px;
-    box-shadow: none !important;
+    box-shadow: 0 35px 70px rgba(0, 0, 0, 0.95), var(--neon-glow);
     padding: 28px 38px;
 }
 
@@ -495,25 +111,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: var(--text-muted);
     position: relative;
-    box-shadow: none !important;
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95), var(--neon-glow);
 }
 
 input[type="text"] {
     width: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.75);
     border: 1px solid var(--card-border);
     border-radius: 12px;
     padding: 12px 16px;
-    color: #ffffff;
-    font-family: 'Montserrat', sans-serif;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     outline: none;
-    box-shadow: none !important;
     transition: all 0.3s ease;
 }
 
-input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: none !important; }
+input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
 
 .btn-primary {
     background: #ffffff;
@@ -521,52 +136,16 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: n
     border: none;
     border-radius: 12px;
     padding: 14px 24px;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: none !important;
     transition: all 0.3s ease;
 }
-.btn-primary:hover { background: #e0e0e0; box-shadow: none !important; }
-
-/* Pagination Controls Styling */
-.pagination-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 30px;
-    margin-bottom: 40px;
-}
-.page-btn {
-    background: var(--card-bg, #111);
-    border: 1px solid var(--card-border, #333);
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-}
-.page-btn:hover:not(:disabled) {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-}
-.page-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-.page-info {
-    color: #ffffff;
-    font-size: 0.85rem;
-    font-weight: 700;
-    font-family: 'Montserrat', sans-serif;
-}
+.btn-primary:hover { background: #e0e0e0; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
 
 /* --- Smoothness & Performance Extensions --- */
+
+/* Smooth image load animation to prevent jarring pop-ins */
 @keyframes imageFadeIn {
     from {
         opacity: 0;
@@ -582,6 +161,7 @@ img, .lazy-thumb {
     animation: imageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Glassmorphic smooth modal animations */
 @keyframes modalScaleIn {
     from {
         opacity: 0;
@@ -594,6 +174,8 @@ img, .lazy-thumb {
 }
 
 div[id$="Modal"], div[id*="Modal"] {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     background: rgba(0, 0, 0, 0.85) !important;
     transition: opacity 0.3s ease;
 }
@@ -603,6 +185,7 @@ div[id*="Modal"] > .control-panel {
     animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* GPU acceleration for interactive UI components */
 .mondrian-nav-box,
 .mondrian-card,
 .tag-pill,
