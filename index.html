@@ -203,9 +203,10 @@
                 height: 42px !important;
                 font-size: 0.75rem !important;
                 border-radius: 6px !important;
-                background: #ffd700 !important; /* Rich golden yellow */
-                color: #000000 !important; /* High contrast dark text on golden yellow */
-                border: 1px solid #e5c100 !important;
+                background: #FFD700 !important; /* Full rich golden color without shading */
+                color: #000000 !important; /* High contrast text */
+                border: 1px solid #FFD700 !important;
+                box-shadow: none !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
                 font-family: 'Montserrat', sans-serif !important;
@@ -213,8 +214,9 @@
             }
 
             .mondrian-nav-box:hover {
-                background: #ffdf33 !important;
+                background: #FFD700 !important;
                 color: #000000 !important;
+                border-color: #FFD700 !important;
                 transform: none !important;
             }
         }
@@ -301,16 +303,3 @@
         <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
-            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
-            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
-        </div>
-        
-        <div class="home-grid" id="streamsGrid"></div>
-        <div class="pagination-bar" id="paginationBar"></div>
-
-        <!-- Search Modal Popup -->
-        <div id="searchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative; background:#111; border:1px solid var(--card-border,
