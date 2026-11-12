@@ -112,7 +112,6 @@
                 -webkit-tap-highlight-color: transparent !important;
             }
 
-            /* 1. Only when site used in mobile, remove neon glow from tag-header */
             .tag-header {
                 box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
             }
@@ -267,7 +266,7 @@
             object-fit: contain;
             cursor: grab;
             transform-origin: center center;
-            /* 3. Pixel optimization for high-res/crisp rendering during zoom */
+            /* 2 & 3. Pixel optimization for high-res crisp rendering during pinch zoom */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             image-rendering: high-quality;
@@ -351,14 +350,14 @@
                 object-fit: contain !important;
                 transform: none !important;
             }
-            /* 2. Stretch landscape image while auto rotating into landscape mode on mobile */
+            /* 1. Stretched Landscape Images During Auto-Rotation on Mobile with width: 100vh, height: 100vw without cropping */
             .viewer-image.mobile-auto-rotate {
-                transform: rotate(90deg) scale(1.15) !important;
+                transform: rotate(90deg) !important;
                 width: 100vh !important;
                 height: 100vw !important;
                 max-width: 100vh !important;
                 max-height: 100vw !important;
-                object-fit: fill !important;
+                object-fit: contain !important;
             }
         }
     </style>
@@ -618,7 +617,7 @@
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
                         const pinchFactor = currentDistance / initialPinchDistance;
-                        // 3. Pinch gesture with pixel optimization (smooth scaling clamped up to 10x without breaking pixels)
+                        // 2. Pinch zoom mechanism with pixel optimization preventing pixel breaking up to 10x
                         currentScale = Math.min(Math.max(initialScaleForPinch * pinchFactor, 1), 10);
                         if (currentScale === 1) {
                             panX = 0;
@@ -686,7 +685,9 @@
                 panX = 0;
                 panY = 0;
                 const photo = window.folderImagesList[index];
-                const fullResUrl = extractImageUrl(photo.url || photo.thumbnail);
+                
+                // 3. Show actual updated high-quality image URL (prioritize full-res .url over thumbnail)
+                const fullResUrl = extractImageUrl(photo.url || photo.thumbnail || photo.image);
 
                 const modal = document.getElementById('inbuiltPhotoModal');
                 const viewerImg = document.getElementById('viewerImageElement');
@@ -704,7 +705,7 @@
                         const tempImg = new Image();
                         tempImg.onload = () => {
                             if (tempImg.naturalWidth > tempImg.naturalHeight) {
-                                // 2. Stretch landscape image while auto-rotating into landscape mode on mobile
+                                // 1. Stretched landscape image during auto-rotation with width: 100vh, height: 100vw without cropping
                                 viewerImg.classList.add('mobile-auto-rotate');
                             } else {
                                 viewerImg.classList.add('mobile-portrait-natural');
