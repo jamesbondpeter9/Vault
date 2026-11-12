@@ -3,14 +3,14 @@
 :root {
     --bg-base: #000000;
     --card-bg: rgba(8, 8, 11, 0.88);
-    --card-border: rgba(255, 255, 255, 0.22);
-    --card-border-hover: rgba(255, 255, 255, 0.95);
+    --card-border: rgba(212, 175, 55, 0.22);
+    --card-border-hover: rgba(212, 175, 55, 0.95);
     --gold-accent: rgba(212, 175, 55, 0.45);
-    --gold-glow: rgba(212, 175, 55, 0.15);
-    --primary: #ffffff;
+    --gold-glow: rgba(212, 175, 55, 0.25);
+    --primary: #d4af37;
     --text-main: #ffffff;
     --text-muted: #888895;
-    --neon-glow: 0 0 30px rgba(255, 255, 255, 0.15), 0 0 15px var(--gold-glow), inset 0 0 15px rgba(255, 255, 255, 0.08);
+    --neon-glow: 0 0 30px rgba(212, 175, 55, 0.22), 0 0 15px var(--gold-glow), inset 0 0 15px rgba(212, 175, 55, 0.12);
 }
 
 /* Enable smooth scrolling portal-wide */
@@ -31,10 +31,10 @@ body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: var(--bg-base);
     background-image: 
-        radial-gradient(circle at 50% -20%, rgba(50, 50, 65, 0.5) 0%, transparent 60%),
-        radial-gradient(circle at 10% 80%, rgba(212, 175, 55, 0.07) 0%, transparent 35%),
-        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
-        linear-gradient(135deg, rgba(15, 15, 20, 0.9) 0%, rgba(0, 0, 0, 1) 100%);
+        radial-gradient(circle at 50% -20%, rgba(60, 50, 20, 0.5) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(212, 175, 55, 0.12) 0%, transparent 35%),
+        radial-gradient(circle at 90% 90%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+        linear-gradient(135deg, rgba(20, 18, 10, 0.9) 0%, rgba(0, 0, 0, 1) 100%);
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
@@ -128,10 +128,10 @@ input[type="text"] {
     transition: all 0.3s ease;
 }
 
-input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0 0 20px rgba(212, 175, 55, 0.25); }
 
 .btn-primary {
-    background: #ffffff;
+    background: linear-gradient(135deg, #f3e5ab 0%, #d4af37 100%);
     color: #000000;
     border: none;
     border-radius: 12px;
@@ -141,7 +141,7 @@ input[type="text"]:focus { border-color: var(--card-border-hover); box-shadow: 0
     cursor: pointer;
     transition: all 0.3s ease;
 }
-.btn-primary:hover { background: #e0e0e0; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+.btn-primary:hover { background: linear-gradient(135deg, #fff2b8 0%, #e6be42 100%); box-shadow: 0 0 20px rgba(212, 175, 55, 0.45); }
 
 /* --- Smoothness & Performance Extensions --- */
 
