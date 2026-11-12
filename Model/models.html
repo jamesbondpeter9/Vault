@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Authentication Guard -->
+    <!-- Master Authentication Guard -->
     <script>
         if (sessionStorage.getItem('portal_authenticated') !== 'true') {
-            alert('Access Denied: Please log in first.');
-            window.location.href = '../login.html';
+            window.location.href = 'login.html';
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Models Directory - Portal</title>
-    <link rel="stylesheet" href="../style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Video Portal - Home</title>
+    <!-- Imported Montserrat Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
         .nav-bar-compact {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 2px;
             margin-bottom: 20px;
+            max-width: 1700px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
             height: 52px !important;
@@ -36,428 +40,495 @@
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mondrian-nav-box:hover {
             background: #fff;
             color: #000;
             border-color: #fff;
+            transform: translateY(-1px);
         }
 
-        .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; justify-content: center; }
-        .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
-        .filter-btn:hover, .filter-btn.active { background: #fff; color: #000; border-color: #fff; }
-        
-        .models-grid {
+        .home-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 320px;
+            grid-auto-rows: 140px;
             grid-auto-flow: dense;
-            gap: 4px;
+            gap: 2px;
             align-items: stretch;
+            padding-left: 2px;
+            padding-right: 2px;
+            box-sizing: border-box;
         }
-        @media(max-width: 1400px) { .models-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 900px) { .models-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { 
-            .models-grid { 
-                grid-template-columns: 1fr; 
-                grid-auto-rows: auto;
-                gap: 2px;
-                -webkit-transform: translateZ(0);
-                transform: translateZ(0);
+        @media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 900px) { 
+            .home-grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+                grid-auto-rows: 150px;
             } 
-            .mondrian-card.landscape,
+        }
+        @media(max-width: 500px) { 
+            .home-grid { 
+                grid-template-columns: 1fr !important; 
+                grid-auto-rows: auto !important;
+                gap: 0.5px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                -webkit-transform: none;
+                transform: none;
+            } 
+        }
+
+        .mondrian-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            text-decoration: none;
+            background: #000;
+            display: block;
+            box-sizing: border-box;
+            will-change: transform, box-shadow;
+            transform: translate3d(0,0,0);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mondrian-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+        .mondrian-card.landscape { grid-column: span 2; grid-row: span 4; }
+        .mondrian-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+
+        @media(max-width: 900px) {
             .mondrian-card.portrait,
+            .mondrian-card.landscape,
             .mondrian-card.square {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
+                grid-column: span 1;
+                grid-row: span 2;
+            }
+        }
+
+        /* Mobile specific enhancements */
+        @media(max-width: 500px) {
+            html, body {
+                background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
+                color: #ffffff !important;
+                font-family: 'Montserrat', sans-serif !important;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+                -webkit-tap-highlight-color: transparent !important;
+            }
+
+            .home-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .mondrian-card {
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 11 !important;
                 height: auto !important;
-                aspect-ratio: auto !important;
+                border-radius: 4px !important; /* Slightly reduced corner curvedness */
+                border-left: none !important;
+                border-right: none !important;
+                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: none !important; /* Removed neon glow */
+                background: rgb(0, 0, 0) !important;
+                outline: none !important;
+                margin-bottom: 0.5px !important;
+                width: 100vw !important;
+                position: relative !important;
+                left: 50% !important;
+                right: 50% !important;
+                margin-left: -50vw !important;
+                margin-right: -50vw !important;
+                transform: none !important;
+                transition: none !important;
+                -webkit-tap-highlight-color: transparent !important;
+                box-sizing: border-box !important;
             }
+
+            .mondrian-card:hover,
+            .mondrian-card:active,
+            .mondrian-card:focus {
+                transform: none !important;
+                box-shadow: none !important; /* Removed neon glow on hover/active */
+                z-index: 1 !important;
+                outline: none !important;
+                border-color: rgba(212, 175, 55, 0.6) !important;
+            }
+
             .mondrian-thumb {
-                aspect-ratio: auto;
-                height: auto;
-                will-change: transform;
-            }
-            .mondrian-thumb img {
+                border-radius: 4px !important; /* Matching reduced corner curvedness */
+                background: rgb(0, 0, 0) !important;
                 position: relative !important;
                 width: 100% !important;
-                height: auto !important;
-                max-height: none !important;
-                object-fit: initial !important;
-                display: block;
-                image-rendering: high-quality;
-                image-rendering: -webkit-optimize-contrast;
-                -webkit-transform: translateZ(0);
-                transform: translateZ(0);
-                will-change: transform;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+
+            .mondrian-thumb img {
+                border-radius: 4px !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                width: 100% !important;
+                height: 100% !important;
+                filter: saturate(1.25) contrast(1.18) brightness(1.05) !important; /* Enhanced image clarity and color depth */
+                image-rendering: -webkit-optimize-contrast; /* 4K-HD resolution optimization */
+                image-rendering: crisp-edges;
+            }
+            
+            .mondrian-overlay {
+                display: none !important;
+            }
+            
+            .nav-bar-compact {
+                width: 100% !important;
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                margin-bottom: 15px !important;
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+                box-sizing: border-box !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .mondrian-nav-card {
+                width: 100% !important;
+                display: block !important;
+            }
+
+            .mondrian-nav-box {
+                width: 100% !important;
+                height: 48px !important;
+                font-size: 0.95rem !important;
+                border-radius: 8px !important;
+                background: #111111 !important; /* Matching mobile index.html navigation inner background */
+                color: #ffffff !important;
+                border: 1px solid #333333 !important; /* Matching mobile index.html navigation border */
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                font-family: 'Montserrat', sans-serif !important; /* Matching mobile index.html font */
+                font-weight: 700 !important;
+                -webkit-tap-highlight-color: transparent !important;
+            }
+
+            .mondrian-nav-box:hover,
+            .mondrian-nav-box:active,
+            .mondrian-nav-box:focus {
+                background: #1a1a1a !important;
+                color: #ffffff !important;
+                border-color: #555555 !important;
+                transform: none !important;
+                box-shadow: none !important;
+                outline: none !important;
             }
         }
 
-        .mondrian-card.landscape { grid-column: span 2; grid-row: span 1; }
-        .mondrian-card.portrait { grid-column: span 1; grid-row: span 2; }
-        .mondrian-card.square { grid-column: span 1; grid-row: span 1; }
-
         .mondrian-thumb {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            border-radius: 20px;
-            cursor: pointer;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
+            background: #000;
         }
 
-        /* High quality mobile rendering compatibility without compression */
         .mondrian-thumb img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: fill;
             object-position: center;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .mondrian-overlay {
             position: absolute;
-            inset: 0;
-            image-rendering: -webkit-optimize-contrast;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 22px 10px 8px 10px;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            z-index: 5;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .update-thumb-btn { 
-            position: absolute; top: 10px; left: 10px; 
-            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
-            color: #fff; width: 26px; height: 26px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
-            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
+        /* Pagination Controls Styling */
+        .pagination-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 30px;
+            margin-bottom: 40px;
         }
-        .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
-        @media(max-width: 500px) { .update-thumb-btn { opacity: 0.8; } }
-
-        .delete-btn { 
-            position: absolute; top: 10px; right: 10px; 
-            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); 
-            color: #ff4d4d; width: 26px; height: 26px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 0.9rem; font-weight: bold; cursor: pointer; 
-            opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
+        .page-btn {
+            background: var(--card-bg, #111);
+            border: 1px solid var(--card-border, #333);
+            color: var(--text-muted, #ccc);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
         }
-        .mondrian-thumb:hover .delete-btn { opacity: 1; }
-        @media(max-width: 500px) { .delete-btn { opacity: 0.8; } }
+        .page-btn:hover:not(:disabled) {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .page-info {
+            color: var(--text-muted, #ccc);
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
     </style>
 </head>
 <body>
     <div class="site-container">
+        <!-- Compact Top Nav Bar -->
         <div class="nav-bar-compact">
-            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
+            <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
+            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
+            <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
         </div>
+        
+        <div class="home-grid" id="streamsGrid"></div>
+        <div class="pagination-bar" id="paginationBar"></div>
 
-        <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
-
-        <div class="filter-bar" id="filterBar"></div>
-        <div class="models-grid" id="modelsGrid"><div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div></div>
-
-        <div id="paginationBar" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 30px; margin-bottom: 40px;"></div>
-
-        <div id="modelModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Add New Model</h3>
-                <form id="modelForm">
-                    <div style="margin-bottom: 14px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Model Name</label>
-                        <input type="text" id="modelName" required="" placeholder="Enter model name">
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Photo / Thumbnail URL</label>
-                        <input type="text" id="modelThumb" required="" placeholder="https://...">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary" style="flex:1;">Save Model</button>
-                        <button type="button" onclick="closeAddModelModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="updateThumbModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
-            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Update Thumbnail Image</h3>
-                <form id="updateThumbForm">
-                    <div style="margin-bottom: 20px;">
-                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">New Thumbnail URL</label>
-                        <input type="text" id="newThumbUrl" required="" placeholder="https://...">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary" style="flex:1;">Update</button>
-                        <button type="button" onclick="closeUpdateThumbModal()" class="btn-primary" style="background:#333; color:#fff; flex:1;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="deleteModal" style="display:none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 100;">
-            <div class="control-panel" style="width: 100%; max-width: 350px; text-align: center;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Delete Model</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Are you sure you want to remove this model from the directory?</p>
+        <!-- Search Modal Popup -->
+        <div id="searchModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+            <div class="control-panel" style="width: 100%; max-width: 400px; position:relative; background:#111; border:1px solid var(--card-border, #333); padding:24px; border-radius:16px; box-sizing:border-box;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color:#fff; font-family:'Plus Jakarta Sans', sans-serif;">Search Streams</h3>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="Type to filter streams..." style="width:100%; padding:10px 14px; background:#000; border:1px solid var(--card-border, #333); color:#fff; border-radius:8px; font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; box-sizing:border-box;">
+                </div>
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="confirmDeleteModel()" class="btn-primary" style="flex:1; background:#ff4d4d; color:#fff;">Delete</button>
-                    <button onclick="closeDeleteModal()" class="btn-primary" style="flex:1; background:#333; color:#fff;">Cancel</button>
+                    <button type="button" onclick="clearSearchFilter()" class="page-btn" style="flex:1; background:#333; color:#fff; border-color:#444;">Clear</button>
+                    <button type="button" onclick="closeSearchModal()" class="page-btn" style="flex:1; background:#fff; color:#000; border-color:#fff;">Done</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Script references pointing to Modelstorage.js -->
-    <script src="../config.js"></script>
-    <script src="Modelstorage.js"></script>
-    <script src="../github-sync.js"></script>
+    
+    <script src="config.js"></script>
+    <script src="Media/storage.js"></script>
+    <script src="github-sync.js"></script>
     <script>
-        let currentLetterFilter = 'ALL';
         let currentPage = 1;
         const pageSize = 20;
-        let modelIndexToDelete = null;
-        let modelIndexToUpdateThumb = null;
+        let currentSearchQuery = '';
+
+        function portalLogout() {
+            sessionStorage.removeItem('portal_authenticated');
+            try {
+                localStorage.removeItem('portal_authenticated');
+            } catch (e) {}
+            window.location.href = 'login.html';
+        }
+
+        function openSearchModal() {
+            document.getElementById('searchModal').style.display = 'flex';
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = currentSearchQuery;
+            searchInput.focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').style.display = 'none';
+        }
+
+        function clearSearchFilter() {
+            currentSearchQuery = '';
+            document.getElementById('searchInput').value = '';
+            currentPage = 1;
+            renderPortalStreams();
+            closeSearchModal();
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Ensure database initializes and remote sync completes BEFORE rendering elements
-            if (typeof ModelStorageDB !== 'undefined') {
-                await ModelStorageDB.initDB();
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.initDB === 'function') {
+                await StorageDB.initDB();
             }
 
-            buildFilterBar();
-            renderModels();
-
-            // Auto-generate name from thumbnail URL as user types/pastes
-            const thumbField = document.getElementById('modelThumb');
-            if (thumbField) {
-                thumbField.addEventListener('input', () => {
-                    const urlVal = thumbField.value.trim();
-                    if (!urlVal) return;
-                    try {
-                        const cleanUrl = urlVal.split('?')[0].split('#')[0];
-                        const segments = cleanUrl.split('/');
-                        let filename = segments[segments.length - 1];
-                        if (filename.includes('.')) {
-                            filename = filename.substring(0, filename.lastIndexOf('.'));
-                        }
-                        if (filename) {
-                            // Replace hyphens and underscores with spaces (supports First-Name, First-Middle-Last, etc.)
-                            const formattedName = filename.replace(/[-_]/g, ' ');
-                            document.getElementById('modelName').value = formattedName;
-                        }
-                    } catch (err) {}
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchQuery = e.target.value.trim().toLowerCase();
+                    currentPage = 1;
+                    renderPortalStreams();
                 });
             }
 
-            document.getElementById('modelForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const nameInput = document.getElementById('modelName');
-                const thumbInput = document.getElementById('modelThumb');
-                const name = nameInput.value.trim();
-                const thumb = thumbInput.value.trim();
-                if (!name || !thumb) return;
-
-                const img = new Image();
-                img.src = thumb;
-                img.onload = () => {
-                    const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                    saveModel(name, thumb, shape);
-                };
-                img.onerror = () => {
-                    saveModel(name, thumb, 'square');
-                };
-            });
-
-            document.getElementById('updateThumbForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newUrl = document.getElementById('newThumbUrl').value.trim();
-                if (modelIndexToUpdateThumb !== null && newUrl) {
-                    const img = new Image();
-                    img.src = newUrl;
-                    img.onload = () => {
-                        const shape = img.height > img.width ? 'portrait' : (img.width > img.height ? 'landscape' : 'square');
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, shape);
-                    };
-                    img.onerror = () => {
-                        updateModelThumb(modelIndexToUpdateThumb, newUrl, 'square');
-                    };
-                }
-                closeUpdateThumbModal();
-            });
+            renderPortalStreams();
         });
 
-        async function saveModel(name, thumbnail, shape) {
-            const modelData = { name, thumbnail, shape, createdAt: Date.now() };
-
-            if (typeof ModelStorageDB !== 'undefined') {
-                await ModelStorageDB.addModel(modelData);
+        function renderPortalStreams() {
+            let allStreams = [];
+            if (typeof StorageDB !== 'undefined' && typeof StorageDB.getVideoStreams === 'function') {
+                allStreams = StorageDB.getVideoStreams() || [];
+            } else if (typeof StorageDB !== 'undefined' && typeof StorageDB.getStreams === 'function') {
+                allStreams = StorageDB.getStreams() || [];
+            } else {
+                try {
+                    const rawLocal = localStorage.getItem('video_portal_streams_db') || localStorage.getItem('portal_videos') || localStorage.getItem('videos_db');
+                    if (rawLocal) {
+                        const parsed = JSON.parse(rawLocal);
+                        allStreams = Array.isArray(parsed) ? parsed : (parsed.streams || parsed.videos || []);
+                    }
+                } catch (e) {}
             }
 
-            document.getElementById('modelName').value = '';
-            document.getElementById('modelThumb').value = '';
-            closeAddModelModal();
-            currentPage = 1;
-            renderModels();
-        }
-
-        async function updateModelThumb(index, newUrl, shape) {
-            if (typeof ModelStorageDB !== 'undefined') {
-                const models = ModelStorageDB.getModels() || [];
-                if (models[index]) {
-                    models[index].thumbnail = newUrl;
-                    models[index].shape = shape;
-                    await ModelStorageDB.saveAndSyncModels(models, true);
-                }
-            }
-
-            renderModels();
-        }
-
-        function buildFilterBar() {
-            const filterBar = document.getElementById('filterBar');
-            const letters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
-            filterBar.innerHTML = '';
-            letters.forEach(letter => {
-                const btn = document.createElement('button');
-                btn.className = `filter-btn ${letter === 'ALL' ? 'active' : ''}`;
-                btn.textContent = letter;
-                btn.onclick = () => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentLetterFilter = letter;
-                    currentPage = 1;
-                    renderModels();
-                };
-                filterBar.appendChild(btn);
-            });
-        }
-
-        function renderModels() {
-            if (typeof ModelStorageDB === 'undefined') return;
-            const models = ModelStorageDB.getModels() || [];
-            const grid = document.getElementById('modelsGrid');
+            const grid = document.getElementById('streamsGrid');
             const paginationBar = document.getElementById('paginationBar');
             
-            const modelsWithIndex = models.map((m, idx) => ({ ...m, originalIndex: idx }));
-            const filtered = modelsWithIndex.filter(m => {
-                if (currentLetterFilter === 'ALL') return true;
-                return m.name.toUpperCase().startsWith(currentLetterFilter);
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 60px;">No models found.</div>`;
+            if (!Array.isArray(allStreams) || allStreams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No streams found. Click "+" to create your first stream!</div>`;
                 paginationBar.innerHTML = '';
                 return;
             }
 
-            const totalPages = Math.ceil(filtered.length / pageSize);
+            const originalStreams = allStreams;
+            allStreams = allStreams.slice().reverse();
+
+            const filteredStreams = allStreams.filter(stream => {
+                if (!currentSearchQuery) return true;
+                const titleMatch = stream.title && stream.title.toLowerCase().includes(currentSearchQuery);
+                return titleMatch;
+            });
+
+            if (filteredStreams.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 1; text-align: center; color: var(--text-muted); padding: 60px;">No matching streams found for "${currentSearchQuery}".</div>`;
+                paginationBar.innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredStreams.length / pageSize);
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = startIndex + pageSize;
-            const paginatedItems = filtered.slice(startIndex, endIndex);
+            const paginatedItems = filteredStreams.slice(startIndex, endIndex);
 
             grid.innerHTML = '';
-            paginatedItems.forEach((model) => {
-                const card = document.createElement('div');
-                const shape = model.shape || (model.originalIndex % 2 === 0 ? 'portrait' : 'landscape');
-                card.className = `mondrian-card ${shape}`;
+            
+            paginatedItems.forEach((stream, paginatedIdx) => {
+                const actualIndex = originalStreams.indexOf(stream);
+                const card = document.createElement('a');
+                card.href = `Media/watch.html?index=${actualIndex}`;
+                card.className = `mondrian-card portrait`;
 
                 card.innerHTML = `
-                    <div class="mondrian-thumb" onclick="openAlbums('${encodeURIComponent(model.name)}')">
-                        <button type="button" class="update-thumb-btn" onclick="event.stopPropagation(); openUpdateThumbModal(${model.originalIndex})" title="Update thumbnail">+</button>
-                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); openDeleteModal(${model.originalIndex})" title="Delete model">&times;</button>
-                        ${model.thumbnail ? `<img src="${model.thumbnail}" alt="${model.name}">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">No Photo</div>'}
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 14px 16px; font-weight: 700; font-size: 0.85rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); z-index: 5;">${model.name}</div>
+                    <div class="mondrian-thumb">
+                        ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb">` : '<div style="color:#888;font-size:0.80rem;">No Thumbnail</div>'}
+                        <div class="mondrian-overlay">${stream.title}</div>
                     </div>`;
+            
                 grid.appendChild(card);
+
+                if (stream.thumbnail) {
+                    const img = card.querySelector('.lazy-thumb');
+                    if (img) {
+                        const updateRatio = () => {
+                            if (img.naturalWidth && img.naturalHeight) {
+                                const ratio = img.naturalWidth / img.naturalHeight;
+                                if (ratio < 0.85) {
+                                    card.className = 'mondrian-card portrait';
+                                } else if (ratio > 1.25) {
+                                    card.className = 'mondrian-card landscape';
+                                } else {
+                                    card.className = 'mondrian-card square';
+                                }
+                            }
+                        };
+                        
+                        if (img.complete) {
+                            updateRatio();
+                        } else {
+                            img.onload = updateRatio;
+                        }
+                    }
+                }
             });
 
             paginationBar.innerHTML = '';
             if (totalPages > 1) {
                 const prevBtn = document.createElement('button');
-                prevBtn.className = 'filter-btn';
+                prevBtn.className = 'page-btn';
                 prevBtn.textContent = '← Prev';
                 prevBtn.disabled = currentPage === 1;
-                prevBtn.style.opacity = currentPage === 1 ? '0.4' : '1';
                 prevBtn.onclick = () => {
                     if (currentPage > 1) {
                         currentPage--;
-                        renderModels();
+                        renderPortalStreams();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
                 paginationBar.appendChild(prevBtn);
 
                 const pageInfo = document.createElement('span');
-                pageInfo.style.color = 'var(--text-muted)';
-                pageInfo.style.fontSize = '0.85rem';
-                pageInfo.style.fontWeight = '700';
+                pageInfo.className = 'page-info';
                 pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
                 const nextBtn = document.createElement('button');
-                nextBtn.className = 'filter-btn';
+                nextBtn.className = 'page-btn';
                 nextBtn.textContent = 'Next →';
                 nextBtn.disabled = currentPage === totalPages;
-                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
                 nextBtn.onclick = () => {
                     if (currentPage < totalPages) {
                         currentPage++;
-                        renderModels();
+                        renderPortalStreams();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
                 paginationBar.appendChild(nextBtn);
             }
         }
-
-        function openAlbums(name) {
-            window.location.href = `vault.html?name=${name}`;
-        }
-
-        function openUpdateThumbModal(index) {
-            modelIndexToUpdateThumb = index;
-            document.getElementById('newThumbUrl').value = '';
-            document.getElementById('updateThumbModal').style.display = 'flex';
-        }
-
-        function closeUpdateThumbModal() {
-            modelIndexToUpdateThumb = null;
-            document.getElementById('updateThumbModal').style.display = 'none';
-        }
-
-        function openDeleteModal(index) {
-            modelIndexToDelete = index;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        function closeDeleteModal() {
-            modelIndexToDelete = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-
-        async function confirmDeleteModel() {
-            if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
-                const models = ModelStorageDB.getModels() || [];
-                const targetModel = models[modelIndexToDelete];
-                
-                if (targetModel) {
-                    await ModelStorageDB.deleteModel(targetModel.name);
-                }
-                renderModels();
-            }
-            closeDeleteModal();
-        }
-
-        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
-        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
     </script>
 </body>
 </html>
