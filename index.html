@@ -24,7 +24,7 @@
             margin-right: auto;
         }
         @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
         .mondrian-nav-box {
             height: 52px !important;
@@ -237,6 +237,11 @@
                 box-shadow: 0 0 20px rgba(212, 175, 55, 0.3) !important;
                 outline: none !important;
             }
+
+            /* Hide Photostream and '+' navigation items exclusively on mobile screens */
+            .mobile-hide-nav {
+                display: none !important;
+            }
         }
 
         .mondrian-thumb {
@@ -322,8 +327,8 @@
         <div class="nav-bar-compact">
             <a href="index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
             <a href="Model/models.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Models</div></a>
-            <a href="Image/photostream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
-            <a href="Media/stream.html" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
+            <a href="Image/photostream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.1rem; font-weight: 800;" title="Photostream">★</div></a>
+            <a href="Media/stream.html" class="mondrian-nav-card mobile-hide-nav"><div class="mondrian-nav-box" style="font-size: 1.2rem; font-weight: 900;">+</div></a>
             <a href="javascript:void(0)" onclick="openSearchModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1rem; font-weight: 800;" title="Search">🔍</div></a>
             <a href="javascript:void(0)" onclick="portalLogout()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 0.7rem; font-weight: 800;">Logout</div></a>
         </div>
