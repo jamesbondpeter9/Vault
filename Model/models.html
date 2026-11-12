@@ -467,7 +467,7 @@
                 pageInfo.style.color = 'var(--text-muted)';
                 pageInfo.style.fontSize = '0.85rem';
                 pageInfo.style.fontWeight = '700';
-                pageInfo.textContent = `Page ${currentPage} of totalPages`;
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
                 const nextBtn = document.createElement('button');
@@ -488,7 +488,6 @@
 
         function openAlbums(name) {
             window.location.href = `vault.html?name=${name}`;
-            
         }
 
         function openUpdateThumbModal(index) {
