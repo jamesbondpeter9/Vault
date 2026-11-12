@@ -91,7 +91,8 @@ body {
     transform: translateY(-1px);
 }
 
-.home-grid {
+.home-grid,
+.view-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     grid-auto-rows: 140px;
@@ -102,15 +103,17 @@ body {
     padding-right: 2px;
     box-sizing: border-box;
 }
-@media(max-width: 1400px) { .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media(max-width: 1400px) { 
+    .home-grid, .view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } 
+}
 @media(max-width: 900px) { 
-    .home-grid { 
+    .home-grid, .view-grid { 
         grid-template-columns: repeat(2, minmax(0, 1fr)); 
         grid-auto-rows: 150px;
     } 
 }
 @media(max-width: 500px) { 
-    .home-grid { 
+    .home-grid, .view-grid { 
         grid-template-columns: 1fr !important; 
         grid-auto-rows: auto !important;
         gap: 2px !important;
@@ -138,7 +141,8 @@ body {
 .stream-card,
 .photo-card,
 .home-card,
-.index-card {
+.index-card,
+.view-card {
     position: relative;
     width: 100%;
     height: 100%;
@@ -158,7 +162,8 @@ body {
 .stream-card:hover,
 .photo-card:hover,
 .home-card:hover,
-.index-card:hover {
+.index-card:hover,
+.view-card:hover {
     transform: translateY(-2px);
     z-index: 10;
 }
@@ -167,7 +172,8 @@ body {
 .album-card.portrait,
 .stream-card.portrait,
 .home-card.portrait,
-.index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
+.index-card.portrait,
+.view-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
 /* Web browser width: span 4 vertical height for thumbnails, excluding models.html / Models.html */
 @media(min-width: 501px) {
@@ -177,12 +183,14 @@ body {
     body:not(:has(script[src*="models"])) .photo-card,
     body:not(:has(script[src*="models"])) .home-card,
     body:not(:has(script[src*="models"])) .index-card,
+    body:not(:has(script[src*="models"])) .view-card,
     .mondrian-card:not(.models-card):not([href*="models"]),
     .album-card:not(.models-card):not([href*="models"]),
     .stream-card:not(.models-card):not([href*="models"]),
     .photo-card:not(.models-card):not([href*="models"]),
     .home-card:not(.models-card):not([href*="models"]),
-    .index-card:not(.models-card):not([href*="models"]) { 
+    .index-card:not(.models-card):not([href*="models"]),
+    .view-card:not(.models-card):not([href*="models"]) { 
         grid-column: span 1 !important; 
         grid-row: span 4 !important; 
     }
@@ -192,14 +200,16 @@ body {
 .album-card.square,
 .stream-card.square,
 .home-card.square,
-.index-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
+.index-card.square,
+.view-card.square { grid-column: span 1; grid-row: span 1; aspect-ratio: 1 / 1; }
 
 @media(max-width: 900px) {
     .mondrian-card.portrait, .mondrian-card.landscape, .mondrian-card.square,
     .album-card.portrait, .album-card.landscape, .album-card.square,
     .stream-card.portrait, .stream-card.landscape, .stream-card.square,
     .home-card.portrait, .home-card.landscape, .home-card.square,
-    .index-card.portrait, .index-card.landscape, .index-card.square {
+    .index-card.portrait, .index-card.landscape, .index-card.square,
+    .view-card.portrait, .view-card.landscape, .view-card.square {
         grid-column: span 1;
         grid-row: span 2;
     }
@@ -210,7 +220,8 @@ body {
 .stream-thumb,
 .photo-thumb,
 .home-thumb,
-.index-thumb {
+.index-thumb,
+.view-thumb {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -233,12 +244,14 @@ body {
     :not(.models-card):not([href*="models"]) > .photo-thumb img,
     :not(.models-card):not([href*="models"]) > .home-thumb img,
     :not(.models-card):not([href*="models"]) > .index-thumb img,
+    :not(.models-card):not([href*="models"]) > .view-thumb img,
     .mondrian-card:not(.models-card):not([href*="models"]) .mondrian-thumb img,
     .album-card:not(.models-card):not([href*="models"]) .album-thumb img,
     .stream-card:not(.models-card):not([href*="models"]) .stream-thumb img,
     .photo-card:not(.models-card):not([href*="models"]) .photo-thumb img,
     .home-card:not(.models-card):not([href*="models"]) .home-thumb img,
-    .index-card:not(.models-card):not([href*="models"]) .index-thumb img {
+    .index-card:not(.models-card):not([href*="models"]) .index-thumb img,
+    .view-card:not(.models-card):not([href*="models"]) .view-thumb img {
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
@@ -253,13 +266,52 @@ body {
 .stream-thumb img,
 .photo-thumb img,
 .home-thumb img,
-.index-thumb img {
+.index-thumb img,
+.view-thumb img {
     width: 100%;
     height: 100%;
     object-fit: fill;
     object-position: center;
     display: block;
     border-radius: 12px;
+}
+
+
+/* ==========================================================================
+   MODELS.HTML & MODEL/MODELS.HTML SPECIFIC STYLING RULES
+   ========================================================================== */
+.models-grid { 
+    grid-template-columns: 1fr; 
+    grid-auto-rows: auto;
+    gap: 2px;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+} 
+.mondrian-card.landscape,
+.mondrian-card.portrait,
+.mondrian-card.square {
+    grid-column: span 1 !important;
+    grid-row: span 1 !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+}
+.mondrian-thumb {
+    aspect-ratio: auto;
+    height: auto;
+    will-change: transform;
+}
+.mondrian-thumb img {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: initial !important;
+    display: block;
+    image-rendering: high-quality;
+    image-rendering: -webkit-optimize-contrast;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 
@@ -285,6 +337,7 @@ body {
     }
 
     .home-grid,
+    .view-grid,
     .albums-grid,
     .photostream-grid,
     .stream-grid,
@@ -302,7 +355,8 @@ body {
     .stream-card,
     .photo-card,
     .home-card,
-    .index-card {
+    .index-card,
+    .view-card {
         grid-column: 1 / -1 !important;
         grid-row: auto !important;
         aspect-ratio: 4 / 5 !important;
@@ -319,7 +373,8 @@ body {
     .stream-thumb,
     .photo-thumb,
     .home-thumb,
-    .index-thumb {
+    .index-thumb,
+    .view-thumb {
         border-radius: 0 !important;
         background: rgb(0, 0, 0) !important;
         border: none !important;
@@ -345,7 +400,8 @@ body {
     .stream-thumb img,
     .photo-thumb img,
     .home-thumb img,
-    .index-thumb img {
+    .index-thumb img,
+    .view-thumb img {
         border-radius: 0 !important;
         object-fit: cover !important;
         width: 100vw !important;
@@ -357,7 +413,8 @@ body {
     .stream-overlay,
     .photo-overlay,
     .home-overlay,
-    .index-overlay {
+    .index-overlay,
+    .view-overlay {
         display: none !important;
     }
 
@@ -398,7 +455,8 @@ body {
 .stream-overlay,
 .photo-overlay,
 .home-overlay,
-.index-overlay {
+.index-overlay,
+.view-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
