@@ -121,7 +121,7 @@
             inset: 0;
         }
 
-        /* 1 & 2. Mobile-specific exact matching index.html structure, shape, size, font, color, background theme and edge-to-edge layout */
+        /* 1. Mobile browser compatibility enhancements */
         @media(max-width: 500px) {
             html, body {
                 background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
@@ -131,6 +131,8 @@
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
                 -webkit-tap-highlight-color: transparent !important;
+                overflow-x: hidden !important;
+                width: 100% !important;
             }
 
             .tag-header {
@@ -157,6 +159,8 @@
                 padding-right: 0 !important;
                 max-width: 100% !important;
                 overflow-x: hidden !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             .album-grid {
