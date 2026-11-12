@@ -224,6 +224,25 @@ body {
     box-shadow: none !important;
 }
 
+/* Original quality inner image rendering for web browser thumbnails */
+@media(min-width: 501px) {
+    .mondrian-thumb img,
+    .album-thumb img,
+    .stream-thumb img,
+    .photo-thumb img,
+    .home-thumb img,
+    .index-thumb img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        object-position: center !important;
+        display: block !important;
+        border-radius: 12px !important;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: high-dpi;
+    }
+}
+
 .mondrian-thumb img,
 .album-thumb img,
 .stream-thumb img,
