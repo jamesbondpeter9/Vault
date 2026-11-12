@@ -169,21 +169,22 @@ body {
 .home-card.portrait,
 .index-card.portrait { grid-column: span 1; grid-row: span 2; aspect-ratio: 9 / 16; }
 
-/* Web browser width: exactly 2 individual thumbnails per horizontal row */
+/* Web browser width: span 4 vertical height for thumbnails, excluding models.html / Models.html */
 @media(min-width: 501px) {
-    .mondrian-card,
-    .album-card,
-    .stream-card,
-    .photo-card,
-    .home-card,
-    .index-card,
-    .mondrian-card.landscape,
-    .album-card.landscape,
-    .stream-card.landscape,
-    .home-card.landscape,
-    .index-card.landscape { 
+    body:not(:has(script[src*="models"])) .mondrian-card,
+    body:not(:has(script[src*="models"])) .album-card,
+    body:not(:has(script[src*="models"])) .stream-card,
+    body:not(:has(script[src*="models"])) .photo-card,
+    body:not(:has(script[src*="models"])) .home-card,
+    body:not(:has(script[src*="models"])) .index-card,
+    .mondrian-card:not(.models-card):not([href*="models"]),
+    .album-card:not(.models-card):not([href*="models"]),
+    .stream-card:not(.models-card):not([href*="models"]),
+    .photo-card:not(.models-card):not([href*="models"]),
+    .home-card:not(.models-card):not([href*="models"]),
+    .index-card:not(.models-card):not([href*="models"]) { 
         grid-column: span 1 !important; 
-        grid-row: span 1 !important; 
+        grid-row: span 4 !important; 
     }
 }
 
@@ -224,22 +225,26 @@ body {
     box-shadow: none !important;
 }
 
-/* Original quality inner image rendering for web browser thumbnails */
+/* Original quality inner image rendering & fitting for web browser thumbnails (excluding models.html) */
 @media(min-width: 501px) {
-    .mondrian-thumb img,
-    .album-thumb img,
-    .stream-thumb img,
-    .photo-thumb img,
-    .home-thumb img,
-    .index-thumb img {
+    :not(.models-card):not([href*="models"]) > .mondrian-thumb img,
+    :not(.models-card):not([href*="models"]) > .album-thumb img,
+    :not(.models-card):not([href*="models"]) > .stream-thumb img,
+    :not(.models-card):not([href*="models"]) > .photo-thumb img,
+    :not(.models-card):not([href*="models"]) > .home-thumb img,
+    :not(.models-card):not([href*="models"]) > .index-thumb img,
+    .mondrian-card:not(.models-card):not([href*="models"]) .mondrian-thumb img,
+    .album-card:not(.models-card):not([href*="models"]) .album-thumb img,
+    .stream-card:not(.models-card):not([href*="models"]) .stream-thumb img,
+    .photo-card:not(.models-card):not([href*="models"]) .photo-thumb img,
+    .home-card:not(.models-card):not([href*="models"]) .home-thumb img,
+    .index-card:not(.models-card):not([href*="models"]) .index-thumb img {
         width: 100% !important;
         height: 100% !important;
-        object-fit: contain !important;
+        object-fit: cover !important;
         object-position: center !important;
         display: block !important;
         border-radius: 12px !important;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: high-dpi;
     }
 }
 
