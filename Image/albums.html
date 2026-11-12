@@ -147,7 +147,7 @@
                 width: 100vw !important;
                 overflow-x: hidden !important;
                 box-sizing: border-box !important;
-                padding-top: 12px !important; /* Added space between top display edge and navigation matching index.html */
+                padding-top: 0px !important; /* Matches index.html gap between top display edge and navigation */
             }
 
             .tag-header {
@@ -173,7 +173,7 @@
                 grid-template-columns: 1fr !important;
                 grid-auto-rows: auto !important;
                 gap: 0.5px !important;
-                padding: 0 !important;
+                padding: 0 2px !important; /* 2px gap between tag header / grid and display edges */
                 margin: 0 !important;
                 width: 100vw !important;
                 box-sizing: border-box !important;
@@ -193,7 +193,7 @@
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
                 margin: 0 0 0.5px 0 !important;
-                width: 100vw !important;
+                width: 100% !important;
                 position: relative !important;
                 left: 0 !important;
                 right: 0 !important;
@@ -233,8 +233,8 @@
                 margin-right: 0 !important;
                 gap: 4px !important;
                 margin-bottom: 12px !important;
-                padding-left: 4px !important;
-                padding-right: 4px !important;
+                padding-left: 2px !important; /* 2px gap between navigation and display edges */
+                padding-right: 2px !important; /* 2px gap between navigation and display edges */
                 box-sizing: border-box !important;
                 background: transparent !important;
                 backdrop-filter: none !important;
@@ -285,7 +285,7 @@
             <a href="javascript:void(0)" onclick="openFolderModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: #fff;">+ New</div></a>
         </div>
 
-        <div class="tag-header">
+        <div class="tag-header" style="margin-left: 2px; margin-right: 2px; width: calc(100% - 4px); box-sizing: border-box;">
             <h1 id="tagTitle" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Albums</h1>
             <p id="tagSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">Albums featuring this model</p>
         </div>
@@ -554,7 +554,7 @@
             if (!confirm(`Are you sure you want to delete folder "${folderName}" and all its photos?`)) return;
 
             let allFolders = ImageStorageDB.getFolders();
-            allFolders = allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
+            allFolders.filter(f => !(f.name === folderName && f.model.toLowerCase() === currentModelName.toLowerCase()));
             ImageStorageDB.saveFolders(allFolders);
 
             let streams = ImageStorageDB.getPhotoStreams();
