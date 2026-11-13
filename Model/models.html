@@ -75,10 +75,9 @@
                 padding-bottom: 85px !important;
             }
 
-            /* Requirement 1: Standard web browser grid structure with 2px gap and removed hover effects on mobile */
             .models-grid { 
                 grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
-                grid-auto-rows: 190px !important;
+                grid-auto-rows: 200px !important; /* Increased row height by 10px from 190px */
                 gap: 2px !important;
                 margin-top: 0.5px !important;
                 width: 100vw !important;
@@ -139,7 +138,16 @@
                 will-change: transform;
             }
 
-            /* Requirement 2: Vertical A-Z filter structure with full alphabet filling row and hover removed */
+            /* Compact model name on mobile: smaller font, compact padding, bottom-left */
+            .mondrian-thumb > div:last-child {
+                padding: 6px 8px !important;
+                font-size: 0.7rem !important;
+                max-width: 90% !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
             .filter-bar {
                 display: grid !important;
                 grid-template-columns: repeat(9, minmax(0, 1fr)) !important;
@@ -182,7 +190,6 @@
                 border-color: rgba(212, 175, 55, 0.9) !important;
             }
 
-            /* Requirement 2 & Bottom Navigation Dock layout */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -233,7 +240,6 @@
                 outline: none !important;
             }
 
-            /* Requirement 3: Hide '+' and 'x' symbols from thumbnails on mobile */
             .update-thumb-btn,
             .delete-btn {
                 display: none !important;
