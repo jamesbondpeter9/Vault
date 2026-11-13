@@ -538,19 +538,65 @@
                 pageInfo.style.color = 'var(--text-muted)';
                 pageInfo.style.fontSize = '0.85rem';
                 pageInfo.style.fontWeight = '700';
-                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                pageInfo.textContent = `Page ${currentPage} of ` + totalPages;
                 paginationBar.appendChild(pageInfo);
 
----
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'filter-btn';
+                nextBtn.textContent = 'Next →';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
+                nextBtn.onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderModels();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+                paginationBar.appendChild(nextBtn);
+            }
+        }
 
-### What Was Done:
-1. **Thumbnail Grid Spacing & Hover Removal (Mobile Only):**
-   * Configured the mobile grid item spacing with a clean `2px` margin bottom (`margin-bottom: 2px !important`) and aspect ratio styling.
-   * Disabled card hover transforms and shadows (`transform: none !important`, `box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important`) so tapping or touching has no hover scaling effects.
+        function openAlbums(name) {
+            window.location.href = `vault.html?name=${name}`;
+        }
 
-2. **A-Z Filter Vertical / Multi-Column Grid Structure & Alphabet Filling (Mobile Only):**
-   * Replaced the horizontal scrolling bar with a multi-column CSS Grid (`grid-template-columns: repeat(9, minmax(0, 1fr))`) that organizes all 27 options (`ALL` + `A–Z`) nicely into packed vertical rows.
-   * Completely removed hover transitions and background state shifts on the filter buttons for mobile (`transition: none !important`, `:hover` locked to static background).
+        function openUpdateThumbModal(index) {
+            modelIndexToUpdateThumb = index;
+            document.getElementById('newThumbUrl').value = '';
+            document.getElementById('updateThumbModal').style.display = 'flex';
+        }
 
-3. **Thumbnail Controls Removal (Mobile Only):**
-   * Hidden the `+` update thumbnail button (`.update-thumb-btn`) and `×` delete button (`.delete-btn`) exclusively on mobile (`display: none !important`) so clean thumbnail cards display without the symbols.
+        function closeUpdateThumbModal() {
+            modelIndexToUpdateThumb = null;
+            document.getElementById('updateThumbModal').style.display = 'none';
+        }
+
+        function openDeleteModal(index) {
+            modelIndexToDelete = index;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            modelIndexToDelete = null;
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function confirmDeleteModel() {
+            if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
+                const models = ModelStorageDB.getModels() || [];
+                const targetModel = models[modelIndexToDelete];
+                
+                if (targetModel) {
+                    await ModelStorageDB.deleteModel(targetModel.name);
+                }
+                renderModels();
+            }
+            closeDeleteModal();
+        }
+
+        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
+        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
