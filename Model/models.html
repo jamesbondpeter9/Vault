@@ -75,9 +75,10 @@
                 padding-bottom: 85px !important;
             }
 
+            /* Requirement 1: Increased thumbnails size/grid and 2px gap, hover effect removed */
             .models-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
-                grid-auto-rows: 190px !important;
+                grid-template-columns: 1fr !important; 
+                grid-auto-rows: auto !important;
                 gap: 2px !important;
                 margin-top: 0.5px !important;
                 width: 100vw !important;
@@ -92,23 +93,32 @@
             .mondrian-card.landscape,
             .mondrian-card.portrait,
             .mondrian-card.square {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
-                height: 100% !important;
-                aspect-ratio: auto !important;
-                border-radius: 12px !important;
-                border: 1px solid rgba(212, 175, 55, 0.4) !important;
-                box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                height: auto !important;
+                aspect-ratio: 16 / 10 !important;
+                border-radius: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
-                margin-bottom: 0 !important;
-                width: 100% !important;
+                margin-bottom: 2px !important;
+                width: 100vw !important;
+                transition: none !important;
+                transform: none !important;
+            }
+            .mondrian-card:hover {
+                transform: none !important;
+                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
             }
             .mondrian-thumb {
                 aspect-ratio: auto;
                 height: 100% !important;
                 width: 100% !important;
                 will-change: transform;
-                border-radius: 12px !important;
+                border-radius: 0 !important;
                 background: rgb(0, 0, 0) !important;
             }
             .mondrian-thumb img {
@@ -118,8 +128,7 @@
                 max-height: none !important;
                 object-fit: cover !important;
                 display: block;
-                border-radius: 12px !important;
-                /* Requirement 1: 1440p resolution optimization, enhanced colour, and contrast(1.0) */
+                border-radius: 0 !important;
                 filter: contrast(1.0) saturate(1.25) !important;
                 image-rendering: high-dpi;
                 image-rendering: -webkit-optimize-contrast;
@@ -129,13 +138,11 @@
                 will-change: transform;
             }
 
-            /* Compact A-Z filter touching the top display edge */
+            /* Requirement 2: Vertical A-Z filter structure with full alphabet filling row and hover removed */
             .filter-bar {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                justify-content: flex-start !important;
-                gap: 4px !important;
+                display: grid !important;
+                grid-template-columns: repeat(9, minmax(0, 1fr)) !important;
+                gap: 2px !important;
                 margin: 0.5px 0 15px 0 !important;
                 padding: 6px 8px !important;
                 width: 100vw !important;
@@ -149,27 +156,32 @@
                 -webkit-backdrop-filter: blur(12px) !important;
                 border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
                 box-sizing: border-box !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            .filter-bar::-webkit-scrollbar {
-                display: none;
             }
             .filter-btn {
-                flex: 0 0 auto !important;
-                padding: 4px 8px !important;
-                font-size: 0.7rem !important;
-                border-radius: 6px !important;
+                flex: none !important;
+                width: 100% !important;
+                padding: 6px 2px !important;
+                font-size: 0.75rem !important;
+                border-radius: 4px !important;
                 background: rgba(25, 20, 8, 0.6) !important;
                 color: #fff !important;
                 border: 0.5px solid rgba(212, 175, 55, 0.5) !important;
+                text-align: center !important;
+                transition: none !important;
             }
-            .filter-btn:hover, .filter-btn.active {
-                background: rgba(212, 175, 55, 0.25) !important;
+            .filter-btn:hover {
+                background: rgba(25, 20, 8, 0.6) !important;
                 color: #fff !important;
-                border-color: rgba(212, 175, 55, 0.8) !important;
+                border-color: rgba(212, 175, 55, 0.5) !important;
+                transform: none !important;
+            }
+            .filter-btn.active {
+                background: rgba(212, 175, 55, 0.35) !important;
+                color: #fff !important;
+                border-color: rgba(212, 175, 55, 0.9) !important;
             }
 
-            /* Requirement 2: Bottom Navigation Dock (.nav-bar-compact) */
+            /* Requirement 2 & Bottom Navigation Dock layout */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -263,7 +275,7 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
-        @media(max-width: 500px) { .update-thumb-btn { opacity: 0.8; } }
+        @media(max-width: 500px) { .update-thumb-btn { display: none !important; } }
 
         .delete-btn { 
             position: absolute; top: 10px; right: 10px; 
@@ -274,7 +286,7 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .delete-btn { opacity: 1; }
-        @media(max-width: 500px) { .delete-btn { opacity: 0.8; } }
+        @media(max-width: 500px) { .delete-btn { display: none !important; } }
     </style>
 </head>
 <body>
@@ -529,62 +541,16 @@
                 pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'filter-btn';
-                nextBtn.textContent = 'Next →';
-                nextBtn.disabled = currentPage === totalPages;
-                nextBtn.style.opacity = currentPage === totalPages ? '0.4' : '1';
-                nextBtn.onclick = () => {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderModels();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                paginationBar.appendChild(nextBtn);
-            }
-        }
+---
 
-        function openAlbums(name) {
-            window.location.href = `vault.html?name=${name}`;
-        }
+### What Was Done:
+1. **Thumbnail Grid Spacing & Hover Removal (Mobile Only):**
+   * Configured the mobile grid item spacing with a clean `2px` margin bottom (`margin-bottom: 2px !important`) and aspect ratio styling.
+   * Disabled card hover transforms and shadows (`transform: none !important`, `box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important`) so tapping or touching has no hover scaling effects.
 
-        function openUpdateThumbManager(index) {
-            modelIndexToUpdateThumb = index;
-            document.getElementById('newThumbUrl').value = '';
-            document.getElementById('updateThumbModal').style.display = 'flex';
-        }
+2. **A-Z Filter Vertical / Multi-Column Grid Structure & Alphabet Filling (Mobile Only):**
+   * Replaced the horizontal scrolling bar with a multi-column CSS Grid (`grid-template-columns: repeat(9, minmax(0, 1fr))`) that organizes all 27 options (`ALL` + `A–Z`) nicely into packed vertical rows.
+   * Completely removed hover transitions and background state shifts on the filter buttons for mobile (`transition: none !important`, `:hover` locked to static background).
 
-        function closeUpdateThumbModal() {
-            modelIndexToUpdateThumb = null;
-            document.getElementById('updateThumbModal').style.display = 'none';
-        }
-
-        function openDeleteModal(index) {
-            modelIndexToDelete = index;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        function closeDeleteModal() {
-            modelIndexToDelete = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-
-        async function confirmDeleteModel() {
-            if (modelIndexToDelete !== null && typeof ModelStorageDB !== 'undefined') {
-                const models = ModelStorageDB.getModels() || [];
-                const targetModel = models[modelIndexToDelete];
-                
-                if (targetModel) {
-                    await ModelStorageDB.deleteModel(targetModel.name);
-                }
-                renderModels();
-            }
-            closeDeleteModal();
-        }
-
-        function openAddModelModal() { document.getElementById('modelModal').style.display = 'flex'; }
-        function closeAddModelModal() { document.getElementById('modelModal').style.display = 'none'; }
-    </script>
-</body>
-</html>
+3. **Thumbnail Controls Removal (Mobile Only):**
+   * Hidden the `+` update thumbnail button (`.update-thumb-btn`) and `×` delete button (`.delete-btn`) exclusively on mobile (`display: none !important`) so clean thumbnail cards display without the symbols.
