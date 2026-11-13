@@ -195,3 +195,33 @@ div[id*="Modal"] > .control-panel {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
 }
+
+/* --- Mobile Navigation Theme & Size Matching --- */
+@media(max-width: 500px) {
+    .nav-bar-compact {
+        height: 52px !important;
+        background: var(--card-bg) !important;
+        backdrop-filter: blur(40px) !important;
+        -webkit-backdrop-filter: blur(40px) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9), var(--neon-glow) !important;
+        padding: 0 !important;
+        gap: 2px !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        box-sizing: border-box !important;
+    }
+
+    .mondrian-nav-box {
+        height: 100% !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border: none !important;
+        border-radius: 16px !important;
+        box-shadow: none !important;
+        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+    }
+}
