@@ -75,10 +75,10 @@
                 padding-bottom: 85px !important;
             }
 
-            /* Requirement 1: Increased thumbnails size/grid and 2px gap, hover effect removed */
+            /* Requirement 1: Standard web browser grid structure with 2px gap and removed hover effects on mobile */
             .models-grid { 
-                grid-template-columns: 1fr !important; 
-                grid-auto-rows: auto !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+                grid-auto-rows: 190px !important;
                 gap: 2px !important;
                 margin-top: 0.5px !important;
                 width: 100vw !important;
@@ -93,33 +93,34 @@
             .mondrian-card.landscape,
             .mondrian-card.portrait,
             .mondrian-card.square {
-                grid-column: 1 / -1 !important;
-                grid-row: auto !important;
-                height: auto !important;
-                aspect-ratio: 16 / 10 !important;
-                border-radius: 0 !important;
-                border-left: none !important;
-                border-right: none !important;
-                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
-                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
-                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+                height: 100% !important;
+                aspect-ratio: auto !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(212, 175, 55, 0.4) !important;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
                 background: rgb(0, 0, 0) !important;
-                margin-bottom: 2px !important;
-                width: 100vw !important;
+                margin-bottom: 0 !important;
+                width: 100% !important;
                 transition: none !important;
                 transform: none !important;
             }
             .mondrian-card:hover {
                 transform: none !important;
-                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
             }
             .mondrian-thumb {
                 aspect-ratio: auto;
                 height: 100% !important;
                 width: 100% !important;
                 will-change: transform;
-                border-radius: 0 !important;
+                border-radius: 12px !important;
                 background: rgb(0, 0, 0) !important;
+                transition: none !important;
+            }
+            .mondrian-thumb:hover {
+                transform: none !important;
             }
             .mondrian-thumb img {
                 position: absolute !important;
@@ -128,7 +129,7 @@
                 max-height: none !important;
                 object-fit: cover !important;
                 display: block;
-                border-radius: 0 !important;
+                border-radius: 12px !important;
                 filter: contrast(1.0) saturate(1.25) !important;
                 image-rendering: high-dpi;
                 image-rendering: -webkit-optimize-contrast;
@@ -231,6 +232,12 @@
                 transform: none !important;
                 outline: none !important;
             }
+
+            /* Requirement 3: Hide '+' and 'x' symbols from thumbnails on mobile */
+            .update-thumb-btn,
+            .delete-btn {
+                display: none !important;
+            }
         }
 
         .mondrian-card.landscape { grid-column: span 2; grid-row: span 1; }
@@ -275,7 +282,6 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .update-thumb-btn { opacity: 1; }
-        @media(max-width: 500px) { .update-thumb-btn { display: none !important; } }
 
         .delete-btn { 
             position: absolute; top: 10px; right: 10px; 
@@ -286,7 +292,6 @@
             opacity: 0; transition: opacity 0.2s ease; z-index: 20; 
         }
         .mondrian-thumb:hover .delete-btn { opacity: 1; }
-        @media(max-width: 500px) { .delete-btn { display: none !important; } }
     </style>
 </head>
 <body>
@@ -538,7 +543,7 @@
                 pageInfo.style.color = 'var(--text-muted)';
                 pageInfo.style.fontSize = '0.85rem';
                 pageInfo.style.fontWeight = '700';
-                pageInfo.textContent = `Page ${currentPage} of ` + totalPages;
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
                 const nextBtn = document.createElement('button');
@@ -561,7 +566,7 @@
             window.location.href = `vault.html?name=${name}`;
         }
 
-        function openUpdateThumbModal(index) {
+        function openUpdateThumbManager(index) {
             modelIndexToUpdateThumb = index;
             document.getElementById('newThumbUrl').value = '';
             document.getElementById('updateThumbModal').style.display = 'flex';
