@@ -190,7 +190,6 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
-                /* Requirement 3: Normal contrast, enhanced color, and 1440p crisp optimization */
                 filter: contrast(1.0) saturate(1.25) !important;
                 image-rendering: -webkit-optimize-contrast;
                 image-rendering: high-dpi;
@@ -200,7 +199,7 @@
                 display: none !important;
             }
             
-            /* Requirement 2: Expanded wide navigation touching left and right display edges, matching background theme */
+            /* Expanded wide navigation touching left and right display edges, matching background theme */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -228,8 +227,8 @@
                 border-radius: 0 !important;
                 background: transparent !important;
                 color: #fff !important;
-                border: none !important;
-                border-right: 0.5px solid rgba(212, 175, 55, 0.15) !important;
+                /* Requirement 2: Yellow boundary line on each navigation item */
+                border: 0.5px solid rgba(212, 175, 55, 0.5) !important;
                 box-shadow: none !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
                 font-weight: 700 !important;
@@ -239,9 +238,9 @@
             .mondrian-nav-box:hover,
             .mondrian-nav-box:active,
             .mondrian-nav-box:focus {
-                background: rgba(212, 175, 55, 0.15) !important;
+                background: rgba(212, 175, 55, 0.2) !important;
                 color: #fff !important;
-                border-color: rgba(212, 175, 55, 0.4) !important;
+                border-color: rgba(212, 175, 55, 0.8) !important;
                 transform: none !important;
                 outline: none !important;
             }
@@ -467,13 +466,37 @@
                 card.href = `Media/watch.html?index=${actualIndex}`;
                 card.className = `mondrian-card portrait`;
 
+                // Requirement 1: If mobile viewport and this is the absolute first item on the first page, prepend the logo image at the top of its thumbnail
+                const isFirstItemOverall = (currentPage === 1 && paginatedIdx === 0 && !currentSearchQuery);
+                
+                let logoHtml = '';
+                if (isFirstItemOverall) {
+                    logoHtml = `<div class="mobile-logo-banner" style="display:none; width:100%; background:#000; text-align:center; box-sizing:border-box;"><img src="https://i.postimg.cc/26RF0LSt/Logo.jpg" alt="Logo" style="width:100%; height:auto; display:block; object-fit:contain; image-rendering:-webkit-optimize-contrast; image-rendering:high-dpi;" /></div>`;
+                }
+
                 card.innerHTML = `
                     <div class="mondrian-thumb">
+                        ${logoHtml}
                         ${stream.thumbnail ? `<img src="${stream.thumbnail}" alt="${stream.title}" class="lazy-thumb" srcset="" sizes="100vw">` : '<div style="color:#888;font-size:0.80rem;">No Thumbnail</div>'}
                         <div class="mondrian-overlay">${stream.title}</div>
                     </div>`;
             
                 grid.appendChild(card);
+
+                if (isFirstItemOverall) {
+                    const checkMobileAndShowLogo = () => {
+                        const logoBanner = card.querySelector('.mobile-logo-banner');
+                        if (logoBanner) {
+                            if (window.innerWidth <= 500) {
+                                logoBanner.style.display = 'block';
+                            } else {
+                                logoBanner.style.display = 'none';
+                            }
+                        }
+                    };
+                    checkMobileAndShowLogo();
+                    window.addEventListener('resize', checkMobileAndShowLogo);
+                }
 
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
