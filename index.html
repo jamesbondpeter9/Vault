@@ -83,8 +83,8 @@
                 right: auto !important;
                 -webkit-transform: none;
                 transform: none;
-                /* Requirement 1: 0.5px gap from top display edge and bottom padding for fixed nav */
-                margin-top: 0.5px !important;
+                /* Requirement 3: 0 margin from top display so top thumbnails touch top display edge */
+                margin-top: 0 !important;
                 padding-top: 0 !important;
                 padding-bottom: 75px !important; 
             } 
@@ -133,10 +133,6 @@
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
                 -webkit-tap-highlight-color: transparent !important;
-            }
-
-            .home-grid {
-                grid-template-columns: 1fr !important;
             }
 
             .mondrian-card {
@@ -199,7 +195,7 @@
                 display: none !important;
             }
             
-            /* Expanded wide navigation touching left and right display edges, matching background theme */
+            /* Requirement 2: Removed background plate of navigation (transparent background, no blur, no top border, no shadow) */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -208,17 +204,17 @@
                 width: 100vw !important;
                 max-width: 100vw !important;
                 z-index: 9999 !important;
-                background: rgba(5, 5, 5, 0.96) !important;
-                backdrop-filter: blur(12px) !important;
-                -webkit-backdrop-filter: blur(12px) !important;
-                border-top: 1px solid rgba(212, 175, 55, 0.25) !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border-top: none !important;
                 padding: 10px 0px calc(10px + env(safe-area-inset-bottom, 0px)) 0px !important;
                 margin: 0 !important;
                 display: grid !important;
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
                 gap: 0px !important;
                 box-sizing: border-box !important;
-                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.9) !important;
+                box-shadow: none !important;
             }
 
             .mondrian-nav-box {
@@ -227,7 +223,6 @@
                 border-radius: 0 !important;
                 background: transparent !important;
                 color: #fff !important;
-                /* Requirement 2: Yellow boundary line on each navigation item */
                 border: 0.5px solid rgba(212, 175, 55, 0.5) !important;
                 box-shadow: none !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -466,13 +461,8 @@
                 card.href = `Media/watch.html?index=${actualIndex}`;
                 card.className = `mondrian-card portrait`;
 
-                // Requirement 1: If mobile viewport and this is the absolute first item on the first page, prepend the logo image at the top of its thumbnail
-                const isFirstItemOverall = (currentPage === 1 && paginatedIdx === 0 && !currentSearchQuery);
-                
+                /* Requirement 1: Removed logo injection entirely on mobile */
                 let logoHtml = '';
-                if (isFirstItemOverall) {
-                    logoHtml = `<div class="mobile-logo-banner" style="display:none; width:100%; background:#000; text-align:center; box-sizing:border-box;"><img src="https://i.postimg.cc/26RF0LSt/Logo.jpg" alt="Logo" style="width:100%; height:auto; display:block; object-fit:contain; image-rendering:-webkit-optimize-contrast; image-rendering:high-dpi;" /></div>`;
-                }
 
                 card.innerHTML = `
                     <div class="mondrian-thumb">
@@ -482,21 +472,6 @@
                     </div>`;
             
                 grid.appendChild(card);
-
-                if (isFirstItemOverall) {
-                    const checkMobileAndShowLogo = () => {
-                        const logoBanner = card.querySelector('.mobile-logo-banner');
-                        if (logoBanner) {
-                            if (window.innerWidth <= 500) {
-                                logoBanner.style.display = 'block';
-                            } else {
-                                logoBanner.style.display = 'none';
-                            }
-                        }
-                    };
-                    checkMobileAndShowLogo();
-                    window.addEventListener('resize', checkMobileAndShowLogo);
-                }
 
                 if (stream.thumbnail) {
                     const img = card.querySelector('.lazy-thumb');
