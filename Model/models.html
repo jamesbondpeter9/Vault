@@ -77,7 +77,7 @@
 
             .models-grid { 
                 grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
-                grid-auto-rows: 280px !important; /* Increased row height by 10px from 190px */
+                grid-auto-rows: 280px !important;
                 gap: 2px !important;
                 margin-top: 0.5px !important;
                 width: 100vw !important;
@@ -206,10 +206,15 @@
                 padding: 0px 0px env(safe-area-inset-bottom, 0px) 0px !important;
                 margin: 0 !important;
                 display: grid !important;
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                 gap: 0px !important;
                 box-sizing: border-box !important;
                 box-shadow: none !important;
+            }
+
+            /* Hide home nav item on mobile */
+            .mobile-hide-home {
+                display: none !important;
             }
 
             /* Working: Styles individual mobile navigation boxes with sharp borders and transparent backgrounds */
@@ -300,8 +305,8 @@
 <body>
     <div class="site-container">
         <div class="nav-bar-compact">
-            <a href="../index.html" class="mondrian-nav-card"><div class="mondrian-nav-box">Home</div></a>
-            <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;">+</div></a>
+            <a href="../index.html" class="mondrian-nav-card mobile-hide-home"><div class="mondrian-nav-box">Home</div></a>
+            <a href="javascript:void(0)" onclick="openAddModelModal()" class="mondrian-nav-card" style="grid-column: 1 / -1;"><div class="mondrian-nav-box" style="font-size: 1.3rem; font-weight: 900;"><span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border:1px solid currentColor; border-radius:50%; font-size:0.9rem; font-weight:800; line-height:1;">+</span></div></a>
         </div>
 
         <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">Models Directory</h1>
