@@ -9,7 +9,7 @@
         }
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Folder View - Portal</title>
     <!-- Imported Montserrat Font matching index.html -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -315,7 +315,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Separate Dedicated Mobile Photo Viewer Modal with Edge-to-Edge Auto Mechanism */
+        /* Separate Dedicated Mobile Photo Viewer Modal with 4K Original Resolution & 2-Finger Pinch Zoom Support */
         #mobilePhotoModal {
             position: fixed;
             top: 0;
@@ -356,6 +356,8 @@
             -webkit-tap-highlight-color: transparent;
             object-fit: contain;
             display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         .mob-viewer-close {
             position: absolute;
@@ -467,7 +469,7 @@
         <div id="viewerTitleElement" class="viewer-title-bar"></div>
     </div>
 
-    <!-- Separate Dedicated Mobile Photo Viewer Modal with Edge-to-Edge Fitting -->
+    <!-- Separate Dedicated Mobile Photo Viewer Modal with 4K Handling & 2-Finger Zoom -->
     <div id="mobilePhotoModal">
         <button class="mob-viewer-close" onclick="closeMobileModal()">&times;</button>
         <div class="mob-nav-left" onclick="navigateMobileViewer(-1)"></div>
@@ -669,7 +671,7 @@
                 });
             }
 
-            // Separate Dedicated Mobile Viewer Event Listeners (Pinch-Zoom and Panning)
+            // Separate Dedicated Mobile Viewer Event Listeners (Optimized 4K Handling & 2-Finger Pinch Zoom)
             const mobImg = document.getElementById('mobViewerImage');
             const mobWrapper = document.getElementById('mobViewerWrapper');
 
@@ -701,7 +703,7 @@
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
                         const pinchFactor = currentDistance / mobInitialPinchDistance;
-                        mobCurrentScale = Math.min(Math.max(mobInitialScaleForPinch * pinchFactor, 1), 10);
+                        mobCurrentScale = Math.min(Math.max(mobInitialScaleForPinch * pinchFactor, 1), 15); // Expanded limit for 4K pristine inspection
                         if (mobCurrentScale === 1) {
                             mobPanX = 0;
                             mobPanY = 0;
@@ -827,7 +829,7 @@
             openDesktopModal(currentViewerIndex);
         }
 
-        // Separate Dedicated Mobile Photo Viewer Logic with Edge-to-Edge Auto Mechanism
+        // Separate Dedicated Mobile Photo Viewer Logic with 4K Original Quality Loading & 2-Finger Pinch Zoom Support
         function openMobileModal(index) {
             if (window.folderImagesList && window.folderImagesList[index]) {
                 currentViewerIndex = index;
