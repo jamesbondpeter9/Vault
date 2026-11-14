@@ -68,6 +68,7 @@
             } 
         }
         @media(max-width: 500px) { 
+            /* Working: Arranges stream items into a single full-width vertical column with zero gap and spacing for mobile viewports */
             .home-grid { 
                 display: flex !important;
                 flex-direction: column !important;
@@ -123,12 +124,14 @@
 
         /* Mobile specific enhancements ONLY */
         @media(max-width: 500px) {
+            /* Working: Resets default browser margins and paddings across all elements on mobile screens */
             * {
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
             }
 
+            /* Working: Applies dark gradient background and removes scroll bounce/margins on mobile HTML and body */
             html, body {
                 width: 100% !important;
                 height: 100% !important;
@@ -144,6 +147,7 @@
                 padding: 0 !important;
             }
 
+            /* Working: Eliminates container padding and margins on mobile to ensure full screen width usage */
             .site-container {
                 width: 100% !important;
                 max-width: 100% !important;
@@ -151,6 +155,7 @@
                 padding: 0 !important;
             }
 
+            /* Working: Styles individual stream cards to span full viewport width with a 16:9 proportion and clean bottom border on mobile */
             .mondrian-card {
                 width: 100vw !important;
                 max-width: 100vw !important;
@@ -174,12 +179,14 @@
                 display: block !important;
             }
 
+            /* Working: Removes top spacing, padding, and borders from the first card so it touches the top display edge */
             .mondrian-card:first-child {
                 margin-top: 0 !important;
                 padding-top: 0 !important;
                 border-top: none !important;
             }
 
+            /* Working: Disables hover movement and shadows on mobile touch interactions for cards */
             .mondrian-card:hover,
             .mondrian-card:active,
             .mondrian-card:focus {
@@ -189,6 +196,7 @@
                 outline: none !important;
             }
 
+            /* Working: Positions thumbnail containers cleanly edge-to-edge with zero borders or offsets on mobile */
             .mondrian-thumb {
                 border-radius: 0 !important;
                 background: rgb(0, 0, 0) !important;
@@ -201,6 +209,7 @@
                 overflow: hidden !important;
             }
 
+            /* Working: Preserves natural inner image scaling/covering behavior without altering image tags or sizing attributes on mobile */
             .mondrian-thumb img {
                 border-radius: 0 !important;
                 object-fit: cover !important;
@@ -214,11 +223,12 @@
                 image-rendering: high-dpi;
             }
             
+            /* Working: Hides thumbnail text title overlays on mobile viewports for a cleaner look */
             .mondrian-overlay {
                 display: none !important;
             }
             
-            /* Transparent navigation bar touching bottom edge */
+            /* Working: Fixes navigation bar to the bottom edge with a transparent background plate on mobile */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -240,6 +250,7 @@
                 box-shadow: none !important;
             }
 
+            /* Working: Styles individual mobile navigation boxes with sharp borders and transparent backgrounds */
             .mondrian-nav-box {
                 height: 48px !important;
                 font-size: 0.8rem !important;
@@ -253,6 +264,7 @@
                 -webkit-tap-highlight-color: transparent !important;
             }
 
+            /* Working: Adds subtle gold highlight on tap/focus for mobile nav boxes */
             .mondrian-nav-box:hover,
             .mondrian-nav-box:active,
             .mondrian-nav-box:focus {
@@ -263,7 +275,7 @@
                 outline: none !important;
             }
 
-            /* Hide Photostream and '+' navigation items exclusively on mobile screens */
+            /* Working: Hides secondary navigation options ('+' and Photostream) exclusively on mobile screens */
             .mobile-hide-nav {
                 display: none !important;
             }
