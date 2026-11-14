@@ -69,9 +69,9 @@
         }
         @media(max-width: 500px) { 
             .home-grid { 
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+                grid-template-columns: 1fr !important; 
                 grid-auto-rows: auto !important;
-                gap: 2px !important;
+                gap: 0px !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 margin-left: 0 !important;
@@ -85,7 +85,7 @@
                 box-sizing: border-box !important;
                 -webkit-transform: none;
                 transform: none;
-                margin-top: 0.5px !important;
+                margin-top: 0 !important;
                 padding-top: 0 !important;
                 padding-bottom: 75px !important; 
             } 
@@ -137,17 +137,20 @@
             }
 
             .mondrian-card {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
-                aspect-ratio: auto !important;
-                height: 190px !important;
-                border-radius: 12px !important;
-                border: 1px solid rgba(212, 175, 55, 0.4) !important;
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 10 !important;
+                height: auto !important;
+                border-radius: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: none !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
                 box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
                 margin-bottom: 0 !important;
-                width: 100% !important;
+                width: 100vw !important;
                 position: relative !important;
                 left: auto !important;
                 right: auto !important;
@@ -170,7 +173,7 @@
             }
 
             .mondrian-thumb {
-                border-radius: 12px !important;
+                border-radius: 0 !important;
                 background: rgb(0, 0, 0) !important;
                 position: relative !important;
                 width: 100% !important;
@@ -179,7 +182,7 @@
             }
 
             .mondrian-thumb img {
-                border-radius: 12px !important;
+                border-radius: 0 !important;
                 object-fit: cover !important;
                 object-position: center !important;
                 width: 100% !important;
@@ -199,7 +202,7 @@
                 text-overflow: ellipsis !important;
             }
             
-            /* Requirement 1: Removed background plate of navigation (transparent background, no blur, no top border, no shadow) */
+            /* Requirement 1: Touch bottom of navigation with bottom display edge */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -212,7 +215,7 @@
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
                 border-top: none !important;
-                padding: 10px 0px calc(10px + env(safe-area-inset-bottom, 0px)) 0px !important;
+                padding: 8px 0px env(safe-area-inset-bottom, 0px) 0px !important;
                 margin: 0 !important;
                 display: grid !important;
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -222,7 +225,7 @@
             }
 
             .mondrian-nav-box {
-                height: 48px !important;
+                height: 44px !important;
                 font-size: 0.8rem !important;
                 border-radius: 0 !important;
                 background: transparent !important;
