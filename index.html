@@ -155,13 +155,13 @@
                 padding: 0 !important;
             }
 
-            /* Working: Styles individual stream cards to span full viewport width with a 16:9 proportion and clean bottom border on mobile */
+            /* Working: Styles individual stream cards with a slight 0.5px left/right gap from display edges and very little curved corners on mobile */
             .mondrian-card {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
                 aspect-ratio: 16 / 11 !important;
                 height: auto !important;
-                border-radius: 0 !important;
+                border-radius: 6px !important;
                 border-left: none !important;
                 border-right: none !important;
                 border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
@@ -169,13 +169,13 @@
                 box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                margin-bottom: 0.5px !important;
-                width: 100vw !important;
+                margin-bottom: 4px !important;
+                width: calc(100vw - 1px) !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0.5px !important;
+                right: 0.5px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
@@ -201,7 +201,7 @@
 
             /* Working: Positions thumbnail containers cleanly edge-to-edge with zero borders or offsets on mobile */
             .mondrian-thumb {
-                border-radius: 0 !important;
+                border-radius: 6px !important;
                 background: rgb(0, 0, 0) !important;
                 position: absolute !important;
                 inset: 0 !important;
@@ -212,7 +212,7 @@
                 overflow: hidden !important;
             }
 
-            /* Working: Preserves natural inner image scaling/covering behavior without altering image tags or sizing attributes on mobile */
+            /* Working: Preserves natural inner image scaling/covering behavior without touching or warping inner images on mobile */
             .mondrian-thumb img {
                 border-radius: 0 !important;
                 object-fit: cover !important;
@@ -552,7 +552,7 @@
 
                 const pageInfo = document.createElement('span');
                 pageInfo.className = 'page-info';
-                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                pageInfo.textContent = `Page ${currentPage} of `${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
                 const newNextBtn = document.createElement('button');
