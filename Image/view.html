@@ -35,7 +35,7 @@
             margin-right: auto;
         }
         @media(max-width: 900px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media(max-width: 500px) { .nav-bar-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media(max-width: 500px) { .nav-bar-compact { display: none !important; } }
 
         .mondrian-nav-box {
             height: 52px !important;
@@ -110,21 +110,52 @@
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
                 -webkit-tap-highlight-color: transparent !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow-x: hidden !important;
             }
 
-            .tag-header {
-                box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
-            }
-
-            .vault-grid {
-                grid-template-columns: 1fr !important;
-                grid-auto-rows: auto !important;
-                gap: 0.5px !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
+            .site-container {
                 width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* 2. Replace compact size tag header on mobile */
+            .tag-header {
+                background: rgba(15, 12, 4, 0.95) !important;
+                backdrop-filter: blur(12px) !important;
+                -webkit-backdrop-filter: blur(12px) !important;
+                border: none !important;
+                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border-radius: 0 !important;
+                padding: 12px 14px !important;
+                margin: 0 0 4px 0 !important;
+                box-shadow: none !important;
+                width: 100vw !important;
+                box-sizing: border-box !important;
+            }
+            .tag-header h1 {
+                font-size: 1.15rem !important;
+                margin-bottom: 2px !important;
+                font-weight: 800 !important;
+                color: #fff !important;
+            }
+            .tag-header p {
+                font-size: 0.75rem !important;
+                color: var(--text-muted) !important;
+            }
+
+            /* 3. 5px gap left and right of display and thumbnail left and right side edge without reducing thumbnail size and inner image */
+            .vault-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 5px !important;
+                padding: 0 5px !important;
+                margin: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
                 box-sizing: border-box !important;
             }
 
@@ -134,34 +165,26 @@
                 aspect-ratio: 16 / 11 !important;
                 height: auto !important;
                 border-radius: 6px !important;
-                border-left: none !important;
-                border-right: none !important;
-                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
-                border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border: 0.5px solid rgba(212, 175, 55, 0.4) !important;
                 box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                margin-bottom: 4px !important;
-                width: calc(100vw - 1px) !important;
+                margin: 0 !important;
+                width: calc(100vw - 10px) !important;
                 position: relative !important;
-                left: 0.7px !important;
-                right: 0.7px !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
+                left: 0 !important;
+                right: 0 !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
                 box-sizing: border-box !important;
             }
 
-            /* Working: Removes top spacing, padding, and borders from the first card so it touches the top display edge */
             .mondrian-card:first-child {
                 margin-top: 0 !important;
                 padding-top: 0 !important;
-                border-top: none !important;
             }
 
-            /* Working: Disables hover movement and shadows on mobile touch interactions for cards */
             .mondrian-card:hover,
             .mondrian-card:active,
             .mondrian-card:focus {
@@ -171,7 +194,6 @@
                 outline: none !important;
             }
 
-            /* Working: Positions thumbnail containers cleanly edge-to-edge with zero borders or offsets on mobile */
             .mondrian-thumb {
                 border-radius: 6px !important;
                 background: rgb(0, 0, 0) !important;
@@ -184,7 +206,6 @@
                 overflow: hidden !important;
             }
 
-            /* Working: Preserves natural inner image scaling/covering behavior without touching or warping inner images on mobile */
             .mondrian-thumb img {
                 border-radius: 0 !important;
                 object-fit: cover !important;
@@ -198,58 +219,8 @@
                 image-rendering: high-dpi;
             }
             
-            /* Working: Hides thumbnail text title overlays on mobile viewports for a cleaner look */
             .mondrian-overlay {
                 display: none !important;
-            }
-            
-            /* Working: Fixes navigation bar to the bottom edge with a transparent background plate on mobile */
-            .nav-bar-compact {
-                position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                width: 100vw !important;
-                max-width: 100vw !important;
-                z-index: 9999 !important;
-                background: transparent !important;
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
-                border-top: none !important;
-                padding: 0px 0px env(safe-area-inset-bottom, 0px) 0px !important;
-                margin: 0 !important;
-                display: grid !important;
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-                gap: 0px !important;
-                box-sizing: border-box !important;
-                box-shadow: none !important;
-            }
-
-            /* Working: Styles individual mobile navigation boxes with sharp borders and transparent backgrounds */
-            .mondrian-nav-box {
-                height: 48px !important;
-                font-size: 0.8rem !important;
-                border-radius: 0 !important;
-                background: transparent !important;
-                color: #fff !important;
-                border: 0.5px solid rgba(212, 175, 55, 0.5) !important;
-                box-shadow: none !important;
-                font-family: 'Plus Jakarta Sans', sans-serif !important;
-                font-weight: 700 !important;
-                -webkit-tap-highlight-color: transparent !important;
-                transform: none !important;
-                transition: none !important;
-            }
-
-            /* Working: Removes hover/active movement upward or translation shift on mobile nav boxes */
-            .mondrian-nav-box:hover,
-            .mondrian-nav-box:active,
-            .mondrian-nav-box:focus {
-                background: rgba(212, 175, 55, 0.2) !important;
-                color: #fff !important;
-                border-color: rgba(212, 175, 55, 0.8) !important;
-                transform: none !important;
-                outline: none !important;
             }
         }
 
@@ -301,7 +272,6 @@
             object-fit: contain;
             cursor: grab;
             transform-origin: center center;
-            /* 2 & 3. Pixel optimization for high-res crisp rendering during pinch zoom */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             image-rendering: high-quality;
@@ -385,7 +355,6 @@
                 object-fit: contain !important;
                 transform: none !important;
             }
-            /* 1. Stretched Landscape Images During Auto-Rotation on Mobile with width: 100vh, height: 100vw without cropping */
             .viewer-image.mobile-auto-rotate {
                 transform: rotate(90deg) !important;
                 width: 100vh !important;
@@ -461,12 +430,8 @@
             });
         }
 
-        // Mobile data loader fetching directly from Image/images.json as primary source
         async function fetchMobileUnifiedImages() {
             let images = [];
-            const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-
-            // 1. Fetch directly from Image/images.json first to fulfill data resource requirement
             try {
                 const res = await fetch('../Image/images.json');
                 if (res.ok) {
@@ -483,7 +448,6 @@
                 } catch (err) {}
             }
 
-            // 2. Fallback to ImageStorageDB if Image/images.json returned empty
             if (images.length === 0 && typeof ImageStorageDB !== 'undefined') {
                 try {
                     if (typeof ImageStorageDB.initDB === 'function') await ImageStorageDB.initDB();
@@ -491,7 +455,6 @@
                 } catch (e) {}
             }
 
-            // 3. Fallback to localStorage keys if still empty
             if (images.length === 0) {
                 try {
                     const localImages = localStorage.getItem('portal_images') || localStorage.getItem('images_db');
@@ -536,7 +499,6 @@
                 return titleA !== titleB ? titleA.localeCompare(titleB) : (a.createdAt || 0) - (b.createdAt || 0);
             });
 
-            // Update folder count badge
             const badge = document.getElementById('folderCountBadge');
             if (badge) badge.textContent = folderImages.length;
 
@@ -565,7 +527,6 @@
 
             window.folderImagesList = folderImages;
 
-            // Setup Custom Viewer Interactions (Wheel Zoom, Mouse Drag, Touch Pan/Pinch Zoom, Keyboard Navigation)
             const viewerImg = document.getElementById('viewerImageElement');
             const wrapper = document.getElementById('viewerContentWrapper');
 
@@ -652,7 +613,6 @@
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
                         const pinchFactor = currentDistance / initialPinchDistance;
-                        // 2. Pinch zoom mechanism with pixel optimization preventing pixel breaking up to 10x
                         currentScale = Math.min(Math.max(initialScaleForPinch * pinchFactor, 1), 10);
                         if (currentScale === 1) {
                             panX = 0;
@@ -673,12 +633,6 @@
                     }
                     if (e.touches.length === 0) {
                         isDragging = false;
-                    }
-                });
-
-                viewerImg.addEventListener('click', (e) => {
-                    if (currentScale > 1) {
-                        e.stopPropagation();
                     }
                 });
 
@@ -713,7 +667,8 @@
             }
         }
 
-        function openPhotoModal(index) {
+        // 4. Custom photoviewer for mobile browser with auto landscape image width determination logic
+        async function openPhotoModal(index) {
             if (window.folderImagesList && window.folderImagesList[index]) {
                 currentViewerIndex = index;
                 currentScale = 1;
@@ -721,7 +676,6 @@
                 panY = 0;
                 const photo = window.folderImagesList[index];
                 
-                // 3. Show actual updated high-quality image URL (prioritize full-res .url over thumbnail)
                 const fullResUrl = extractImageUrl(photo.url || photo.thumbnail || photo.image);
 
                 const modal = document.getElementById('inbuiltPhotoModal');
@@ -729,22 +683,34 @@
                 const viewerTitle = document.getElementById('viewerTitleElement');
 
                 if (modal && viewerImg) {
-                    viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
-                    viewerImg.style.transform = 'scale(1) translate(0px, 0px)';
+                    viewerImg.className = 'viewer-image';
                     viewerImg.src = fullResUrl;
-                    if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo';
+                    if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo View';
                     modal.classList.add('active');
 
+                    // 4. Auto orientation & natural width detection logic for mobile viewer
                     const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
                     if (isMobileDevice) {
                         const tempImg = new Image();
                         tempImg.onload = () => {
-                            if (tempImg.naturalWidth > tempImg.naturalHeight) {
-                                // 1. Stretched landscape image during auto-rotation with width: 100vh, height: 100vw without cropping
+                            const naturalW = tempImg.naturalWidth;
+                            const naturalH = tempImg.naturalHeight;
+                            const isLandscape = naturalW > naturalH;
+                            const screenW = window.innerWidth;
+                            const screenH = window.innerHeight;
+                            const isScreenPortrait = screenH > screenW;
+
+                            viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
+
+                            if (isLandscape && isScreenPortrait) {
+                                // Auto rotate or apply natural width scaling for landscape images on portrait screens
                                 viewerImg.classList.add('mobile-auto-rotate');
+                            } else if (isLandscape) {
+                                viewerImg.classList.add('mobile-landscape-natural');
                             } else {
                                 viewerImg.classList.add('mobile-portrait-natural');
                             }
+                            updateImageTransform();
                         };
                         tempImg.src = fullResUrl;
                     }
@@ -754,20 +720,17 @@
 
         function closeInbuiltModal() {
             const modal = document.getElementById('inbuiltPhotoModal');
-            if (modal) modal.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('active');
+            }
             const viewerImg = document.getElementById('viewerImageElement');
             if (viewerImg) {
                 viewerImg.src = '';
-                viewerImg.classList.remove('mobile-auto-rotate', 'mobile-landscape-natural', 'mobile-portrait-natural');
+                viewerImg.className = 'viewer-image';
             }
-            currentScale = 1;
-            panX = 0;
-            panY = 0;
         }
 
         function navigateViewer(direction) {
-            if (currentScale > 1) return;
-
             if (!window.folderImagesList || window.folderImagesList.length === 0) return;
             currentViewerIndex += direction;
             if (currentViewerIndex < 0) {
@@ -779,25 +742,17 @@
         }
 
         async function deletePhoto(index, event) {
-            event.stopPropagation();
+            if (event) event.stopPropagation();
             if (!confirm('Are you sure you want to delete this photo?')) return;
 
-            const targetPhoto = window.folderImagesList[index];
-            if (!targetPhoto) return;
+            const photo = window.folderImagesList[index];
+            if (!photo) return;
 
-            let allPhotoStreams = ImageStorageDB.getPhotoStreams() || [];
-            allPhotoStreams = allPhotoStreams.filter(item => {
-                const isMatchUrl = (item.url === targetPhoto.url || item.thumbnail === targetPhoto.thumbnail);
-                const isMatchFolder = item.folder === currentFolderName || (Array.isArray(item.folders) && item.folders.includes(currentFolderName));
-                return !(isMatchUrl && isMatchFolder);
-            });
-
-            ImageStorageDB.savePhotoStreams(allPhotoStreams);
-            if (typeof GitHubSync !== 'undefined' && typeof GitHubSync.triggerAutoSync === 'function') {
-                await GitHubSync.triggerAutoSync();
+            if (typeof ImageStorageDB !== 'undefined' && typeof ImageStorageDB.deletePhotoStream === 'function') {
+                await ImageStorageDB.deletePhotoStream(photo.id || photo.title);
             }
 
-            location.reload();
+            window.location.reload();
         }
     </script>
 </body>
