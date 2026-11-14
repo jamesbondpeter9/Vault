@@ -69,21 +69,19 @@
         }
         @media(max-width: 500px) { 
             .home-grid { 
-                grid-template-columns: 1fr !important; 
-                grid-auto-rows: auto !important;
-                gap: 0.5px !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
                 position: relative !important;
-                left: auto !important;
-                right: auto !important;
-                -webkit-transform: none;
-                transform: none;
-                /* Requirement 3: 0 margin from top display so top thumbnails touch top display edge */
+                left: 0 !important;
+                right: 0 !important;
+                top: 0 !important;
+                box-sizing: border-box !important;
+                transform: none !important;
                 margin-top: 0 !important;
                 padding-top: 0 !important;
                 padding-bottom: 75px !important; 
@@ -123,9 +121,18 @@
             }
         }
 
-        /* Mobile specific enhancements */
+        /* Mobile specific enhancements ONLY */
         @media(max-width: 500px) {
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
             html, body {
+                width: 100% !important;
+                height: 100% !important;
+                overflow-x: hidden !important;
                 background: radial-gradient(circle at 50% 0%, #241d08 0%, #050505 75%, #000000 100%) !important;
                 color: #ffffff !important;
                 font-family: 'Montserrat', sans-serif !important;
@@ -133,50 +140,64 @@
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
                 -webkit-tap-highlight-color: transparent !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .site-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .mondrian-card {
-                grid-column: 1 / -1 !important;
-                grid-row: auto !important;
-                aspect-ratio: 16 / 11 !important;
-                height: auto !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                height: 56.25vw !important;
+                min-height: 220px !important;
                 border-radius: 0 !important;
-                border-left: none !important;
-                border-right: none !important;
-                border-top: 0.5px solid rgba(212, 175, 55, 0.4) !important;
+                border: none !important;
                 border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
-                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
+                box-shadow: none !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                margin-bottom: 0.5px !important;
-                width: 100vw !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 position: relative !important;
-                left: 50% !important;
-                right: 50% !important;
-                margin-left: -50vw !important;
-                margin-right: -50vw !important;
+                left: 0 !important;
+                right: 0 !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
                 box-sizing: border-box !important;
+                display: block !important;
+            }
+
+            .mondrian-card:first-child {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+                border-top: none !important;
             }
 
             .mondrian-card:hover,
             .mondrian-card:active,
             .mondrian-card:focus {
                 transform: none !important;
-                box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
+                box-shadow: none !important;
                 z-index: 1 !important;
                 outline: none !important;
-                border-color: rgba(212, 175, 55, 0.6) !important;
             }
 
             .mondrian-thumb {
                 border-radius: 0 !important;
                 background: rgb(0, 0, 0) !important;
-                position: relative !important;
+                position: absolute !important;
+                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 overflow: hidden !important;
             }
 
@@ -186,6 +207,8 @@
                 object-position: center !important;
                 width: 100% !important;
                 height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 filter: contrast(1.0) saturate(1.25) !important;
                 image-rendering: -webkit-optimize-contrast;
                 image-rendering: high-dpi;
@@ -195,7 +218,7 @@
                 display: none !important;
             }
             
-            /* Requirement 2: Removed background plate of navigation (transparent background, no blur, no top border, no shadow) */
+            /* Transparent navigation bar touching bottom edge */
             .nav-bar-compact {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -208,7 +231,7 @@
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
                 border-top: none !important;
-                padding: 10px 0px calc(10px + env(safe-area-inset-bottom, 0px)) 0px !important;
+                padding: 0px 0px env(safe-area-inset-bottom, 0px) 0px !important;
                 margin: 0 !important;
                 display: grid !important;
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -461,7 +484,6 @@
                 card.href = `Media/watch.html?index=${actualIndex}`;
                 card.className = `mondrian-card portrait`;
 
-                /* Requirement 1: Removed logo injection entirely on mobile */
                 let logoHtml = '';
 
                 card.innerHTML = `
@@ -518,18 +540,18 @@
                 pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
                 paginationBar.appendChild(pageInfo);
 
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'page-btn';
-                nextBtn.textContent = 'Next →';
-                nextBtn.disabled = currentPage === totalPages;
-                nextBtn.onclick = () => {
+                const newNextBtn = document.createElement('button');
+                newNextBtn.className = 'page-btn';
+                newNextBtn.textContent = 'Next →';
+                newNextBtn.disabled = currentPage === totalPages;
+                newNextBtn.onclick = () => {
                     if (currentPage < totalPages) {
                         currentPage++;
                         renderPortalStreams();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
-                paginationBar.appendChild(nextBtn);
+                paginationBar.appendChild(newNextBtn);
             }
         }
     </script>
