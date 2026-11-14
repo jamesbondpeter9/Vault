@@ -122,7 +122,6 @@
                 padding: 0 !important;
             }
 
-            /* 1. Same 5px gap in tag header on mobile (matching vault-grid 5px gap layout) */
             .tag-header {
                 background: rgba(15, 12, 4, 0.95) !important;
                 backdrop-filter: blur(12px) !important;
@@ -147,7 +146,6 @@
                 color: var(--text-muted) !important;
             }
 
-            /* 5px gap left and right of display and thumbnail left and right side edge */
             .vault-grid {
                 display: flex !important;
                 flex-direction: column !important;
@@ -223,20 +221,18 @@
                 display: none !important;
             }
 
-            /* 2. Only when site use in mobile, remove 'x' delete button from thumbnails */
             .mondrian-thumb button[title="Delete Photo"] {
                 display: none !important;
             }
         }
 
-        /* Inbuilt Custom Photo Viewer Styles */
+        /* Desktop Inbuilt Custom Photo Viewer Styles */
         #inbuiltPhotoModal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            height: 100dvh;
             background: rgba(0, 0, 0, 0.95);
             z-index: 99999;
             display: none;
@@ -245,13 +241,7 @@
             overflow: hidden;
             user-select: none;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
             outline: none;
-        }
-        @media (max-width: 900px) {
-            #inbuiltPhotoModal {
-                touch-action: none;
-            }
         }
         #inbuiltPhotoModal.active {
             display: flex;
@@ -264,12 +254,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        @media (max-width: 900px) {
-            .viewer-content-wrapper {
-                touch-action: none;
-            }
         }
         .viewer-image {
             max-width: 100%;
@@ -277,16 +261,7 @@
             object-fit: contain;
             cursor: grab;
             transform-origin: center center;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: high-quality;
             will-change: transform;
-            -webkit-tap-highlight-color: transparent;
-        }
-        @media (max-width: 900px) {
-            .viewer-image {
-                touch-action: none;
-            }
         }
         .viewer-image:active {
             cursor: grabbing;
@@ -298,10 +273,9 @@
             width: 50%;
             z-index: 10;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-            border: none;
             background: transparent;
+            border: none;
+            outline: none;
         }
         .viewer-nav-left { left: 0; }
         .viewer-nav-right { right: 0; }
@@ -321,7 +295,6 @@
             justify-content: center;
             cursor: pointer;
             z-index: 20;
-            -webkit-tap-highlight-color: transparent;
             outline: none;
         }
         .viewer-title-bar {
@@ -341,51 +314,127 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        @media(max-width: 900px) {
-            .viewer-image.mobile-landscape-natural {
-                width: 100vw !important;
-                max-width: 100vw !important;
-                height: auto !important;
-                max-height: 100vh !important;
-                object-fit: contain !important;
-                transform: none !important;
-            }
-            .viewer-image.mobile-portrait-natural {
-                height: 100vh !important;
-                height: 100dvh !important;
-                max-height: 100vh !important;
-                max-height: 100dvh !important;
-                width: auto !important;
-                max-width: 100vw !important;
-                object-fit: contain !important;
-                transform: none !important;
-            }
-            /* 4. In auto landscape image touch top and bottom edges of display (using width: 100vh, height: 100vw or 100dvw) */
-            .viewer-image.mobile-auto-rotate {
-                transform: rotate(90deg) !important;
-                width: 100vh !important;
-                width: 100dvh !important;
-                height: 100vw !important;
-                max-width: 100vh !important;
-                max-width: 100dvh !important;
-                max-height: 100vw !important;
-                object-fit: contain !important;
-            }
 
-            /* 3. Reduce '+' (close button) and image title size in photoviewer on mobile */
-            .viewer-close-btn {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 18px !important;
-                top: 12px !important;
-                right: 12px !important;
-            }
-            .viewer-title-bar {
-                font-size: 0.7rem !important;
-                padding: 5px 10px !important;
-                bottom: 12px !important;
-                border-radius: 12px !important;
-            }
+        /* Separate Dedicated Mobile Photo Viewer Modal */
+        #mobilePhotoModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            user-select: none;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+            outline: none;
+        }
+        #mobilePhotoModal.active {
+            display: flex;
+        }
+        .mob-viewer-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+        .mob-viewer-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transform-origin: center center;
+            will-change: transform;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mob-viewer-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 30;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mob-viewer-title {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.7rem;
+            z-index: 30;
+            pointer-events: none;
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mob-nav-left, .mob-nav-right {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            z-index: 20;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mob-nav-left { left: 0; }
+        .mob-nav-right { right: 0; }
+
+        .mob-viewer-image.mobile-landscape-natural {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: auto !important;
+            max-height: 100vh !important;
+            object-fit: contain !important;
+            transform: none !important;
+        }
+        .mob-viewer-image.mobile-portrait-natural {
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-height: 100vh !important;
+            max-height: 100dvh !important;
+            width: auto !important;
+            max-width: 100vw !important;
+            object-fit: contain !important;
+            transform: none !important;
+        }
+        .mob-viewer-image.mobile-auto-rotate {
+            transform: rotate(90deg) !important;
+            width: 100vh !important;
+            width: 100dvh !important;
+            height: 100vw !important;
+            max-width: 100vh !important;
+            max-width: 100dvh !important;
+            max-height: 100vw !important;
+            object-fit: contain !important;
         }
     </style>
 </head>
@@ -407,7 +456,7 @@
         <div class="vault-grid" id="vaultGrid"></div>
     </div>
 
-    <!-- Custom Photo Viewer Modal -->
+    <!-- Desktop Photo Viewer Modal -->
     <div id="inbuiltPhotoModal">
         <button class="viewer-close-btn" onclick="closeInbuiltModal()">&times;</button>
         <div class="viewer-nav-left" onclick="navigateViewer(-1)"></div>
@@ -416,6 +465,17 @@
             <img id="viewerImageElement" class="viewer-image" src="" alt="Full View">
         </div>
         <div id="viewerTitleElement" class="viewer-title-bar"></div>
+    </div>
+
+    <!-- Separate Dedicated Mobile Photo Viewer Modal -->
+    <div id="mobilePhotoModal">
+        <button class="mob-viewer-close" onclick="closeMobileModal()">&times;</button>
+        <div class="mob-nav-left" onclick="navigateMobileViewer(-1)"></div>
+        <div class="mob-nav-right" onclick="navigateMobileViewer(1)"></div>
+        <div class="mob-viewer-wrapper" id="mobViewerWrapper">
+            <img id="mobViewerImage" class="mob-viewer-image" src="" alt="Mobile Full View">
+        </div>
+        <div id="mobViewerTitle" class="mob-viewer-title"></div>
     </div>
 
     <script src="../config.js"></script>
@@ -431,6 +491,15 @@
         let isDragging = false;
         let startX = 0;
         let startY = 0;
+
+        let mobCurrentScale = 1;
+        let mobPanX = 0;
+        let mobPanY = 0;
+        let mobIsDragging = false;
+        let mobTouchStartX = 0;
+        let mobTouchStartY = 0;
+        let mobInitialPinchDistance = 0;
+        let mobInitialScaleForPinch = 1;
 
         function extractImageUrl(input) {
             if (!input) return '';
@@ -550,6 +619,7 @@
 
             window.folderImagesList = folderImages;
 
+            // Desktop Viewer Event Listeners
             const viewerImg = document.getElementById('viewerImageElement');
             const wrapper = document.getElementById('viewerContentWrapper');
 
@@ -597,72 +667,69 @@
                 window.addEventListener('mouseup', () => {
                     isDragging = false;
                 });
+            }
 
-                let touchStartX = 0;
-                let touchStartY = 0;
-                let initialPinchDistance = 0;
-                let initialScaleForPinch = 1;
+            // Separate Dedicated Mobile Viewer Event Listeners
+            const mobImg = document.getElementById('mobViewerImage');
+            const mobWrapper = document.getElementById('mobViewerWrapper');
 
+            if (mobWrapper && mobImg) {
                 function getTouchDistance(touches) {
                     const dx = touches[0].clientX - touches[1].clientX;
                     const dy = touches[0].clientY - touches[1].clientY;
                     return Math.sqrt(dx * dx + dy * dy);
                 }
 
-                viewerImg.addEventListener('touchstart', (e) => {
-                    const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-                    if (!isMobileDevice) return;
-
+                mobImg.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 2) {
-                        isDragging = false;
-                        initialPinchDistance = getTouchDistance(e.touches);
-                        initialScaleForPinch = currentScale;
+                        mobIsDragging = false;
+                        mobInitialPinchDistance = getTouchDistance(e.touches);
+                        mobInitialScaleForPinch = mobCurrentScale;
                     } else if (e.touches.length === 1) {
-                        if (currentScale > 1) {
-                            isDragging = true;
-                            touchStartX = e.touches[0].clientX - panX;
-                            touchStartY = e.touches[0].clientY - panY;
+                        if (mobCurrentScale > 1) {
+                            mobIsDragging = true;
+                            mobTouchStartX = e.touches[0].clientX - mobPanX;
+                            mobTouchStartY = e.touches[0].clientY - mobPanY;
                         } else {
-                            isDragging = false;
+                            mobIsDragging = false;
                         }
                     }
                 }, { passive: true });
 
-                viewerImg.addEventListener('touchmove', (e) => {
-                    const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-                    if (!isMobileDevice) return;
-
-                    if (e.touches.length === 2 && initialPinchDistance > 0) {
+                mobImg.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 2 && mobInitialPinchDistance > 0) {
                         e.preventDefault();
                         const currentDistance = getTouchDistance(e.touches);
-                        const pinchFactor = currentDistance / initialPinchDistance;
-                        currentScale = Math.min(Math.max(initialScaleForPinch * pinchFactor, 1), 10);
-                        if (currentScale === 1) {
-                            panX = 0;
-                            panY = 0;
+                        const pinchFactor = currentDistance / mobInitialPinchDistance;
+                        mobCurrentScale = Math.min(Math.max(mobInitialScaleForPinch * pinchFactor, 1), 10);
+                        if (mobCurrentScale === 1) {
+                            mobPanX = 0;
+                            mobPanY = 0;
                         }
-                        updateImageTransform();
-                    } else if (isDragging && e.touches.length === 1 && currentScale > 1) {
+                        updateMobileImageTransform();
+                    } else if (mobIsDragging && e.touches.length === 1 && mobCurrentScale > 1) {
                         e.preventDefault();
-                        panX = e.touches[0].clientX - touchStartX;
-                        panY = e.touches[0].clientY - touchStartY;
-                        updateImageTransform();
+                        mobPanX = e.touches[0].clientX - mobTouchStartX;
+                        mobPanY = e.touches[0].clientY - mobTouchStartY;
+                        updateMobileImageTransform();
                     }
                 }, { passive: false });
 
-                viewerImg.addEventListener('touchend', (e) => {
+                mobImg.addEventListener('touchend', (e) => {
                     if (e.touches.length < 2) {
-                        initialPinchDistance = 0;
+                        mobInitialPinchDistance = 0;
                     }
                     if (e.touches.length === 0) {
-                        isDragging = false;
+                        mobIsDragging = false;
                     }
                 });
+            }
 
-                window.addEventListener('keydown', (e) => {
-                    const modal = document.getElementById('inbuiltPhotoModal');
-                    if (!modal || !modal.classList.contains('active')) return;
+            window.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('inbuiltPhotoModal');
+                const mobModal = document.getElementById('mobilePhotoModal');
 
+                if (modal && modal.classList.contains('active')) {
                     if (e.key === 'ArrowRight') {
                         e.preventDefault();
                         navigateViewer(1);
@@ -673,31 +740,55 @@
                         e.preventDefault();
                         closeInbuiltModal();
                     }
-                });
-            }
+                } else if (mobModal && mobModal.classList.contains('active')) {
+                    if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        navigateMobileViewer(1);
+                    } else if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        navigateMobileViewer(-1);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        closeMobileModal();
+                    }
+                }
+            });
         });
 
         function updateImageTransform() {
             const viewerImg = document.getElementById('viewerImageElement');
             if (!viewerImg) return;
-            const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-            const isAutoRotated = isMobileDevice && viewerImg.classList.contains('mobile-auto-rotate');
+            viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+        }
+
+        function updateMobileImageTransform() {
+            const mobImg = document.getElementById('mobViewerImage');
+            if (!mobImg) return;
+            const isAutoRotated = mobImg.classList.contains('mobile-auto-rotate');
             
             if (isAutoRotated) {
-                viewerImg.style.transform = `translate(${panX}px, ${panY}px) rotate(90deg) scale(${currentScale})`;
+                mobImg.style.transform = `translate(${mobPanX}px, ${mobPanY}px) rotate(90deg) scale(${mobCurrentScale})`;
             } else {
-                viewerImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+                mobImg.style.transform = `translate(${mobPanX}px, ${mobPanY}px) scale(${mobCurrentScale})`;
             }
         }
 
-        async function openPhotoModal(index) {
+        function openPhotoModal(index) {
+            const isMobileDevice = window.innerWidth <= 500 || /Mobi|Android/i.test(navigator.userAgent);
+            if (isMobileDevice) {
+                openMobileModal(index);
+            } else {
+                openDesktopModal(index);
+            }
+        }
+
+        function openDesktopModal(index) {
             if (window.folderImagesList && window.folderImagesList[index]) {
                 currentViewerIndex = index;
                 currentScale = 1;
                 panX = 0;
                 panY = 0;
                 const photo = window.folderImagesList[index];
-                
                 const fullResUrl = extractImageUrl(photo.url || photo.thumbnail || photo.image);
 
                 const modal = document.getElementById('inbuiltPhotoModal');
@@ -709,31 +800,7 @@
                     viewerImg.src = fullResUrl;
                     if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo View';
                     modal.classList.add('active');
-
-                    const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
-                    if (isMobileDevice) {
-                        const tempImg = new Image();
-                        tempImg.onload = () => {
-                            const naturalW = tempImg.naturalWidth;
-                            const naturalH = tempImg.naturalHeight;
-                            const isLandscape = naturalW > naturalH;
-                            const screenW = window.innerWidth;
-                            const screenH = window.innerHeight;
-                            const isScreenPortrait = screenH > screenW;
-
-                            viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
-
-                            if (isLandscape && isScreenPortrait) {
-                                viewerImg.classList.add('mobile-auto-rotate');
-                            } else if (isLandscape) {
-                                viewerImg.classList.add('mobile-landscape-natural');
-                            } else {
-                                viewerImg.classList.add('mobile-portrait-natural');
-                            }
-                            updateImageTransform();
-                        };
-                        tempImg.src = fullResUrl;
-                    }
+                    updateImageTransform();
                 }
             }
         }
@@ -746,7 +813,6 @@
             const viewerImg = document.getElementById('viewerImageElement');
             if (viewerImg) {
                 viewerImg.src = '';
-                viewerImg.className = 'viewer-image';
             }
         }
 
@@ -758,7 +824,75 @@
             } else if (currentViewerIndex >= window.folderImagesList.length) {
                 currentViewerIndex = 0;
             }
-            openPhotoModal(currentViewerIndex);
+            openDesktopModal(currentViewerIndex);
+        }
+
+        // Separate Dedicated Mobile Photo Viewer Logic
+        function openMobileModal(index) {
+            if (window.folderImagesList && window.folderImagesList[index]) {
+                currentViewerIndex = index;
+                mobCurrentScale = 1;
+                mobPanX = 0;
+                mobPanY = 0;
+                const photo = window.folderImagesList[index];
+                const fullResUrl = extractImageUrl(photo.url || photo.thumbnail || photo.image);
+
+                const mobModal = document.getElementById('mobilePhotoModal');
+                const mobImg = document.getElementById('mobViewerImage');
+                const mobTitle = document.getElementById('mobViewerTitle');
+
+                if (mobModal && mobImg) {
+                    mobImg.className = 'mob-viewer-image';
+                    mobImg.src = fullResUrl;
+                    if (mobTitle) mobTitle.textContent = photo.title || 'Photo View';
+                    mobModal.classList.add('active');
+
+                    const tempImg = new Image();
+                    tempImg.onload = () => {
+                        const naturalW = tempImg.naturalWidth;
+                        const naturalH = tempImg.naturalHeight;
+                        const isLandscape = naturalW > naturalH;
+                        const screenW = window.innerWidth;
+                        const screenH = window.innerHeight;
+                        const isScreenPortrait = screenH > screenW;
+
+                        mobImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
+
+                        if (isLandscape && isScreenPortrait) {
+                            mobImg.classList.add('mobile-auto-rotate');
+                        } else if (isLandscape) {
+                            mobImg.classList.add('mobile-landscape-natural');
+                        } else {
+                            mobImg.classList.add('mobile-portrait-natural');
+                        }
+                        updateMobileImageTransform();
+                    };
+                    tempImg.src = fullResUrl;
+                }
+            }
+        }
+
+        function closeMobileModal() {
+            const mobModal = document.getElementById('mobilePhotoModal');
+            if (mobModal) {
+                mobModal.classList.remove('active');
+            }
+            const mobImg = document.getElementById('mobViewerImage');
+            if (mobImg) {
+                mobImg.src = '';
+                mobImg.className = 'mob-viewer-image';
+            }
+        }
+
+        function navigateMobileViewer(direction) {
+            if (!window.folderImagesList || window.folderImagesList.length === 0) return;
+            currentViewerIndex += direction;
+            if (currentViewerIndex < 0) {
+                currentViewerIndex = window.folderImagesList.length - 1;
+            } else if (currentViewerIndex >= window.folderImagesList.length) {
+                currentViewerIndex = 0;
+            }
+            openMobileModal(currentViewerIndex);
         }
 
         async function deletePhoto(index, event) {
