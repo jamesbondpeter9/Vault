@@ -122,7 +122,7 @@
                 padding: 0 !important;
             }
 
-            /* 2. Replace compact size tag header on mobile */
+            /* 1. Same 5px gap in tag header on mobile (matching vault-grid 5px gap layout) */
             .tag-header {
                 background: rgba(15, 12, 4, 0.95) !important;
                 backdrop-filter: blur(12px) !important;
@@ -131,9 +131,9 @@
                 border-bottom: 0.5px solid rgba(212, 175, 55, 0.4) !important;
                 border-radius: 0 !important;
                 padding: 12px 14px !important;
-                margin: 0 0 4px 0 !important;
+                margin: 0 5px 4px 5px !important;
                 box-shadow: none !important;
-                width: 100vw !important;
+                width: calc(100vw - 10px) !important;
                 box-sizing: border-box !important;
             }
             .tag-header h1 {
@@ -147,7 +147,7 @@
                 color: var(--text-muted) !important;
             }
 
-            /* 3. 5px gap left and right of display and thumbnail left and right side edge without reducing thumbnail size and inner image */
+            /* 5px gap left and right of display and thumbnail left and right side edge */
             .vault-grid {
                 display: flex !important;
                 flex-direction: column !important;
@@ -220,6 +220,11 @@
             }
             
             .mondrian-overlay {
+                display: none !important;
+            }
+
+            /* 2. Only when site use in mobile, remove 'x' delete button from thumbnails */
+            .mondrian-thumb button[title="Delete Photo"] {
                 display: none !important;
             }
         }
@@ -355,13 +360,31 @@
                 object-fit: contain !important;
                 transform: none !important;
             }
+            /* 4. In auto landscape image touch top and bottom edges of display (using width: 100vh, height: 100vw or 100dvw) */
             .viewer-image.mobile-auto-rotate {
                 transform: rotate(90deg) !important;
                 width: 100vh !important;
+                width: 100dvh !important;
                 height: 100vw !important;
                 max-width: 100vh !important;
+                max-width: 100dvh !important;
                 max-height: 100vw !important;
                 object-fit: contain !important;
+            }
+
+            /* 3. Reduce '+' (close button) and image title size in photoviewer on mobile */
+            .viewer-close-btn {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 18px !important;
+                top: 12px !important;
+                right: 12px !important;
+            }
+            .viewer-title-bar {
+                font-size: 0.7rem !important;
+                padding: 5px 10px !important;
+                bottom: 12px !important;
+                border-radius: 12px !important;
             }
         }
     </style>
@@ -667,7 +690,6 @@
             }
         }
 
-        // 4. Custom photoviewer for mobile browser with auto landscape image width determination logic
         async function openPhotoModal(index) {
             if (window.folderImagesList && window.folderImagesList[index]) {
                 currentViewerIndex = index;
@@ -688,7 +710,6 @@
                     if (viewerTitle) viewerTitle.textContent = photo.title || 'Photo View';
                     modal.classList.add('active');
 
-                    // 4. Auto orientation & natural width detection logic for mobile viewer
                     const isMobileDevice = window.innerWidth <= 900 || /Mobi|Android/i.test(navigator.userAgent);
                     if (isMobileDevice) {
                         const tempImg = new Image();
@@ -703,7 +724,6 @@
                             viewerImg.classList.remove('mobile-landscape-natural', 'mobile-portrait-natural', 'mobile-auto-rotate');
 
                             if (isLandscape && isScreenPortrait) {
-                                // Auto rotate or apply natural width scaling for landscape images on portrait screens
                                 viewerImg.classList.add('mobile-auto-rotate');
                             } else if (isLandscape) {
                                 viewerImg.classList.add('mobile-landscape-natural');
