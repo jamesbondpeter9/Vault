@@ -1,6 +1,19 @@
 {
     "models": [],
-    "photostreams": [],
+    "photostreams": [
+        {
+            "title": "A J Applegate",
+            "url": "https://i.postimg.cc/MG8cg1vD/A-J-Applegate.jpg",
+            "thumbnail": "https://i.postimg.cc/MG8cg1vD/A-J-Applegate.jpg",
+            "models": [
+                "A J Applegate"
+            ],
+            "folder": "AJ1",
+            "folders": [
+                "AJ1"
+            ]
+        }
+    ],
     "folders": [
         {
             "name": "AJ1",
