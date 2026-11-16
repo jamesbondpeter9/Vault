@@ -240,17 +240,17 @@
                 width: 100vw !important;
                 max-width: 100vw !important;
                 z-index: 9999 !important;
-                background: rgba(0, 0, 0, 0.95) !important;
-                backdrop-filter: blur(10px) !important;
-                -webkit-backdrop-filter: blur(10px) !important;
-                border-top: 0.5px solid rgba(212, 175, 55, 0.3) !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border-top: none !important;
                 padding: 0px 0px env(safe-area-inset-bottom, 0px) 0px !important;
                 margin: 0 !important;
                 display: grid !important;
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
                 gap: 0px !important;
                 box-sizing: border-box !important;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.8) !important;
+                box-shadow: none !important;
             }
 
             /* Working: Styles individual mobile navigation boxes with sharp borders and transparent backgrounds */
@@ -260,7 +260,7 @@
                 border-radius: 0 !important;
                 background: transparent !important;
                 color: #fff !important;
-                border: 0.5px solid rgba(212, 175, 55, 0.3) !important;
+                border: 0.5px solid rgba(212, 175, 55, 0.5) !important;
                 box-shadow: none !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
                 font-weight: 700 !important;
@@ -270,13 +270,13 @@
                 touch-action: manipulation !important;
             }
 
-            /* Working: Completely locks position and removes any visual or positional shift on touch/click/focus for mobile nav boxes */
+            /* Working: Locks position and removes any visual or positional shift on touch/click/focus for mobile nav boxes */
             .mondrian-nav-box:hover,
             .mondrian-nav-box:active,
             .mondrian-nav-box:focus {
                 background: transparent !important;
                 color: #fff !important;
-                border-color: rgba(212, 175, 55, 0.3) !important;
+                border-color: rgba(212, 175, 55, 0.5) !important;
                 transform: none !important;
                 box-shadow: none !important;
                 outline: none !important;
@@ -560,7 +560,7 @@
                 paginationBar.appendChild(pageInfo);
 
                 const newNextBtn = document.createElement('button');
-                newNextBtn.className = 'page-btn';
+                newNextBtn.className, 'page-btn';
                 newNextBtn.textContent = 'Next →';
                 newNextBtn.disabled = currentPage === totalPages;
                 newNextBtn.onclick = () => {
