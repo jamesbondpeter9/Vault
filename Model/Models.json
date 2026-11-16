@@ -209,6 +209,12 @@
             "thumbnail": "https://i.postimg.cc/mkTmLN2g/Rebecca-Volpetti.jpg",
             "shape": "portrait",
             "createdAt": 1794860061603
+        },
+        {
+            "name": "Liza Del Sierra",
+            "thumbnail": "https://i.postimg.cc/Y9BHxV89/Liza-Del-Sierra.jpg",
+            "shape": "portrait",
+            "createdAt": 1794860994426
         }
     ]
 }
