@@ -203,6 +203,12 @@
             "thumbnail": "https://i.postimg.cc/SQPT98ss/Lovita-Fate.jpg",
             "shape": "portrait",
             "createdAt": 1794858493557
+        },
+        {
+            "name": "Rebecca Volpetti",
+            "thumbnail": "https://i.postimg.cc/mkTmLN2g/Rebecca-Volpetti.jpg",
+            "shape": "portrait",
+            "createdAt": 1794860061603
         }
     ]
 }
