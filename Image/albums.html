@@ -163,7 +163,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
-                padding: 12px 2px 0 2px !important; /* Added 12px top spacing to prevent navigation from touching top display edge */
+                padding: 12px 2px 0 2px !important;
                 box-sizing: border-box !important;
             }
 
@@ -173,9 +173,18 @@
                 box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow) !important;
                 background: var(--card-bg) !important;
                 max-width: 1700px !important;
-                margin: 0 auto 20px auto !important;
-                padding: 24px 32px !important;
+                margin: 0 auto 12px auto !important;
+                padding: 12px 16px !important;
                 box-sizing: border-box !important;
+            }
+
+            .tag-header h1 {
+                font-size: 1.2rem !important;
+                margin-bottom: 2px !important;
+            }
+
+            .tag-header p {
+                font-size: 0.75rem !important;
             }
 
             .mondrian-card {
@@ -231,15 +240,15 @@
                 display: grid !important;
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
                 gap: 2px !important;
-                margin-bottom: 20px !important;
+                margin-bottom: 12px !important;
                 max-width: 1700px !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
             }
 
             .mondrian-nav-box {
-                height: 52px !important;
-                font-size: 0.85rem !important;
+                height: 44px !important;
+                font-size: 0.8rem !important;
                 border-radius: 12px !important;
                 display: flex !important;
                 align-items: center !important;
