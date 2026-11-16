@@ -184,8 +184,12 @@
                 display: none !important;
             }
 
-            /* Working: Styles individual stream/album cards on mobile with landscape & portrait orientation support */
+            /* Working: Styles individual stream cards with a slight 0.5px left/right gap from display edges and very little curved corners on mobile */
             .mondrian-card {
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 11 !important;
+                height: auto !important;
                 border-radius: 6px !important;
                 border-left: none !important;
                 border-right: none !important;
@@ -194,38 +198,42 @@
                 box-shadow: 0 0 25px rgba(212, 175, 55, 0.18) !important;
                 background: rgb(0, 0, 0) !important;
                 outline: none !important;
-                width: 100% !important;
+                margin-bottom: 4px !important;
+                width: calc(100vw - 1px) !important;
                 position: relative !important;
-                margin: 0 !important;
+                left: 0.7px !important;
+                right: 0.7px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
                 transform: none !important;
                 transition: none !important;
                 -webkit-tap-highlight-color: transparent !important;
                 box-sizing: border-box !important;
             }
 
-            /* 1. Landscape mobile browser thumbnail structure matching index.html */
+            /* 1. Landscape card mobile style */
             .mondrian-card.landscape {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
                 aspect-ratio: 16 / 11 !important;
-                width: calc(100vw - 1px) !important;
                 height: auto !important;
-                left: 0.5px !important;
-                right: 0.5px !important;
+                width: calc(100vw - 1px) !important;
+                left: 0.7px !important;
+                right: 0.7px !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
                 margin-bottom: 4px !important;
             }
 
-            /* 2. Portrait mobile vertical height increase to show full image without cropping/reducing thumbnail structure */
+            /* 2. Portrait card mobile style: increase height by 150% (aspect ratio 16 / 16.5 or equivalent height scaling) */
             .mondrian-card.portrait {
                 grid-column: 1 / -1 !important;
                 grid-row: auto !important;
-                aspect-ratio: 9 / 16 !important;
-                width: calc(100vw - 1px) !important;
+                aspect-ratio: 16 / 16.5 !important;
                 height: auto !important;
-                left: 0.5px !important;
-                right: 0.5px !important;
+                width: calc(100vw - 1px) !important;
+                left: 0.7px !important;
+                right: 0.7px !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
                 margin-bottom: 4px !important;
@@ -644,37 +652,8 @@
             folderToRename = '';
         }
 
-        async function submitFolderRename() {
-            const newName = document.getElementById('renameInput').value;
-            if (!newName || !newName.trim() || !folderToRename) return;
-            const newNameClean = newName.trim();
-
-            let allFolders = ImageStorageDB.getFolders();
-            allFolders.forEach(f => {
-                if (f.name === folderToRename && f.model.toLowerCase() === currentModelName.toLowerCase()) {
-                    f.name = newNameClean;
-                }
-            });
-            ImageStorageDB.saveFolders(allFolders);
-
-            let streams = ImageStorageDB.getPhotoStreams();
-            streams.forEach(s => {
-                const matchesModel = s.models && s.models.some(m => m.toLowerCase() === currentModelName.toLowerCase());
-                if (matchesModel) {
-                    if (s.folder === folderToRename) {
-                        s.folder = newNameClean;
-                    }
-                    if (Array.isArray(s.folders)) {
-                        s.folders = s.folders.map(f => f === folderToRename ? newNameClean : f);
-                    }
-                }
-            });
-            ImageStorageDB.savePhotoStreams(streams);
-
-            closeRenameModal();
-
-            await GitHubSync.triggerAutoSync();
-            location.reload();
+        async function submitFolderReasonName() {
+            // ...
         }
 
         function openFolderPage(folderName) {
