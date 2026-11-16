@@ -155,6 +155,12 @@
             "thumbnail": "https://i.postimg.cc/TwML9vd9/Isis-Love.jpg",
             "shape": "portrait",
             "createdAt": 1794844185165
+        },
+        {
+            "name": "Aubrey Gold",
+            "thumbnail": "https://i.postimg.cc/nLrRb5DG/Aubrey-Gold.jpg",
+            "shape": "portrait",
+            "createdAt": 1794845820174
         }
     ]
 }
