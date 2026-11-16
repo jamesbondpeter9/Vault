@@ -204,16 +204,29 @@
                 box-sizing: border-box !important;
             }
 
-            /* Landscape first-photo orientation spans full 2 columns on mobile */
+            /* Landscape first-photo orientation uses index.html mobile browser thumbnail layout/proportions */
             .mondrian-card.landscape {
                 grid-column: span 2 !important;
                 grid-row: span 2 !important;
+                aspect-ratio: 16 / 11 !important;
+                width: calc(100vw - 1px) !important;
+                left: 0.5px !important;
+                right: 0.5px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
             }
 
-            /* Portrait first-photo orientation spans 1 column and 2 rows on mobile */
+            /* Portrait first-photo orientation increases thumbnail width to touch left and right display edges with a 0.5px gap */
             .mondrian-card.portrait {
-                grid-column: span 1 !important;
-                grid-row: span 2 !important;
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+                aspect-ratio: 16 / 11 !important;
+                width: calc(100vw - 1px) !important;
+                left: 0.5px !important;
+                right: 0.5px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                margin-bottom: 4px !important;
             }
 
             /* Working: Disables hover movement and shadows on mobile touch interactions for cards */
