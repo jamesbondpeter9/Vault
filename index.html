@@ -267,18 +267,16 @@
                 -webkit-tap-highlight-color: transparent !important;
                 transform: none !important;
                 transition: none !important;
-                touch-action: manipulation !important;
             }
 
-            /* Working: Locks position and removes any visual or positional shift on touch/click/focus for mobile nav boxes */
+            /* Working: Removes hover/active movement upward or translation shift on mobile nav boxes */
             .mondrian-nav-box:hover,
             .mondrian-nav-box:active,
             .mondrian-nav-box:focus {
-                background: transparent !important;
+                background: rgba(212, 175, 55, 0.2) !important;
                 color: #fff !important;
-                border-color: rgba(212, 175, 55, 0.5) !important;
+                border-color: rgba(212, 175, 55, 0.8) !important;
                 transform: none !important;
-                box-shadow: none !important;
                 outline: none !important;
             }
 
@@ -560,7 +558,7 @@
                 paginationBar.appendChild(pageInfo);
 
                 const newNextBtn = document.createElement('button');
-                newNextBtn.className, 'page-btn';
+                newNextBtn.className = 'page-btn';
                 newNextBtn.textContent = 'Next →';
                 newNextBtn.disabled = currentPage === totalPages;
                 newNextBtn.onclick = () => {
